@@ -572,3 +572,125 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.tabelaItensBody.innerHTML = '';
         for (const key in ITENS_CATALOGO) {
           const item = ITENS_CATALOGO[key];
+          const tr = document.createElement('tr');
+          const savedQty = currentValues[`qtd-${key}`] || 0;
+          tr.innerHTML = `
+            <td>${item[`name_${currentLang}`]}</td>
+            <td>${item.preco.toFixed(2)}</td>
+            <td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td>
+            <td style="text-align: center;">0.00</td>
+          `;
+          tr.querySelector(`td:nth-child(2)`).appendChild(this.createCoinIcon());
+          tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
+          dom.tabelaItensBody.appendChild(tr);
+          tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
+        }
+    },
+
+    updateUI() {
+        const calculo = this.calculateValues();
+        const rows = dom.tabelaItensBody.getElementsByTagName('tr');
+        Array.from(rows).forEach((row, index) => {
+          const key = Object.keys(ITENS_CATALOGO)[index];
+          if (!calculo.itens[key]) return;
+          const itemCalculado = calculo.itens[key];
+          const precoCell = row.querySelector(`td:nth-child(2)`);
+          const totalCell = row.querySelector(`td:nth-child(4)`);
+          if (calculo.descontoPercentual > 0) {
+            precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)} ➝ ${itemCalculado.precoComDesconto.toFixed(2)}`;
+          } else {
+            precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)}`;
+          }
+          precoCell.appendChild(this.createCoinIcon());
+          totalCell.innerHTML = `${itemCalculado.subtotal.toFixed(2)}`;
+          totalCell.appendChild(this.createCoinIcon());
+        });
+        dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b>`;
+        dom.totalGeralCell.appendChild(this.createCoinIcon());
+    },
+    
+    reset(clearDistributor = true) {
+        dom.nomeClienteInput.value = '';
+        dom.descontoInput.value = '';
+        if(clearDistributor) {
+            dom.totalMushInput.value = '';
+            dom.leftoverMushDiv.innerHTML = '';
+        }
+        for (const key in ITENS_CATALOGO) {
+            const input = document.getElementById(`qtd-${key}`);
+            if (input) input.value = 0;
+        }
+        this.updateUI();
+    },
+    
+    generateImage() {
+        const calculo = this.calculateValues();
+        const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+        let temItens = false;
+        const t = TRANSLATIONS[currentLang];
+
+        if (window.saveReceiptToFirebase) {
+            const itemsToSave = {};
+            for(const key in calculo.itens) {
+                if(calculo.itens[key].quantidade > 0) {
+                    itemsToSave[key] = calculo.itens[key].quantidade;
+                    temItens = true;
+                }
+            }
+            if(temItens) {
+                const receiptData = {
+                    customerName: nome,
+                    discountApplied: calculo.descontoPercentual,
+                    grandTotal: calculo.totalFinal,
+                    items: itemsToSave
+                };
+                window.saveReceiptToFirebase(receiptData);
+            }
+        }
+        
+        dom.resultadoDiv.querySelector('h3').innerHTML = `${t.receiptHeader} - <span id="resNome">${nome}</span>`;
+        dom.resumoItensDiv.innerHTML = `<h4 class="receipt-section-title">${t.receiptItemsHeader}</h4>`;
+        dom.resumoTotaisDiv.innerHTML = '';
+        
+        let hasItemsForReceipt = false;
+        for(const key in calculo.itens) {
+          const item = calculo.itens[key];
+          if (item.quantidade > 0) {
+            hasItemsForReceipt = true;
+            const itemLine = document.createElement('div');
+            itemLine.className = 'receipt-line';
+            const precoComMoeda = document.createElement('span');
+            precoComMoeda.className = 'receipt-value';
+            precoComMoeda.textContent = item.subtotal.toFixed(2);
+            precoComMoeda.appendChild(this.createCoinIcon());
+            itemLine.innerHTML = `<span class="receipt-label">${item.nome} (x${item.quantidade})</span>`;
+            itemLine.appendChild(precoComMoeda);
+            dom.resumoItensDiv.appendChild(itemLine);
+          }
+        }
+        if (!hasItemsForReceipt) { alert(t.alertNoItems); return; }
+        if (calculo.descontoPercentual > 0) {
+            dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line"><span class="receipt-label">${t.receiptSubtotal}</span><span class="receipt-value">${calculo.totalBruto.toFixed(2)}</span></div><div class="receipt-line"><span class="receipt-label">${t.receiptDiscount} (${calculo.descontoPercentual.toFixed(2)}%)</span><span class="receipt-value">- ${calculo.valorDescontoTotal.toFixed(2)}</span></div>`;
+        }
+        dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line final-total"><span class="receipt-label">${t.receiptFinalTotal}</span><span class="receipt-value">${calculo.totalFinal.toFixed(2)}</span></div>`;
+        dom.resumoTotaisDiv.querySelectorAll('.receipt-value').forEach(el => el.appendChild(this.createCoinIcon()));
+        dom.resultadoDiv.style.display = 'block';
+        setTimeout(() => {
+            html2canvas(dom.resultadoDiv, { backgroundColor: null, scale: 2 }).then(canvas => {
+              const link = document.createElement('a');
+              const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+              link.download = `${nomeSanitizado}_recibo.png`;
+              link.href = canvas.toDataURL('image/png');
+              link.click();
+              dom.resultadoDiv.style.display = 'none';
+            });
+        }, 300);
+      }
+  };
+  
+  app.init();
+});
+</script>
+
+</body>
+</html>
