@@ -8,6 +8,43 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
 
+<!-- SCRIPTS DO FIREBASE -->
+<script type="module">
+  // Importa as funções necessárias dos SDKs do Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // --- PASSO IMPORTANTE ---
+  // Cole a sua configuração do Firebase que você copiou aqui dentro.
+  const firebaseConfig = {
+    apiKey: "AIzaSyDgeTU4YmFpZIwcmE2-cxGKTkO2KqeQotE",
+    authDomain: "token-calculator-a45d6.firebaseapp.com",
+    projectId: "token-calculator-a45d6",
+    storageBucket: "token-calculator-a45d6.firebasestorage.app",
+    messagingSenderId: "597974335563",
+    appId: "1:597974335563:web:9d07ada2708d61b7d30dce"
+  };
+
+  // Inicializa o Firebase e o Firestore
+  const appFirebase = initializeApp(firebaseConfig);
+  const db = getFirestore(appFirebase);
+
+  // Torna a função de salvar dados acessível globalmente para o nosso outro script
+  window.saveReceiptToFirebase = async (receiptData) => {
+    try {
+      const docRef = await addDoc(collection(db, "receipts"), {
+        ...receiptData,
+        createdAt: Timestamp.now() // Adiciona um carimbo de data/hora
+      });
+      console.log("Recibo salvo com o ID: ", docRef.id);
+    } catch (e) {
+      console.error("Erro ao adicionar o documento: ", e);
+      alert("Houve um erro ao salvar o recibo no banco de dados.");
+    }
+  };
+</script>
+
+
 <style>
   :root {
     --font-header: 'Poppins', sans-serif;
@@ -285,7 +322,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  const MOEDA_BASE64 = "data:image/webp;base64,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"; // COLE SUA STRING BASE64 AQUI
+  const MOEDA_BASE64 = ""; // COLE SUA STRING BASE64 AQUI
   const ITENS_CATALOGO = {
     revive: { preco: 790, name_br: 'Revive Token', name_en: 'Revive Token' },
     max: { preco: 570, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
@@ -295,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const TRANSLATIONS = {
       br: {
-          pageTitle: "Calculadora de Tokens feita por Riciv", mainHeader: "Risk's Tokens", themeLabel: "Tema Claro",
+          pageTitle: "Calculadora de Tokens", mainHeader: "Calculadora de Tokens", themeLabel: "Tema Claro",
           idLabel: "Identificador / Nome", idPlaceholder: "Digite seu nome ou ID", discountLabel: "Desconto (%)",
           discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Preço Unitário", tableQty: "Quantidade",
           tableTotal: "Valor Total", tableGrandTotal: "TOTAL GERAL", btnCalculate: "Calcular", btnReset: "Resetar",
@@ -310,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
           leftoverConfirm2: "Deseja distribuir este valor nos itens restantes:"
       },
       en: {
-          pageTitle: "Token Calculator by Riciv", mainHeader: "Risk's Tokens", themeLabel: "Light Theme",
+          pageTitle: "Token Calculator", mainHeader: "Token Calculator", themeLabel: "Light Theme",
           idLabel: "Identifier / Name", idPlaceholder: "Enter your name or ID", discountLabel: "Discount (%)",
           discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Unit Price", tableQty: "Quantity",
           tableTotal: "Total Value", tableGrandTotal: "GRAND TOTAL", btnCalculate: "Calculate", btnReset: "Reset",
@@ -535,103 +572,3 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.tabelaItensBody.innerHTML = '';
         for (const key in ITENS_CATALOGO) {
           const item = ITENS_CATALOGO[key];
-          const tr = document.createElement('tr');
-          const savedQty = currentValues[`qtd-${key}`] || 0;
-          tr.innerHTML = `
-            <td>${item[`name_${currentLang}`]}</td>
-            <td>${item.preco.toFixed(2)}</td>
-            <td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td>
-            <td style="text-align: center;">0.00</td>
-          `;
-          tr.querySelector(`td:nth-child(2)`).appendChild(this.createCoinIcon());
-          tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
-          dom.tabelaItensBody.appendChild(tr);
-          tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
-        }
-    },
-
-    updateUI() {
-        const calculo = this.calculateValues();
-        const rows = dom.tabelaItensBody.getElementsByTagName('tr');
-        Array.from(rows).forEach((row, index) => {
-          const key = Object.keys(ITENS_CATALOGO)[index];
-          if (!calculo.itens[key]) return;
-          const itemCalculado = calculo.itens[key];
-          const precoCell = row.querySelector(`td:nth-child(2)`);
-          const totalCell = row.querySelector(`td:nth-child(4)`);
-          if (calculo.descontoPercentual > 0) {
-            precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)} ➝ ${itemCalculado.precoComDesconto.toFixed(2)}`;
-          } else {
-            precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)}`;
-          }
-          precoCell.appendChild(this.createCoinIcon());
-          totalCell.innerHTML = `${itemCalculado.subtotal.toFixed(2)}`;
-          totalCell.appendChild(this.createCoinIcon());
-        });
-        dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b>`;
-        dom.totalGeralCell.appendChild(this.createCoinIcon());
-    },
-    
-    reset(clearDistributor = true) {
-        dom.nomeClienteInput.value = '';
-        dom.descontoInput.value = '';
-        if(clearDistributor) {
-            dom.totalMushInput.value = '';
-            dom.leftoverMushDiv.innerHTML = '';
-        }
-        for (const key in ITENS_CATALOGO) {
-            const input = document.getElementById(`qtd-${key}`);
-            if (input) input.value = 0;
-        }
-        this.updateUI();
-    },
-    
-    generateImage() {
-        const calculo = this.calculateValues();
-        const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
-        let temItens = false;
-        const t = TRANSLATIONS[currentLang];
-        dom.resultadoDiv.querySelector('h3').innerHTML = `${t.receiptHeader} - <span id="resNome">${nome}</span>`;
-        dom.resumoItensDiv.innerHTML = `<h4 class="receipt-section-title">${t.receiptItemsHeader}</h4>`;
-        dom.resumoTotaisDiv.innerHTML = '';
-        for(const key in calculo.itens) {
-          const item = calculo.itens[key];
-          if (item.quantidade > 0) {
-            temItens = true;
-            const itemLine = document.createElement('div');
-            itemLine.className = 'receipt-line';
-            const precoComMoeda = document.createElement('span');
-            precoComMoeda.className = 'receipt-value';
-            precoComMoeda.textContent = item.subtotal.toFixed(2);
-            precoComMoeda.appendChild(this.createCoinIcon());
-            itemLine.innerHTML = `<span class="receipt-label">${item.nome} (x${item.quantidade})</span>`;
-            itemLine.appendChild(precoComMoeda);
-            dom.resumoItensDiv.appendChild(itemLine);
-          }
-        }
-        if (!temItens) { alert(t.alertNoItems); return; }
-        if (calculo.descontoPercentual > 0) {
-            dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line"><span class="receipt-label">${t.receiptSubtotal}</span><span class="receipt-value">${calculo.totalBruto.toFixed(2)}</span></div><div class="receipt-line"><span class="receipt-label">${t.receiptDiscount} (${calculo.descontoPercentual.toFixed(2)}%)</span><span class="receipt-value">- ${calculo.valorDescontoTotal.toFixed(2)}</span></div>`;
-        }
-        dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line final-total"><span class="receipt-label">${t.receiptFinalTotal}</span><span class="receipt-value">${calculo.totalFinal.toFixed(2)}</span></div>`;
-        dom.resumoTotaisDiv.querySelectorAll('.receipt-value').forEach(el => el.appendChild(this.createCoinIcon()));
-        dom.resultadoDiv.style.display = 'block';
-        setTimeout(() => {
-            html2canvas(dom.resultadoDiv, { backgroundColor: null, scale: 2 }).then(canvas => {
-              const link = document.createElement('a');
-              const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
-              link.download = `${nomeSanitizado}_recibo.png`;
-              link.href = canvas.toDataURL('image/png');
-              link.click();
-              dom.resultadoDiv.style.display = 'none';
-            });
-        }, 300);
-      }
-  };
-  
-  app.init();
-});
-</script>
-
-</body>
-</html>
