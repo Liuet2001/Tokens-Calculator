@@ -8,41 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
 
-<!-- SCRIPTS DO FIREBASE -->
-<script type="module">
-  // Importa as funções necessárias dos SDKs do Firebase
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  // --- PASSO IMPORTANTE ---
-  // Cole a sua configuração do Firebase que você copiou aqui dentro.
-  const firebaseConfig = {
-    apiKey: "AIzaSyDgeTU4YmFpZIwcmE2-cxGKTkO2KqeQotE",
-    authDomain: "token-calculator-a45d6.firebaseapp.com",
-    projectId: "token-calculator-a45d6",
-    storageBucket: "token-calculator-a45d6.firebasestorage.app",
-    messagingSenderId: "597974335563",
-    appId: "1:597974335563:web:9d07ada2708d61b7d30dce"
-  };
-
-  // Inicializa o Firebase e o Firestore
-  const appFirebase = initializeApp(firebaseConfig);
-  const db = getFirestore(appFirebase);
-
-  // Torna a função de salvar dados acessível globalmente para o nosso outro script
-  window.saveReceiptToFirebase = async (receiptData) => {
-    try {
-      const docRef = await addDoc(collection(db, "receipts"), {
-        ...receiptData,
-        createdAt: Timestamp.now() // Adiciona um carimbo de data/hora
-      });
-      console.log("Recibo salvo com o ID: ", docRef.id);
-    } catch (e) {
-      console.error("Erro ao adicionar o documento: ", e);
-      alert("Houve um erro ao salvar o recibo no banco de dados.");
-    }
-  };
-</script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
 
 <style>
@@ -320,17 +287,33 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-
-  const MOEDA_BASE64 = ""; // COLE SUA STRING BASE64 AQUI
-  const ITENS_CATALOGO = {
-    revive: { preco: 790, name_br: 'Revive Token', name_en: 'Revive Token' },
-    max: { preco: 570, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
-    partial: { preco: 195, name_br: 'Partial Growth Token', name_en: 'Partial Growth Token' },
-    change: { preco: 90, name_br: 'Appearance Change Token', name_en: 'Appearance Change Token' }
+  // --- INICIALIZAÇÃO DO FIREBASE ---
+  // Cole a sua configuração do Firebase que você copiou aqui dentro.
+  const firebaseConfig = {
+    apiKey: "AIzaSyDgeTU4YmFpZIwcmE2-cxGKTkO2KqeQotE",
+    authDomain: "token-calculator-a45d6.firebaseapp.com",
+    projectId: "token-calculator-a45d6",
+    storageBucket: "token-calculator-a45d6.firebasestorage.app",
+    messagingSenderId: "COLE_SEU_MESSAGING_SENDER_ID_AQUI",
+    appId: "1:597974335563:web:9d07ada2708d61b7d30dce"
   };
 
-  const TRANSLATIONS = {
+  // Inicializa o Firebase usando a sintaxe de compatibilidade
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // --- LÓGICA DA APLICAÇÃO ---
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const MOEDA_BASE64 = ""; // COLE SUA STRING BASE64 AQUI
+    const ITENS_CATALOGO = {
+      revive: { preco: 790, name_br: 'Revive Token', name_en: 'Revive Token' },
+      max: { preco: 570, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
+      partial: { preco: 195, name_br: 'Partial Growth Token', name_en: 'Partial Growth Token' },
+      change: { preco: 90, name_br: 'Appearance Change Token', name_en: 'Appearance Change Token' }
+    };
+
+    const TRANSLATIONS = {
       br: {
           pageTitle: "Calculadora de Tokens", mainHeader: "Calculadora de Tokens", themeLabel: "Tema Claro",
           idLabel: "Identificador / Nome", idPlaceholder: "Digite seu nome ou ID", discountLabel: "Desconto (%)",
@@ -362,334 +345,342 @@ document.addEventListener('DOMContentLoaded', () => {
           leftoverConfirm2: "leftover. Do you want to distribute this amount to the remaining items:"
       }
   };
-  
-  const dom = {
-    html: document.documentElement,
-    nomeClienteInput: document.getElementById('nomeCliente'),
-    descontoInput: document.getElementById('desconto'),
-    tabelaItensBody: document.getElementById('tabela-itens'),
-    totalGeralCell: document.getElementById('totalGeral'),
-    resultadoDiv: document.getElementById('resultado'),
-    resNomeSpan: document.getElementById('resNome'),
-    resumoItensDiv: document.getElementById('resumo-itens'),
-    resumoTotaisDiv: document.getElementById('resumo-totais'),
-    btnCalcular: document.getElementById('btnCalcular'),
-    btnResetar: document.getElementById('btnResetar'),
-    btnGerarImagem: document.getElementById('btnGerarImagem'),
-    themeToggle: document.getElementById('theme-toggle'),
-    langBr: document.getElementById('lang-br'),
-    langEn: document.getElementById('lang-en'),
-    modeQtyRadio: document.getElementById('mode-qty'),
-    modeMushRadio: document.getElementById('mode-mush'),
-    distributorSection: document.getElementById('distributor-section'),
-    tokenFiltersContainer: document.getElementById('token-filters-container'),
-    totalMushInput: document.getElementById('total-mush'),
-    btnDistribute: document.getElementById('btnDistribute'),
-    leftoverMushDiv: document.getElementById('leftover-mush')
-  };
-
-  let currentLang = 'br';
-
-  const app = {
-    init() {
-        this.loadPreferences();
-        this.addEventListeners();
-        this.setLanguage(currentLang);
-    },
-
-    loadPreferences() {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        this.setTheme(savedTheme);
-        const savedLang = localStorage.getItem('language') || 'br';
-        currentLang = savedLang;
-    },
-
-    addEventListeners() {
-        dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
-        dom.btnCalcular.addEventListener('click', this.updateUI.bind(this));
-        dom.btnResetar.addEventListener('click', this.reset.bind(this));
-        dom.btnGerarImagem.addEventListener('click', this.generateImage.bind(this));
-        dom.themeToggle.addEventListener('click', () => {
-            const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            this.setTheme(newTheme);
-        });
-        dom.langBr.addEventListener('click', () => this.setLanguage('br'));
-        dom.langEn.addEventListener('click', () => this.setLanguage('en'));
-        dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
-        dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
-        dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
-    },
-
-    toggleMode(mode) {
-        if (mode === 'quantity') {
-            dom.distributorSection.style.display = 'none';
-            dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
-            dom.btnCalcular.style.display = 'inline-block';
-        } else {
-            dom.distributorSection.style.display = 'flex';
-            dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
-            dom.btnCalcular.style.display = 'none';
-        }
-    },
-
-    setTheme(theme) {
-        dom.html.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-    },
-
-    setLanguage(lang) {
-        currentLang = lang;
-        localStorage.setItem('language', lang);
-        document.querySelectorAll('[data-translate-key]').forEach(el => {
-            const key = el.dataset.translateKey;
-            if (TRANSLATIONS[lang][key]) el.innerText = TRANSLATIONS[lang][key];
-        });
-        document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
-            const key = el.dataset.translateKeyPlaceholder;
-            if (TRANSLATIONS[lang][key]) el.placeholder = TRANSLATIONS[lang][key];
-        });
-        document.title = TRANSLATIONS[lang].pageTitle;
-        dom.langBr.classList.toggle('active', lang === 'br');
-        dom.langEn.classList.toggle('active', lang === 'en');
-        this.loadTable();
-        this.buildTokenFilters();
-        this.updateUI();
-    },
     
-    buildTokenFilters() {
-        dom.tokenFiltersContainer.innerHTML = '';
-        for (const key in ITENS_CATALOGO) {
-            const item = ITENS_CATALOGO[key];
-            const label = document.createElement('label');
-            label.innerHTML = `
-                <input type="checkbox" value="${key}" checked>
-                <span>${item[`name_${currentLang}`]}</span>
-            `;
-            dom.tokenFiltersContainer.appendChild(label);
-        }
-    },
+    const dom = {
+      html: document.documentElement,
+      nomeClienteInput: document.getElementById('nomeCliente'),
+      descontoInput: document.getElementById('desconto'),
+      tabelaItensBody: document.getElementById('tabela-itens'),
+      totalGeralCell: document.getElementById('totalGeral'),
+      resultadoDiv: document.getElementById('resultado'),
+      resNomeSpan: document.getElementById('resNome'),
+      resumoItensDiv: document.getElementById('resumo-itens'),
+      resumoTotaisDiv: document.getElementById('resumo-totais'),
+      btnCalcular: document.getElementById('btnCalcular'),
+      btnResetar: document.getElementById('btnResetar'),
+      btnGerarImagem: document.getElementById('btnGerarImagem'),
+      themeToggle: document.getElementById('theme-toggle'),
+      langBr: document.getElementById('lang-br'),
+      langEn: document.getElementById('lang-en'),
+      modeQtyRadio: document.getElementById('mode-qty'),
+      modeMushRadio: document.getElementById('mode-mush'),
+      distributorSection: document.getElementById('distributor-section'),
+      tokenFiltersContainer: document.getElementById('token-filters-container'),
+      totalMushInput: document.getElementById('total-mush'),
+      btnDistribute: document.getElementById('btnDistribute'),
+      leftoverMushDiv: document.getElementById('leftover-mush')
+    };
 
-    distributeMush() {
-        let totalMush = parseInt(dom.totalMushInput.value) || 0;
-        const discount = parseFloat(dom.descontoInput.value) || 0;
-        const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+    let currentLang = 'br';
 
-        this.reset(false);
+    const app = {
+      init() {
+          this.loadPreferences();
+          this.addEventListeners();
+          this.setLanguage(currentLang);
+      },
 
-        if (selectedTokenKeys.length === 0) return;
+      loadPreferences() {
+          const savedTheme = localStorage.getItem('theme') || 'dark';
+          this.setTheme(savedTheme);
+          const savedLang = localStorage.getItem('language') || 'br';
+          currentLang = savedLang;
+      },
 
-        const itemsToConsider = selectedTokenKeys.map(key => ({ 
-            key, 
-            ...ITENS_CATALOGO[key],
-            priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100))
-        }));
-        
-        const t = TRANSLATIONS[currentLang];
-        let remainingMush = totalMush;
+      addEventListeners() {
+          dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
+          dom.btnCalcular.addEventListener('click', this.updateUI.bind(this));
+          dom.btnResetar.addEventListener('click', this.reset.bind(this));
+          dom.btnGerarImagem.addEventListener('click', this.generateImage.bind(this));
+          dom.themeToggle.addEventListener('click', () => {
+              const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+              this.setTheme(newTheme);
+          });
+          dom.langBr.addEventListener('click', () => this.setLanguage('br'));
+          dom.langEn.addEventListener('click', () => this.setLanguage('en'));
+          dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
+          dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
+          dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
+      },
 
-        const fairShare = totalMush / itemsToConsider.length;
-
-        itemsToConsider.forEach(item => {
-            if (item.priceWithDiscount > 0 && fairShare >= item.priceWithDiscount) {
-                const quantityFromShare = Math.floor(fairShare / item.priceWithDiscount);
-                const qtyInput = document.getElementById(`qtd-${item.key}`);
-                if (qtyInput) qtyInput.value = quantityFromShare;
-                remainingMush -= quantityFromShare * item.priceWithDiscount;
-            }
-        });
-
-        const sortedForLeftover = itemsToConsider.sort((a, b) => b.priceWithDiscount - a.priceWithDiscount);
-        for (const item of sortedForLeftover) {
-            if (remainingMush < item.priceWithDiscount) continue;
-            const additionalQuantity = Math.floor(remainingMush / item.priceWithDiscount);
-            const qtyInput = document.getElementById(`qtd-${item.key}`);
-            if (qtyInput) qtyInput.value = parseInt(qtyInput.value || 0) + additionalQuantity;
-            remainingMush -= additionalQuantity * item.priceWithDiscount;
-        }
-
-        const allTokenKeys = Object.keys(ITENS_CATALOGO);
-        const unselectedTokenKeys = allTokenKeys.filter(key => !selectedTokenKeys.includes(key));
-
-        if (remainingMush > 1 && unselectedTokenKeys.length > 0) {
-            const unselectedNames = unselectedTokenKeys.map(key => ITENS_CATALOGO[key][`name_${currentLang}`]).join(', ');
-            const confirmMessage = `${t.leftoverConfirm1} ${remainingMush.toFixed(2)} mush. ${t.leftoverConfirm2} ${unselectedNames}?`;
-            
-            if (window.confirm(confirmMessage)) {
-                const leftoverItems = unselectedTokenKeys
-                    .map(key => ({ key, ...ITENS_CATALOGO[key], priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100)) }))
-                    .sort((a, b) => b.priceWithDiscount - a.priceWithDiscount);
-                
-                for (const item of leftoverItems) {
-                    if (remainingMush < item.priceWithDiscount) continue;
-                    const leftoverQuantity = Math.floor(remainingMush / item.priceWithDiscount);
-                    const qtyInput = document.getElementById(`qtd-${item.key}`);
-                    if (qtyInput) qtyInput.value = parseInt(qtyInput.value || 0) + leftoverQuantity;
-                    remainingMush -= leftoverQuantity * item.priceWithDiscount;
-                }
-            }
-        }
-
-        dom.leftoverMushDiv.innerHTML = `${t.leftoverMushText} <span>${remainingMush.toFixed(2)}</span>`;
-        dom.leftoverMushDiv.querySelector('span').appendChild(this.createCoinIcon());
-        this.updateUI();
-    },
-
-    calculateValues() {
-        const descontoPercentual = parseFloat(dom.descontoInput.value) || 0;
-        const resultados = {
-          itens: {}, totalBruto: 0, totalFinal: 0, valorDescontoTotal: 0, descontoPercentual: descontoPercentual
-        };
-        for (const key in ITENS_CATALOGO) {
-          const item = ITENS_CATALOGO[key];
-          const qtdInput = document.getElementById(`qtd-${key}`);
-          const quantidade = qtdInput ? parseInt(qtdInput.value) || 0 : 0;
-          const precoOriginal = item.preco;
-          const precoComDesconto = precoOriginal * (1 - (descontoPercentual / 100));
-          const subtotal = quantidade * precoComDesconto;
-          resultados.itens[key] = {
-            nome: item[`name_${currentLang}`], quantidade: quantidade, precoOriginal: precoOriginal, precoComDesconto: precoComDesconto, subtotal: subtotal
-          };
-          resultados.totalBruto += quantidade * precoOriginal;
-          resultados.totalFinal += subtotal;
-        }
-        resultados.valorDescontoTotal = resultados.totalBruto - resultados.totalFinal;
-        return resultados;
-    },
-
-    createCoinIcon() {
-        const img = document.createElement('img');
-        img.src = MOEDA_BASE64;
-        img.className = 'moeda-img';
-        img.alt = 'mush';
-        return img;
-    },
-
-    loadTable() {
-        const currentValues = {};
-        document.querySelectorAll('#tabela-itens input[type="number"]').forEach(input => {
-            currentValues[input.id] = input.value;
-        });
-        dom.tabelaItensBody.innerHTML = '';
-        for (const key in ITENS_CATALOGO) {
-          const item = ITENS_CATALOGO[key];
-          const tr = document.createElement('tr');
-          const savedQty = currentValues[`qtd-${key}`] || 0;
-          tr.innerHTML = `
-            <td>${item[`name_${currentLang}`]}</td>
-            <td>${item.preco.toFixed(2)}</td>
-            <td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td>
-            <td style="text-align: center;">0.00</td>
-          `;
-          tr.querySelector(`td:nth-child(2)`).appendChild(this.createCoinIcon());
-          tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
-          dom.tabelaItensBody.appendChild(tr);
-          tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
-        }
-    },
-
-    updateUI() {
-        const calculo = this.calculateValues();
-        const rows = dom.tabelaItensBody.getElementsByTagName('tr');
-        Array.from(rows).forEach((row, index) => {
-          const key = Object.keys(ITENS_CATALOGO)[index];
-          if (!calculo.itens[key]) return;
-          const itemCalculado = calculo.itens[key];
-          const precoCell = row.querySelector(`td:nth-child(2)`);
-          const totalCell = row.querySelector(`td:nth-child(4)`);
-          if (calculo.descontoPercentual > 0) {
-            precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)} ➝ ${itemCalculado.precoComDesconto.toFixed(2)}`;
+      toggleMode(mode) {
+          if (mode === 'quantity') {
+              dom.distributorSection.style.display = 'none';
+              dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
+              dom.btnCalcular.style.display = 'inline-block';
           } else {
-            precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)}`;
+              dom.distributorSection.style.display = 'flex';
+              dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
+              dom.btnCalcular.style.display = 'none';
           }
-          precoCell.appendChild(this.createCoinIcon());
-          totalCell.innerHTML = `${itemCalculado.subtotal.toFixed(2)}`;
-          totalCell.appendChild(this.createCoinIcon());
-        });
-        dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b>`;
-        dom.totalGeralCell.appendChild(this.createCoinIcon());
-    },
-    
-    reset(clearDistributor = true) {
-        dom.nomeClienteInput.value = '';
-        dom.descontoInput.value = '';
-        if(clearDistributor) {
-            dom.totalMushInput.value = '';
-            dom.leftoverMushDiv.innerHTML = '';
-        }
-        for (const key in ITENS_CATALOGO) {
-            const input = document.getElementById(`qtd-${key}`);
-            if (input) input.value = 0;
-        }
-        this.updateUI();
-    },
-    
-    generateImage() {
-        const calculo = this.calculateValues();
-        const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
-        let temItens = false;
-        const t = TRANSLATIONS[currentLang];
+      },
 
-        if (window.saveReceiptToFirebase) {
-            const itemsToSave = {};
-            for(const key in calculo.itens) {
-                if(calculo.itens[key].quantidade > 0) {
-                    itemsToSave[key] = calculo.itens[key].quantidade;
-                    temItens = true;
-                }
-            }
-            if(temItens) {
-                const receiptData = {
-                    customerName: nome,
-                    discountApplied: calculo.descontoPercentual,
-                    grandTotal: calculo.totalFinal,
-                    items: itemsToSave
-                };
-                window.saveReceiptToFirebase(receiptData);
-            }
-        }
-        
-        dom.resultadoDiv.querySelector('h3').innerHTML = `${t.receiptHeader} - <span id="resNome">${nome}</span>`;
-        dom.resumoItensDiv.innerHTML = `<h4 class="receipt-section-title">${t.receiptItemsHeader}</h4>`;
-        dom.resumoTotaisDiv.innerHTML = '';
-        
-        let hasItemsForReceipt = false;
-        for(const key in calculo.itens) {
-          const item = calculo.itens[key];
-          if (item.quantidade > 0) {
-            hasItemsForReceipt = true;
-            const itemLine = document.createElement('div');
-            itemLine.className = 'receipt-line';
-            const precoComMoeda = document.createElement('span');
-            precoComMoeda.className = 'receipt-value';
-            precoComMoeda.textContent = item.subtotal.toFixed(2);
-            precoComMoeda.appendChild(this.createCoinIcon());
-            itemLine.innerHTML = `<span class="receipt-label">${item.nome} (x${item.quantidade})</span>`;
-            itemLine.appendChild(precoComMoeda);
-            dom.resumoItensDiv.appendChild(itemLine);
+      setTheme(theme) {
+          dom.html.setAttribute('data-theme', theme);
+          localStorage.setItem('theme', theme);
+      },
+
+      setLanguage(lang) {
+          currentLang = lang;
+          localStorage.setItem('language', lang);
+          document.querySelectorAll('[data-translate-key]').forEach(el => {
+              const key = el.dataset.translateKey;
+              if (TRANSLATIONS[lang][key]) el.innerText = TRANSLATIONS[lang][key];
+          });
+          document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
+              const key = el.dataset.translateKeyPlaceholder;
+              if (TRANSLATIONS[lang][key]) el.placeholder = TRANSLATIONS[lang][key];
+          });
+          document.title = TRANSLATIONS[lang].pageTitle;
+          dom.langBr.classList.toggle('active', lang === 'br');
+          dom.langEn.classList.toggle('active', lang === 'en');
+          this.loadTable();
+          this.buildTokenFilters();
+          this.updateUI();
+      },
+      
+      buildTokenFilters() {
+          dom.tokenFiltersContainer.innerHTML = '';
+          for (const key in ITENS_CATALOGO) {
+              const item = ITENS_CATALOGO[key];
+              const label = document.createElement('label');
+              label.innerHTML = `
+                  <input type="checkbox" value="${key}" checked>
+                  <span>${item[`name_${currentLang}`]}</span>
+              `;
+              dom.tokenFiltersContainer.appendChild(label);
           }
+      },
+
+      distributeMush() {
+          let totalMush = parseInt(dom.totalMushInput.value) || 0;
+          const discount = parseFloat(dom.descontoInput.value) || 0;
+          const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+
+          this.reset(false);
+
+          if (selectedTokenKeys.length === 0) return;
+
+          const itemsToConsider = selectedTokenKeys.map(key => ({ 
+              key, 
+              ...ITENS_CATALOGO[key],
+              priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100))
+          }));
+          
+          const t = TRANSLATIONS[currentLang];
+          let remainingMush = totalMush;
+
+          const fairShare = totalMush / itemsToConsider.length;
+
+          itemsToConsider.forEach(item => {
+              if (item.priceWithDiscount > 0 && fairShare >= item.priceWithDiscount) {
+                  const quantityFromShare = Math.floor(fairShare / item.priceWithDiscount);
+                  const qtyInput = document.getElementById(`qtd-${item.key}`);
+                  if (qtyInput) qtyInput.value = quantityFromShare;
+                  remainingMush -= quantityFromShare * item.priceWithDiscount;
+              }
+          });
+
+          const sortedForLeftover = itemsToConsider.sort((a, b) => b.priceWithDiscount - a.priceWithDiscount);
+          for (const item of sortedForLeftover) {
+              if (remainingMush < item.priceWithDiscount) continue;
+              const additionalQuantity = Math.floor(remainingMush / item.priceWithDiscount);
+              const qtyInput = document.getElementById(`qtd-${item.key}`);
+              if (qtyInput) qtyInput.value = parseInt(qtyInput.value || 0) + additionalQuantity;
+              remainingMush -= additionalQuantity * item.priceWithDiscount;
+          }
+
+          const allTokenKeys = Object.keys(ITENS_CATALOGO);
+          const unselectedTokenKeys = allTokenKeys.filter(key => !selectedTokenKeys.includes(key));
+
+          if (remainingMush > 1 && unselectedTokenKeys.length > 0) {
+              const unselectedNames = unselectedTokenKeys.map(key => ITENS_CATALOGO[key][`name_${currentLang}`]).join(', ');
+              const confirmMessage = `${t.leftoverConfirm1} ${remainingMush.toFixed(2)} mush. ${t.leftoverConfirm2} ${unselectedNames}?`;
+              
+              if (window.confirm(confirmMessage)) {
+                  const leftoverItems = unselectedTokenKeys
+                      .map(key => ({ key, ...ITENS_CATALOGO[key], priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100)) }))
+                      .sort((a, b) => b.priceWithDiscount - a.priceWithDiscount);
+                  
+                  for (const item of leftoverItems) {
+                      if (remainingMush < item.priceWithDiscount) continue;
+                      const leftoverQuantity = Math.floor(remainingMush / item.priceWithDiscount);
+                      const qtyInput = document.getElementById(`qtd-${item.key}`);
+                      if (qtyInput) qtyInput.value = parseInt(qtyInput.value || 0) + leftoverQuantity;
+                      remainingMush -= leftoverQuantity * item.priceWithDiscount;
+                  }
+              }
+          }
+
+          dom.leftoverMushDiv.innerHTML = `${t.leftoverMushText} <span>${remainingMush.toFixed(2)}</span>`;
+          dom.leftoverMushDiv.querySelector('span').appendChild(this.createCoinIcon());
+          this.updateUI();
+      },
+
+      calculateValues() {
+          const descontoPercentual = parseFloat(dom.descontoInput.value) || 0;
+          const resultados = {
+            itens: {}, totalBruto: 0, totalFinal: 0, valorDescontoTotal: 0, descontoPercentual: descontoPercentual
+          };
+          for (const key in ITENS_CATALOGO) {
+            const item = ITENS_CATALOGO[key];
+            const qtdInput = document.getElementById(`qtd-${key}`);
+            const quantidade = qtdInput ? parseInt(qtdInput.value) || 0 : 0;
+            const precoOriginal = item.preco;
+            const precoComDesconto = precoOriginal * (1 - (descontoPercentual / 100));
+            const subtotal = quantidade * precoComDesconto;
+            resultados.itens[key] = {
+              nome: item[`name_${currentLang}`], quantidade: quantidade, precoOriginal: precoOriginal, precoComDesconto: precoComDesconto, subtotal: subtotal
+            };
+            resultados.totalBruto += quantidade * precoOriginal;
+            resultados.totalFinal += subtotal;
+          }
+          resultados.valorDescontoTotal = resultados.totalBruto - resultados.totalFinal;
+          return resultados;
+      },
+
+      createCoinIcon() {
+          const img = document.createElement('img');
+          img.src = MOEDA_BASE64;
+          img.className = 'moeda-img';
+          img.alt = 'mush';
+          return img;
+      },
+
+      loadTable() {
+          const currentValues = {};
+          document.querySelectorAll('#tabela-itens input[type="number"]').forEach(input => {
+              currentValues[input.id] = input.value;
+          });
+          dom.tabelaItensBody.innerHTML = '';
+          for (const key in ITENS_CATALOGO) {
+            const item = ITENS_CATALOGO[key];
+            const tr = document.createElement('tr');
+            const savedQty = currentValues[`qtd-${key}`] || 0;
+            tr.innerHTML = `
+              <td>${item[`name_${currentLang}`]}</td>
+              <td>${item.preco.toFixed(2)}</td>
+              <td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td>
+              <td style="text-align: center;">0.00</td>
+            `;
+            tr.querySelector(`td:nth-child(2)`).appendChild(this.createCoinIcon());
+            tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
+            dom.tabelaItensBody.appendChild(tr);
+            tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
+          }
+      },
+
+      updateUI() {
+          const calculo = this.calculateValues();
+          const rows = dom.tabelaItensBody.getElementsByTagName('tr');
+          Array.from(rows).forEach((row, index) => {
+            const key = Object.keys(ITENS_CATALOGO)[index];
+            if (!calculo.itens[key]) return;
+            const itemCalculado = calculo.itens[key];
+            const precoCell = row.querySelector(`td:nth-child(2)`);
+            const totalCell = row.querySelector(`td:nth-child(4)`);
+            if (calculo.descontoPercentual > 0) {
+              precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)} ➝ ${itemCalculado.precoComDesconto.toFixed(2)}`;
+            } else {
+              precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)}`;
+            }
+            precoCell.appendChild(this.createCoinIcon());
+            totalCell.innerHTML = `${itemCalculado.subtotal.toFixed(2)}`;
+            totalCell.appendChild(this.createCoinIcon());
+          });
+          dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b>`;
+          dom.totalGeralCell.appendChild(this.createCoinIcon());
+      },
+      
+      reset(clearDistributor = true) {
+          dom.nomeClienteInput.value = '';
+          dom.descontoInput.value = '';
+          if(clearDistributor) {
+              dom.totalMushInput.value = '';
+              dom.leftoverMushDiv.innerHTML = '';
+          }
+          for (const key in ITENS_CATALOGO) {
+              const input = document.getElementById(`qtd-${key}`);
+              if (input) input.value = 0;
+          }
+          this.updateUI();
+      },
+      
+      async generateImage() {
+          const calculo = this.calculateValues();
+          const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+          let temItens = false;
+          const t = TRANSLATIONS[currentLang];
+
+          const itemsToSave = {};
+          for(const key in calculo.itens) {
+              if(calculo.itens[key].quantidade > 0) {
+                  itemsToSave[key] = calculo.itens[key].quantidade;
+                  temItens = true;
+              }
+          }
+          if(temItens) {
+              const receiptData = {
+                  customerName: nome,
+                  discountApplied: calculo.descontoPercentual,
+                  grandTotal: calculo.totalFinal,
+                  items: itemsToSave
+              };
+              // Salva no Firebase
+              try {
+                  const docRef = await db.collection("receipts").add({
+                      ...receiptData,
+                      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                  });
+                  console.log("Recibo salvo com o ID: ", docRef.id);
+              } catch(e) {
+                  console.error("Erro ao salvar no Firestore: ", e);
+                  alert("Houve um erro ao salvar o recibo no banco de dados.");
+              }
+          }
+          
+          dom.resultadoDiv.querySelector('h3').innerHTML = `${t.receiptHeader} - <span id="resNome">${nome}</span>`;
+          dom.resumoItensDiv.innerHTML = `<h4 class="receipt-section-title">${t.receiptItemsHeader}</h4>`;
+          dom.resumoTotaisDiv.innerHTML = '';
+          
+          let hasItemsForReceipt = false;
+          for(const key in calculo.itens) {
+            const item = calculo.itens[key];
+            if (item.quantidade > 0) {
+              hasItemsForReceipt = true;
+              const itemLine = document.createElement('div');
+              itemLine.className = 'receipt-line';
+              const precoComMoeda = document.createElement('span');
+              precoComMoeda.className = 'receipt-value';
+              precoComMoeda.textContent = item.subtotal.toFixed(2);
+              precoComMoeda.appendChild(this.createCoinIcon());
+              itemLine.innerHTML = `<span class="receipt-label">${item.nome} (x${item.quantidade})</span>`;
+              itemLine.appendChild(precoComMoeda);
+              dom.resumoItensDiv.appendChild(itemLine);
+            }
+          }
+          if (!hasItemsForReceipt) { alert(t.alertNoItems); return; }
+          if (calculo.descontoPercentual > 0) {
+              dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line"><span class="receipt-label">${t.receiptSubtotal}</span><span class="receipt-value">${calculo.totalBruto.toFixed(2)}</span></div><div class="receipt-line"><span class="receipt-label">${t.receiptDiscount} (${calculo.descontoPercentual.toFixed(2)}%)</span><span class="receipt-value">- ${calculo.valorDescontoTotal.toFixed(2)}</span></div>`;
+          }
+          dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line final-total"><span class="receipt-label">${t.receiptFinalTotal}</span><span class="receipt-value">${calculo.totalFinal.toFixed(2)}</span></div>`;
+          dom.resumoTotaisDiv.querySelectorAll('.receipt-value').forEach(el => el.appendChild(this.createCoinIcon()));
+          dom.resultadoDiv.style.display = 'block';
+          setTimeout(() => {
+              html2canvas(dom.resultadoDiv, { backgroundColor: null, scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+                link.download = `${nomeSanitizado}_recibo.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                dom.resultadoDiv.style.display = 'none';
+              });
+          }, 300);
         }
-        if (!hasItemsForReceipt) { alert(t.alertNoItems); return; }
-        if (calculo.descontoPercentual > 0) {
-            dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line"><span class="receipt-label">${t.receiptSubtotal}</span><span class="receipt-value">${calculo.totalBruto.toFixed(2)}</span></div><div class="receipt-line"><span class="receipt-label">${t.receiptDiscount} (${calculo.descontoPercentual.toFixed(2)}%)</span><span class="receipt-value">- ${calculo.valorDescontoTotal.toFixed(2)}</span></div>`;
-        }
-        dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line final-total"><span class="receipt-label">${t.receiptFinalTotal}</span><span class="receipt-value">${calculo.totalFinal.toFixed(2)}</span></div>`;
-        dom.resumoTotaisDiv.querySelectorAll('.receipt-value').forEach(el => el.appendChild(this.createCoinIcon()));
-        dom.resultadoDiv.style.display = 'block';
-        setTimeout(() => {
-            html2canvas(dom.resultadoDiv, { backgroundColor: null, scale: 2 }).then(canvas => {
-              const link = document.createElement('a');
-              const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
-              link.download = `${nomeSanitizado}_recibo.png`;
-              link.href = canvas.toDataURL('image/png');
-              link.click();
-              dom.resultadoDiv.style.display = 'none';
-            });
-        }, 300);
-      }
-  };
-  
-  app.init();
-});
+    };
+    
+    app.init();
+  });
 </script>
 
 </body>
