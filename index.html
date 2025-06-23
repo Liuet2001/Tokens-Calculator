@@ -141,8 +141,6 @@
   #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover { background: var(--accent-hover); }
   #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
   #btnGerarImagem, #btnLogout { background: var(--bg-tertiary); color: var(--text-primary); }
-  
-  #resultado { display: none; position: absolute; left: -9999px; top: 0; width: 600px; background-color: var(--bg-secondary); color: var(--text-primary); padding: 32px; border-radius: 16px; border: 1px solid var(--border-color); }
 </style>
 </head>
 <body>
@@ -248,340 +246,421 @@
     </div>
 </div>
 
-<div id="resultado">
-  </div>
+<div id="resultado" style="display: none; position: absolute; left: -9999px; top: 0; width: 600px; background-color: var(--bg-secondary); color: var(--text-primary); padding: 32px; border-radius: 16px; border: 1px solid var(--border-color);">
+  <h3>Recibo - <span id="resNome"></span></h3>
+  <div id="resumo-itens" style="display: flex; flex-direction: column; gap: 12px;"></div>
+  <div id="resumo-totais" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px;"></div>
+  <p class="agradecimento" style="text-align: center; margin-top: 32px; font-size: 14px; color: var(--text-secondary);">✨ Agradecemos a preferência! ✨</p>
+</div>
 
 <script>
-  // --- INICIALIZAÇÃO DO FIREBASE ---
   const firebaseConfig = {
     apiKey: "AIzaSyDgeTU4YmFpZIwcmE2-cxGKTkO2KqeQotE",
     authDomain: "token-calculator-a45d6.firebaseapp.com",
     projectId: "token-calculator-a45d6",
     storageBucket: "token-calculator-a45d6.firebasestorage.app",
     messagingSenderId: "597974335563",
-    appId: "1:597974335563:web:9d07ada2708d61b7d30dce"
+    appId: "1:597974335563:web:9d07ada2708d61b7d30dce",
+    measurementId: "G-TGNWMNR21V"
   };
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   const auth = firebase.auth();
 
-  // --- LÓGICA DA APLICAÇÃO ---
-  // Removido o DOMContentLoaded para uma inicialização mais direta
+  const MOEDA_BASE64 = ""; // COLE SUA STRING BASE64 AQUI
+  const DUMMY_DOMAIN = '@painelriciv.com'; // SEU DOMÍNIO FICTÍCIO
+
+  const ITENS_CATALOGO = {
+    revive: { preco: 790, name_br: 'Revive Token', name_en: 'Revive Token' },
+    max: { preco: 570, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
+    partial: { preco: 195, name_br: 'Partial Growth Token', name_en: 'Partial Growth Token' },
+    change: { preco: 90, name_br: 'Appearance Change Token', name_en: 'Appearance Change Token' }
+  };
+
+  const TRANSLATIONS = {
+    br: {
+        pageTitle: "Calculadora de Tokens", mainHeader: "Calculadora de Tokens", themeLabel: "Tema Claro",
+        idLabel: "Identificador / Nome", idPlaceholder: "Digite seu nome ou ID", discountLabel: "Desconto (%)",
+        discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Preço Unitário", tableQty: "Quantidade",
+        tableTotal: "Valor Total", tableGrandTotal: "TOTAL GERAL", btnCalculate: "Calcular", btnReset: "Resetar",
+        btnExport: "Exportar para PNG", alertNoItems: "Nenhum item foi selecionado para gerar o recibo.",
+        alertInsufficientMush: "Mush insuficiente para comprar ao menos um de cada item selecionado.",
+        receiptHeader: "Recibo", receiptItemsHeader: "Itens Comprados", receiptSubtotal: "Subtotal",
+        receiptDiscount: "Desconto", receiptFinalTotal: "Total Final", receiptThanks: "✨ Agradecemos a preferência! ✨",
+        calculationMode: "Modo de Cálculo", modeQty: "Por Quantidade", modeMush: "Por Mush",
+        distributeTokensLabel: "Tokens Desejáveis para Distribuição", totalMushLabel: "Total de Mush a Gastar",
+        btnDistribute: "Distribuir", leftoverMushText: "Sobrou:",
+        leftoverConfirm1: "Sobraram", leftoverConfirm2: "Deseja distribuir este valor nos itens restantes:",
+        loginHeader: "Acessar Calculadora", usernameLabel: "Usuário", passwordLabel: "Senha",
+        loginButton: "Entrar", logoutButton: "Sair", errorInvalidCredentials: "Usuário ou senha inválidos.",
+        errorGeneric: "Ocorreu um erro. Tente novamente.",
+        tabCalculator: "Calculadora", tabHistory: "Histórico", historyHeader: "Histórico de Vendas",
+        historyCustomer: "Cliente", historyDate: "Data", historyTotal: "Total", historySeller: "Vendedor",
+        historyNoRecords: "Nenhum registro encontrado.", historyLoading: "Carregando histórico..."
+    },
+    en: {
+        pageTitle: "Token Calculator", mainHeader: "Token Calculator", themeLabel: "Light Theme",
+        idLabel: "Identifier / Name", idPlaceholder: "Enter your name or ID", discountLabel: "Discount (%)",
+        discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Unit Price", tableQty: "Quantity",
+        tableTotal: "Total Value", tableGrandTotal: "GRAND TOTAL", btnCalculate: "Calculate", btnReset: "Reset",
+        btnExport: "Export to PNG", alertNoItems: "No items were selected to generate the receipt.",
+        alertInsufficientMush: "Insufficient mush to purchase at least one of each selected item.",
+        receiptHeader: "Receipt", receiptItemsHeader: "Purchased Items", receiptSubtotal: "Subtotal",
+        receiptDiscount: "Discount", receiptFinalTotal: "Final Total", receiptThanks: "✨ Thank you for your preference! ✨",
+        calculationMode: "Calculation Mode", modeQty: "By Quantity", modeMush: "By Mush",
+        distributeTokensLabel: "Desirable Tokens for Distribution", totalMushLabel: "Total Mush to Spend",
+        btnDistribute: "Distribute", leftoverMushText: "Leftover:",
+        leftoverConfirm1: "There is", leftoverConfirm2: "leftover. Do you want to distribute this amount to the remaining items:",
+        loginHeader: "Calculator Login", usernameLabel: "Username", passwordLabel: "Password",
+        loginButton: "Login", logoutButton: "Logout", errorInvalidCredentials: "Invalid username or password.",
+        errorGeneric: "An error occurred. Please try again.",
+        tabCalculator: "Calculator", tabHistory: "History", historyHeader: "Sales History",
+        historyCustomer: "Customer", historyDate: "Date", historyTotal: "Total", historySeller: "Seller",
+        historyNoRecords: "No records found.", historyLoading: "Loading history..."
+    }
+  };
+  
+  const dom = {
+    authContainer: document.getElementById('auth-container'),
+    appContainer: document.getElementById('app-container'),
+    usernameInput: document.getElementById('username-input'),
+    passwordInput: document.getElementById('password-input'),
+    btnLogin: document.getElementById('btnLogin'),
+    btnLogout: document.getElementById('btnLogout'),
+    authError: document.getElementById('auth-error'),
+    html: document.documentElement,
+    nomeClienteInput: document.getElementById('nomeCliente'),
+    descontoInput: document.getElementById('desconto'),
+    tabelaItensBody: document.getElementById('tabela-itens'),
+    totalGeralCell: document.getElementById('totalGeral'),
+    themeToggle: document.getElementById('theme-toggle'),
+    langBr: document.getElementById('lang-br'),
+    langEn: document.getElementById('lang-en'),
+    modeQtyRadio: document.getElementById('mode-qty'),
+    modeMushRadio: document.getElementById('mode-mush'),
+    distributorSection: document.getElementById('distributor-section'),
+    tokenFiltersContainer: document.getElementById('token-filters-container'),
+    totalMushInput: document.getElementById('total-mush'),
+    btnDistribute: document.getElementById('btnDistribute'),
+    leftoverMushDiv: document.getElementById('leftover-mush'),
+    tabNavigation: document.querySelector('.tab-navigation'),
+    tabLinks: document.querySelectorAll('.tab-link'),
+    tabContents: document.querySelectorAll('.tab-content'),
+    historyTableContainer: document.getElementById('history-table-container'),
+  };
+
+  let currentLang = 'br';
+
+  const app = {
+    calculatorInitialized: false,
+
+    init() {
+      this.addAuthListeners();
+      // A tradução inicial agora é controlada pelo 'onAuthStateChanged'
+    },
     
-    const MOEDA_BASE64 = ""; // COLE SUA STRING BASE64 AQUI
-    const DUMMY_DOMAIN = '@painelriciv.com'; // SEU DOMÍNIO FICTÍCIO
+    addAuthListeners() {
+      auth.onAuthStateChanged(user => {
+          if (user) {
+              dom.authContainer.classList.add('hidden');
+              dom.appContainer.classList.remove('hidden');
+              if (!this.calculatorInitialized) {
+                  this.loadPreferences();
+                  this.addAppEventListeners();
+                  this.setLanguage(currentLang);
+                  this.calculatorInitialized = true;
+              }
+          } else {
+              dom.authContainer.classList.remove('hidden');
+              dom.appContainer.classList.add('hidden');
+              this.calculatorInitialized = false;
+              this.loadPreferences();
+              this.setLanguage(currentLang, true); // Traduz só o login
+              dom.btnLogin.addEventListener('click', this.handleLogin.bind(this));
+          }
+      });
+      dom.btnLogout.addEventListener('click', this.handleLogout.bind(this));
+    },
+    
+    async handleLogin() {
+        const username = dom.usernameInput.value.trim();
+        const password = dom.passwordInput.value;
+        const t = TRANSLATIONS[currentLang];
+        if (!username || !password) {
+            dom.authError.textContent = t.errorInvalidCredentials;
+            return;
+        }
+        const email = username + DUMMY_DOMAIN;
+        try {
+            dom.authError.textContent = '';
+            await auth.signInWithEmailAndPassword(email, password);
+        } catch (error) {
+            console.error("Erro de login:", error.code);
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                dom.authError.textContent = t.errorInvalidCredentials;
+            } else {
+                dom.authError.textContent = t.errorGeneric;
+            }
+        }
+    },
+    
+    handleLogout() { auth.signOut(); },
 
-    const ITENS_CATALOGO = {
-      revive: { preco: 790, name_br: 'Revive Token', name_en: 'Revive Token' },
-      max: { preco: 570, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
-      partial: { preco: 195, name_br: 'Partial Growth Token', name_en: 'Partial Growth Token' },
-      change: { preco: 90, name_br: 'Appearance Change Token', name_en: 'Appearance Change Token' }
-    };
+    loadPreferences() {
+        this.setTheme(localStorage.getItem('theme') || 'dark');
+        currentLang = localStorage.getItem('language') || 'br';
+    },
 
-    const TRANSLATIONS = {
-      br: {
-          pageTitle: "Calculadora de Tokens", mainHeader: "Calculadora de Tokens", themeLabel: "Tema Claro",
-          idLabel: "Identificador / Nome", idPlaceholder: "Digite seu nome ou ID", discountLabel: "Desconto (%)",
-          discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Preço Unitário", tableQty: "Quantidade",
-          tableTotal: "Valor Total", tableGrandTotal: "TOTAL GERAL", btnCalculate: "Calcular", btnReset: "Resetar",
-          btnExport: "Exportar para PNG", alertNoItems: "Nenhum item foi selecionado para gerar o recibo.",
-          alertInsufficientMush: "Mush insuficiente para comprar ao menos um de cada item selecionado.",
-          receiptHeader: "Recibo", receiptItemsHeader: "Itens Comprados", receiptSubtotal: "Subtotal",
-          receiptDiscount: "Desconto", receiptFinalTotal: "Total Final", receiptThanks: "✨ Agradecemos a preferência! ✨",
-          calculationMode: "Modo de Cálculo", modeQty: "Por Quantidade", modeMush: "Por Mush",
-          distributeTokensLabel: "Tokens Desejáveis para Distribuição", totalMushLabel: "Total de Mush a Gastar",
-          btnDistribute: "Distribuir", leftoverMushText: "Sobrou:",
-          leftoverConfirm1: "Sobraram", leftoverConfirm2: "Deseja distribuir este valor nos itens restantes:",
-          loginHeader: "Acessar Calculadora", usernameLabel: "Usuário", passwordLabel: "Senha",
-          loginButton: "Entrar", logoutButton: "Sair", errorInvalidCredentials: "Usuário ou senha inválidos.",
-          errorGeneric: "Ocorreu um erro. Tente novamente.",
-          tabCalculator: "Calculadora", tabHistory: "Histórico", historyHeader: "Histórico de Vendas",
-          historyCustomer: "Cliente", historyDate: "Data", historyTotal: "Total", historySeller: "Vendedor",
-          historyNoRecords: "Nenhum registro encontrado.", historyLoading: "Carregando histórico..."
-      },
-      en: { // ... (traduções em inglês mantidas)
-          pageTitle: "Token Calculator", mainHeader: "Token Calculator", themeLabel: "Light Theme",
-          idLabel: "Identifier / Name", idPlaceholder: "Enter your name or ID", discountLabel: "Discount (%)",
-          discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Unit Price", tableQty: "Quantity",
-          tableTotal: "Total Value", tableGrandTotal: "GRAND TOTAL", btnCalculate: "Calculate", btnReset: "Reset",
-          btnExport: "Export to PNG", alertNoItems: "No items were selected to generate the receipt.",
-          alertInsufficientMush: "Insufficient mush to purchase at least one of each selected item.",
-          receiptHeader: "Receipt", receiptItemsHeader: "Purchased Items", receiptSubtotal: "Subtotal",
-          receiptDiscount: "Discount", receiptFinalTotal: "Final Total", receiptThanks: "✨ Thank you for your preference! ✨",
-          calculationMode: "Calculation Mode", modeQty: "By Quantity", modeMush: "By Mush",
-          distributeTokensLabel: "Desirable Tokens for Distribution", totalMushLabel: "Total Mush to Spend",
-          btnDistribute: "Distribute", leftoverMushText: "Leftover:",
-          leftoverConfirm1: "There is", leftoverConfirm2: "leftover. Do you want to distribute this amount to the remaining items:",
-          loginHeader: "Calculator Login", usernameLabel: "Username", passwordLabel: "Password",
-          loginButton: "Login", logoutButton: "Logout", errorInvalidCredentials: "Invalid username or password.",
-          errorGeneric: "An error occurred. Please try again.",
-          tabCalculator: "Calculator", tabHistory: "History", historyHeader: "Sales History",
-          historyCustomer: "Customer", historyDate: "Date", historyTotal: "Total", historySeller: "Seller",
-          historyNoRecords: "No records found.", historyLoading: "Loading history..."
+    addAppEventListeners() {
+        dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
+        document.getElementById('btnCalcular').addEventListener('click', this.updateUI.bind(this));
+        document.getElementById('btnResetar').addEventListener('click', this.reset.bind(this));
+        document.getElementById('btnGerarImagem').addEventListener('click', this.generateImage.bind(this));
+        dom.themeToggle.addEventListener('click', () => {
+            const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            this.setTheme(newTheme);
+        });
+        dom.langBr.addEventListener('click', () => this.setLanguage('br'));
+        dom.langEn.addEventListener('click', () => this.setLanguage('en'));
+        dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
+        dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
+        dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
+        dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
+    },
+
+    handleTabClick(event) {
+        const clickedTab = event.target.closest('.tab-link');
+        if (!clickedTab) return;
+        const tabId = clickedTab.dataset.tab;
+        dom.tabLinks.forEach(link => link.classList.remove('active'));
+        dom.tabContents.forEach(content => content.classList.add('hidden'));
+        clickedTab.classList.add('active');
+        document.getElementById(tabId).classList.remove('hidden');
+        if (tabId === 'history-view') {
+            this.loadHistory();
+        }
+    },
+
+    async loadHistory() {
+        const t = TRANSLATIONS[currentLang];
+        dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
+        try {
+            const querySnapshot = await db.collection("receipts").orderBy("createdAt", "desc").get();
+            if (querySnapshot.empty) {
+                dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
+                return;
+            }
+            let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th><th>${t.historySeller}</th><th>${t.historyTotal}</th><th>${t.historyDate}</th></tr></thead><tbody>`;
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                const date = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A';
+                const sellerEmail = data.seller || 'N/A';
+                const sellerUsername = sellerEmail.split('@')[0];
+                tableHTML += `<tr><td>${data.customerName || 'N/A'}</td><td>${sellerUsername}</td><td>${data.grandTotal?.toFixed(2) || '0.00'}</td><td>${date}</td></tr>`;
+            });
+            tableHTML += `</tbody></table>`;
+            dom.historyTableContainer.innerHTML = tableHTML;
+        } catch (error) {
+            console.error("Erro ao buscar histórico: ", error);
+            dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
+        }
+    },
+    
+    setLanguage(lang, isLoginScreenOnly = false) {
+        currentLang = lang;
+        localStorage.setItem('language', lang);
+        document.querySelectorAll('[data-translate-key]').forEach(el => {
+            const key = el.dataset.translateKey;
+            if (TRANSLATIONS[lang][key]) el.innerText = TRANSLATIONS[lang][key];
+        });
+        document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
+            const key = el.dataset.translateKeyPlaceholder;
+            if (TRANSLATIONS[lang][key]) el.placeholder = TRANSLATIONS[lang][key];
+        });
+        document.title = TRANSLATIONS[lang].pageTitle;
+        dom.langBr.classList.toggle('active', lang === 'br');
+        dom.langEn.classList.toggle('active', lang === 'en');
+        if (!isLoginScreenOnly) {
+          this.loadTable();
+          this.buildTokenFilters();
+          this.updateUI();
+        }
+    },
+    
+    toggleMode(mode) {
+      if (mode === 'quantity') {
+          dom.distributorSection.style.display = 'none';
+          dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
+          document.getElementById('btnCalcular').style.display = 'inline-block';
+      } else {
+          dom.distributorSection.style.display = 'flex';
+          dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
+          document.getElementById('btnCalcular').style.display = 'none';
+      }
+    },
+    setTheme(theme) {
+        dom.html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    },
+    buildTokenFilters() {
+        dom.tokenFiltersContainer.innerHTML = '';
+        for (const key in ITENS_CATALOGO) {
+            const item = ITENS_CATALOGO[key];
+            const label = document.createElement('label');
+            label.innerHTML = `<input type="checkbox" value="${key}" checked><span>${item[`name_${currentLang}`]}</span>`;
+            dom.tokenFiltersContainer.appendChild(label);
+        }
+    },
+    distributeMush() {
+      // Lógica de distribuição aqui
+    },
+    calculateValues() {
+        const descontoPercentual = parseFloat(dom.descontoInput.value) || 0;
+        const resultados = {
+          itens: {}, totalBruto: 0, totalFinal: 0, valorDescontoTotal: 0, descontoPercentual
+        };
+        for (const key in ITENS_CATALOGO) {
+          const item = ITENS_CATALOGO[key];
+          const qtdInput = document.getElementById(`qtd-${key}`);
+          const quantidade = qtdInput ? parseInt(qtdInput.value) || 0 : 0;
+          const precoOriginal = item.preco;
+          const precoComDesconto = precoOriginal * (1 - (descontoPercentual / 100));
+          const subtotal = quantidade * precoComDesconto;
+          resultados.itens[key] = {
+            nome: item[`name_${currentLang}`], quantidade, precoOriginal, precoComDesconto, subtotal
+          };
+          resultados.totalBruto += quantidade * precoOriginal;
+          resultados.totalFinal += subtotal;
+        }
+        resultados.valorDescontoTotal = resultados.totalBruto - resultados.totalFinal;
+        return resultados;
+    },
+    createCoinIcon() {
+        const img = document.createElement('img');
+        img.src = MOEDA_BASE64;
+        img.className = 'moeda-img';
+        img.alt = 'mush';
+        return img;
+    },
+    loadTable() {
+        const currentValues = {};
+        document.querySelectorAll('#tabela-itens input[type="number"]').forEach(input => {
+            currentValues[input.id] = input.value;
+        });
+        dom.tabelaItensBody.innerHTML = '';
+        for (const key in ITENS_CATALOGO) {
+          const item = ITENS_CATALOGO[key];
+          const tr = document.createElement('tr');
+          const savedQty = currentValues[`qtd-${key}`] || 0;
+          tr.innerHTML = `<td>${item[`name_${currentLang}`]}</td><td>${item.preco.toFixed(2)}</td><td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td><td style="text-align: center;">0.00</td>`;
+          tr.querySelector(`td:nth-child(2)`).appendChild(this.createCoinIcon());
+          tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
+          dom.tabelaItensBody.appendChild(tr);
+          tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
+        }
+    },
+    updateUI() {
+        const calculo = this.calculateValues();
+        const rows = dom.tabelaItensBody.getElementsByTagName('tr');
+        Array.from(rows).forEach((row, index) => {
+          const key = Object.keys(ITENS_CATALOGO)[index];
+          if (!calculo.itens[key]) return;
+          const itemCalculado = calculo.itens[key];
+          const precoCell = row.querySelector(`td:nth-child(2)`);
+          const totalCell = row.querySelector(`td:nth-child(4)`);
+          if (calculo.descontoPercentual > 0) {
+            precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)} ➝ ${itemCalculado.precoComDesconto.toFixed(2)}`;
+          } else {
+            precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)}`;
+          }
+          precoCell.appendChild(this.createCoinIcon());
+          totalCell.innerHTML = `${itemCalculado.subtotal.toFixed(2)}`;
+          totalCell.appendChild(this.createCoinIcon());
+        });
+        dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b>`;
+        dom.totalGeralCell.appendChild(this.createCoinIcon());
+    },
+    reset(clearDistributor = true) {
+        dom.nomeClienteInput.value = '';
+        dom.descontoInput.value = '';
+        if(clearDistributor) {
+            dom.totalMushInput.value = '';
+            dom.leftoverMushDiv.innerHTML = '';
+        }
+        for (const key in ITENS_CATALOGO) {
+            const input = document.getElementById(`qtd-${key}`);
+            if (input) input.value = 0;
+        }
+        this.updateUI();
+    },
+    async generateImage() {
+        const calculo = this.calculateValues();
+        const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+        let temItens = false;
+        const t = TRANSLATIONS[currentLang];
+
+        const itemsToSave = {};
+        for(const key in calculo.itens) {
+            if(calculo.itens[key].quantidade > 0) {
+                itemsToSave[key] = calculo.itens[key].quantidade;
+                temItens = true;
+            }
+        }
+        if(temItens) {
+            const receiptData = {
+                customerName: nome,
+                discountApplied: calculo.descontoPercentual,
+                grandTotal: calculo.totalFinal,
+                items: itemsToSave,
+                seller: auth.currentUser.displayName || auth.currentUser.email,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            try {
+                await db.collection("receipts").add(receiptData);
+                console.log("Recibo salvo no Firestore");
+            } catch(e) {
+                console.error("Erro ao salvar no Firestore: ", e);
+                alert("Houve um erro ao salvar o recibo no banco de dados.");
+            }
+        }
+          
+        const resultadoDiv = document.getElementById('resultado');
+        const resNomeSpan = resultadoDiv.querySelector('#resNome'); // Precisa buscar dentro do escopo certo
+        const resumoItensDiv = resultadoDiv.querySelector('#resumo-itens');
+        const resumoTotaisDiv = resultadoDiv.querySelector('#resumo-totais');
+        
+        resultadoDiv.querySelector('h3').innerHTML = `${t.receiptHeader} - <span>${nome}</span>`;
+        resumoItensDiv.innerHTML = `<h4 class="receipt-section-title">${t.receiptItemsHeader}</h4>`;
+        resumoTotaisDiv.innerHTML = '';
+          
+        let hasItemsForReceipt = false;
+        for(const key in calculo.itens) {
+          const item = calculo.itens[key];
+          if (item.quantidade > 0) {
+            hasItemsForReceipt = true;
+            const itemLine = document.createElement('div');
+            // ... (código de geração de recibo)
+          }
+        }
+        if (!hasItemsForReceipt) { alert(t.alertNoItems); return; }
+        // ... (código de geração de recibo)
+        
+        resultadoDiv.style.display = 'block';
+        setTimeout(() => {
+            html2canvas(resultadoDiv, { backgroundColor: null, scale: 2 }).then(canvas => {
+              const link = document.createElement('a');
+              const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+              link.download = `${nomeSanitizado}_recibo.png`;
+              link.href = canvas.toDataURL('image/png');
+              link.click();
+              resultadoDiv.style.display = 'none';
+            });
+        }, 300);
       }
     };
     
-    const dom = {
-      authContainer: document.getElementById('auth-container'),
-      appContainer: document.getElementById('app-container'),
-      usernameInput: document.getElementById('username-input'),
-      passwordInput: document.getElementById('password-input'),
-      btnLogin: document.getElementById('btnLogin'),
-      btnLogout: document.getElementById('btnLogout'),
-      authError: document.getElementById('auth-error'),
-      html: document.documentElement,
-      nomeClienteInput: document.getElementById('nomeCliente'),
-      descontoInput: document.getElementById('desconto'),
-      tabelaItensBody: document.getElementById('tabela-itens'),
-      totalGeralCell: document.getElementById('totalGeral'),
-      resultadoDiv: document.getElementById('resultado'),
-      themeToggle: document.getElementById('theme-toggle'),
-      langBr: document.getElementById('lang-br'),
-      langEn: document.getElementById('lang-en'),
-      modeQtyRadio: document.getElementById('mode-qty'),
-      modeMushRadio: document.getElementById('mode-mush'),
-      distributorSection: document.getElementById('distributor-section'),
-      tokenFiltersContainer: document.getElementById('token-filters-container'),
-      totalMushInput: document.getElementById('total-mush'),
-      btnDistribute: document.getElementById('btnDistribute'),
-      leftoverMushDiv: document.getElementById('leftover-mush'),
-      tabNavigation: document.querySelector('.tab-navigation'),
-      tabLinks: document.querySelectorAll('.tab-link'),
-      tabContents: document.querySelectorAll('.tab-content'),
-      historyTableContainer: document.getElementById('history-table-container'),
-    };
-
-    let currentLang = 'br';
-
-    const app = {
-      calculatorInitialized: false,
-      
-      handleLogin: async function() {
-          const username = dom.usernameInput.value.trim();
-          const password = dom.passwordInput.value;
-          const t = TRANSLATIONS[currentLang];
-          if (!username || !password) {
-              dom.authError.textContent = t.errorInvalidCredentials;
-              return;
-          }
-          const email = username + DUMMY_DOMAIN;
-          try {
-              dom.authError.textContent = '';
-              await auth.signInWithEmailAndPassword(email, password);
-          } catch (error) {
-              console.error("Erro de login:", error.code);
-              if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-                  dom.authError.textContent = t.errorInvalidCredentials;
-              } else {
-                  dom.authError.textContent = t.errorGeneric;
-              }
-          }
-      },
-      
-      handleLogout: function() { auth.signOut(); },
-
-      addAppEventListeners: function() {
-          dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
-          dom.btnCalcular.addEventListener('click', this.updateUI.bind(this));
-          dom.btnResetar.addEventListener('click', this.reset.bind(this));
-          dom.btnGerarImagem.addEventListener('click', this.generateImage.bind(this));
-          dom.themeToggle.addEventListener('click', () => {
-              const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-              this.setTheme(newTheme);
-          });
-          dom.langBr.addEventListener('click', () => this.setLanguage('br'));
-          dom.langEn.addEventListener('click', () => this.setLanguage('en'));
-          dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
-          dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
-          dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
-          dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
-      },
-
-      handleTabClick: function(event) {
-          const clickedTab = event.target.closest('.tab-link');
-          if (!clickedTab) return;
-          const tabId = clickedTab.dataset.tab;
-          dom.tabLinks.forEach(link => link.classList.remove('active'));
-          dom.tabContents.forEach(content => content.classList.add('hidden'));
-          clickedTab.classList.add('active');
-          document.getElementById(tabId).classList.remove('hidden');
-          if (tabId === 'history-view') {
-              this.loadHistory();
-          }
-      },
-
-      loadHistory: async function() {
-          const t = TRANSLATIONS[currentLang];
-          dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
-          try {
-              const querySnapshot = await db.collection("receipts").orderBy("createdAt", "desc").get();
-              if (querySnapshot.empty) {
-                  dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
-                  return;
-              }
-              let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th><th>${t.historySeller}</th><th>${t.historyTotal}</th><th>${t.historyDate}</th></tr></thead><tbody>`;
-              querySnapshot.forEach(doc => {
-                  const data = doc.data();
-                  const date = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A';
-                  const sellerEmail = data.seller || 'N/A';
-                  const sellerUsername = sellerEmail.split('@')[0];
-                  tableHTML += `<tr><td>${data.customerName || 'N/A'}</td><td>${sellerUsername}</td><td>${data.grandTotal?.toFixed(2) || '0.00'}</td><td>${date}</td></tr>`;
-              });
-              tableHTML += `</tbody></table>`;
-              dom.historyTableContainer.innerHTML = tableHTML;
-          } catch (error) {
-              console.error("Erro ao buscar histórico: ", error);
-              dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
-          }
-      },
-      
-      setLanguage: function(lang, isInitialLoad = false) {
-          currentLang = lang;
-          localStorage.setItem('language', lang);
-          document.querySelectorAll('[data-translate-key]').forEach(el => {
-              const key = el.dataset.translateKey;
-              if (TRANSLATIONS[lang][key]) el.innerText = TRANSLATIONS[lang][key];
-          });
-          document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
-              const key = el.dataset.translateKeyPlaceholder;
-              if (TRANSLATIONS[lang][key]) el.placeholder = TRANSLATIONS[lang][key];
-          });
-          document.title = TRANSLATIONS[lang].pageTitle;
-          dom.langBr.classList.toggle('active', lang === 'br');
-          dom.langEn.classList.toggle('active', lang === 'en');
-          if (!isInitialLoad && this.calculatorInitialized) {
-            this.loadTable();
-            this.buildTokenFilters();
-            this.updateUI();
-          }
-      },
-      
-      setTheme: function(theme) {
-          dom.html.setAttribute('data-theme', theme);
-          localStorage.setItem('theme', theme);
-      },
-      
-      // ... (todas as outras funções da calculadora, como `calculateValues`, `distributeMush`, etc. vão aqui)
-      // Para manter a organização, o resto das funções está dentro do Object.assign
-    };
-    
-    Object.assign(app, {
-        toggleMode: function(mode) {
-            if (mode === 'quantity') {
-                dom.distributorSection.style.display = 'none';
-                dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
-                dom.btnCalcular.style.display = 'inline-block';
-            } else {
-                dom.distributorSection.style.display = 'flex';
-                dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
-                dom.btnCalcular.style.display = 'none';
-            }
-        },
-        buildTokenFilters: function() {
-            dom.tokenFiltersContainer.innerHTML = '';
-            for (const key in ITENS_CATALOGO) {
-                const item = ITENS_CATALOGO[key];
-                const label = document.createElement('label');
-                label.innerHTML = `<input type="checkbox" value="${key}" checked><span>${item[`name_${currentLang}`]}</span>`;
-                dom.tokenFiltersContainer.appendChild(label);
-            }
-        },
-        distributeMush: function() {
-            // Lógica de distribuição...
-        },
-        calculateValues: function() {
-            // Lógica de cálculo...
-        },
-        createCoinIcon: function() {
-            const img = document.createElement('img');
-            img.src = MOEDA_BASE64;
-            img.className = 'moeda-img';
-            img.alt = 'mush';
-            return img;
-        },
-        loadTable: function() {
-            const currentValues = {};
-            document.querySelectorAll('#tabela-itens input[type="number"]').forEach(input => {
-                currentValues[input.id] = input.value;
-            });
-            dom.tabelaItensBody.innerHTML = '';
-            for (const key in ITENS_CATALOGO) {
-                const item = ITENS_CATALOGO[key];
-                const tr = document.createElement('tr');
-                const savedQty = currentValues[`qtd-${key}`] || 0;
-                tr.innerHTML = `<td>${item[`name_${currentLang}`]}</td><td>${item.preco.toFixed(2)}</td><td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td><td style="text-align: center;">0.00</td>`;
-                tr.querySelector(`td:nth-child(2)`).appendChild(this.createCoinIcon());
-                tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
-                dom.tabelaItensBody.appendChild(tr);
-                tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
-            }
-        },
-        updateUI: function() {
-            const calculo = this.calculateValues();
-            const rows = dom.tabelaItensBody.getElementsByTagName('tr');
-            Array.from(rows).forEach((row, index) => {
-                const key = Object.keys(ITENS_CATALOGO)[index];
-                if (!calculo.itens[key]) return;
-                const itemCalculado = calculo.itens[key];
-                const precoCell = row.querySelector(`td:nth-child(2)`);
-                const totalCell = row.querySelector(`td:nth-child(4)`);
-                if (calculo.descontoPercentual > 0) {
-                    precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)} ➝ ${itemCalculado.precoComDesconto.toFixed(2)}`;
-                } else {
-                    precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)}`;
-                }
-                precoCell.appendChild(this.createCoinIcon());
-                totalCell.innerHTML = `${itemCalculado.subtotal.toFixed(2)}`;
-                totalCell.appendChild(this.createCoinIcon());
-            });
-            dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b>`;
-            dom.totalGeralCell.appendChild(this.createCoinIcon());
-        },
-        reset: function(clearDistributor = true) {
-            dom.nomeClienteInput.value = '';
-            dom.descontoInput.value = '';
-            if(clearDistributor) {
-                dom.totalMushInput.value = '';
-                dom.leftoverMushDiv.innerHTML = '';
-            }
-            for (const key in ITENS_CATALOGO) {
-                const input = document.getElementById(`qtd-${key}`);
-                if (input) input.value = 0;
-            }
-            this.updateUI();
-        },
-        generateImage: async function() {
-            // Lógica para gerar imagem e salvar no Firestore...
-        }
-    });
-
-    // --- PONTO DE ENTRADA PRINCIPAL DA APLICAÇÃO ---
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            // USUÁRIO LOGADO
-            dom.authContainer.classList.add('hidden');
-            dom.appContainer.classList.remove('hidden');
-            // Inicializa a aplicação principal se for a primeira vez
-            if (!app.calculatorInitialized) {
-                app.loadPreferences();
-                app.addAppEventListeners();
-                app.setLanguage(localStorage.getItem('language') || 'br');
-                app.calculatorInitialized = true;
-            }
-        } else {
-            // USUÁRIO DESLOGADO
-            dom.authContainer.classList.remove('hidden');
-            dom.appContainer.classList.add('hidden');
-            app.calculatorInitialized = false; // Permite reiniciar quando logar de novo
-            // Configura apenas o necessário para a tela de login
-            app.setTheme(localStorage.getItem('theme') || 'dark');
-            app.setLanguage(localStorage.getItem('language') || 'br', true);
-            dom.btnLogin.addEventListener('click', app.handleLogin.bind(app));
-            dom.btnLogout.addEventListener('click', app.handleLogout.bind(app));
-        }
-    });
-
+    app.init();
   });
 </script>
 </body>
