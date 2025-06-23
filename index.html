@@ -10,6 +10,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 
 
 <style>
@@ -25,6 +26,7 @@
     --accent-danger: #f43f5e;
     --text-primary: #f8fafc;
     --text-secondary: #a1a1aa;
+    --text-error: #fca5a5;
   }
 
   html[data-theme='light'] {
@@ -37,6 +39,7 @@
     --accent-danger: #ef4444;
     --text-primary: #18181b;
     --text-secondary: #71717a;
+    --text-error: #b91c1c;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -47,6 +50,29 @@
     font-family: var(--font-body);
     padding: 40px 20px;
     transition: background-color 0.3s ease, color 0.3s ease;
+    display: flex; /* Usado para centralizar o container de login */
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  /* ESTILOS PARA O CONTAINER DE LOGIN */
+  #auth-container {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-secondary);
+    padding: 32px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  #auth-error {
+      color: var(--text-error);
+      font-size: 14px;
+      text-align: center;
+      min-height: 20px;
   }
 
   .container {
@@ -75,6 +101,7 @@
       padding-bottom: 16px;
       border-bottom: 1px solid var(--border-color);
   }
+  .settings-controls { display: flex; align-items: center; gap: 20px;}
 
   .language-switcher button { background: none; border: none; padding: 4px; cursor: pointer; transition: all 0.3s ease; }
   .language-switcher button:not(.active) { filter: grayscale(100%); opacity: 0.6; }
@@ -88,11 +115,11 @@
   html[data-theme='light'] .toggle-track { background-color: var(--accent-primary); }
   html[data-theme='light'] .toggle-thumb { transform: translateX(19px); }
 
-  h2 { font-family: var(--font-header); color: var(--accent-primary); font-size: 28px; font-weight: 700; }
+  h2 { font-family: var(--font-header); color: var(--accent-primary); font-size: 28px; font-weight: 700; text-align: center;}
   .input-group { display: flex; flex-direction: column; gap: 8px; }
   .input-group label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
 
-  input[type="text"], input[type="number"] {
+  input[type="text"], input[type="number"], input[type="password"] {
     width: 100%;
     padding: 12px;
     border-radius: 8px;
@@ -103,72 +130,24 @@
     transition: all 0.3s ease;
   }
   
-  input[type="text"]:focus, input[type="number"]:focus {
+  input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus {
     outline: none;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
   }
 
-  .mode-selector {
-      display: flex;
-      gap: 20px;
-      background-color: var(--bg-tertiary);
-      padding: 6px;
-      border-radius: 10px;
-      width: fit-content;
-  }
-  .mode-selector label {
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.3s ease;
-  }
+  .mode-selector { display: flex; gap: 20px; background-color: var(--bg-tertiary); padding: 6px; border-radius: 10px; width: fit-content; }
+  .mode-selector label { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; }
   .mode-selector input[type="radio"] { display: none; }
-  .mode-selector input[type="radio"]:checked + label {
-      background-color: var(--bg-secondary);
-      color: var(--accent-primary);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
+  .mode-selector input[type="radio"]:checked + label { background-color: var(--bg-secondary); color: var(--accent-primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-  .distributor-container {
-      background-color: rgba(120, 120, 120, 0.05);
-      border: 1px dashed var(--border-color);
-      padding: 24px;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-  }
-
-  .token-filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-  }
-  .token-filters label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      font-size: 14px;
-  }
-
-  .distributor-controls {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-  }
+  .distributor-container { background-color: rgba(120, 120, 120, 0.05); border: 1px dashed var(--border-color); padding: 24px; border-radius: 12px; display: flex; flex-direction: column; gap: 20px; }
+  .token-filters { display: flex; flex-wrap: wrap; gap: 16px; }
+  .token-filters label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+  .distributor-controls { display: flex; gap: 16px; align-items: center; }
   .distributor-controls .input-group { flex-grow: 1; }
-  #leftover-mush {
-      margin-top: 28px;
-      font-weight: 500;
-      color: var(--text-secondary);
-  }
-  #leftover-mush span {
-    color: var(--accent-primary);
-    font-weight: 700;
-  }
+  #leftover-mush { margin-top: 28px; font-weight: 500; color: var(--text-secondary); }
+  #leftover-mush span { color: var(--accent-primary); font-weight: 700; }
   
   table { width: 100%; border-collapse: collapse; }
   th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); transition: background-color 0.3s ease; }
@@ -180,103 +159,106 @@
   .buttons { display: flex; justify-content: center; gap: 12px; margin-top: 16px; flex-wrap: wrap;}
   button { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; }
   button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-  #btnCalcular, #btnDistribute { background: var(--accent-primary); color: #fff; }
-  #btnCalcular:hover, #btnDistribute:hover { background: var(--accent-hover); }
+  #btnCalcular, #btnDistribute, #btnLogin { background: var(--accent-primary); color: #fff; }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover { background: var(--accent-hover); }
   #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
-  #btnGerarImagem { background: var(--bg-tertiary); color: var(--text-primary); }
+  #btnGerarImagem, #btnLogout { background: var(--bg-tertiary); color: var(--text-primary); }
   
   #resultado { display: none; position: absolute; left: -9999px; top: 0; width: 600px; background-color: var(--bg-secondary); color: var(--text-primary); padding: 32px; border-radius: 16px; border: 1px solid var(--border-color); }
-  #resultado h3 { color: var(--accent-primary); text-align: center; font-family: var(--font-header); font-size: 22px; margin-bottom: 24px; }
-  #resumo-itens, #resumo-totais { display: flex; flex-direction: column; gap: 12px; }
-  .receipt-section-title { color: var(--text-secondary); font-size: 14px; font-weight: 600; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 8px; }
-  .receipt-line { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-  .receipt-label { color: var(--text-secondary); }
-  .receipt-value { font-weight: 600; color: var(--text-primary); }
-  #resumo-totais { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); }
-  .receipt-line.final-total .receipt-label { font-size: 16px; font-weight: 700; color: var(--text-primary); }
-  .receipt-line.final-total .receipt-value { font-size: 18px; font-weight: 700; color: var(--accent-primary); }
-  .agradecimento { text-align: center; margin-top: 32px; font-size: 14px; color: var(--text-secondary); }
-  .moeda-img { vertical-align: -3px; width: 18px; height: 18px; margin-left: 8px; }
+  .hidden { display: none !important; }
+
 </style>
 </head>
 <body>
 
-<div class="container" id="calculadora-container">
-  
-  <div class="settings-bar">
-      <div class="language-switcher">
-          <button id="lang-br">🇧🇷</button>
-          <button id="lang-en">🇺🇸</button>
-      </div>
-      <div class="theme-switcher">
-          <span class="theme-switcher-label" data-translate-key="themeLabel"></span>
-          <div class="toggle-track" id="theme-toggle">
-              <div class="toggle-thumb"></div>
+<div id="auth-container">
+    <h2 data-translate-key="loginHeader">Login</h2>
+    <div class="input-group">
+        <label for="username-input" data-translate-key="usernameLabel">Usuário</label>
+        <input type="text" id="username-input" autocomplete="username">
+    </div>
+    <div class="input-group">
+        <label for="password-input" data-translate-key="passwordLabel">Senha</label>
+        <input type="password" id="password-input" autocomplete="current-password">
+    </div>
+    <p id="auth-error"></p>
+    <button id="btnLogin" data-translate-key="loginButton">Entrar</button>
+</div>
+
+
+<div id="app-container" class="hidden">
+    <div class="container" id="calculadora-container">
+      <div class="settings-bar">
+          <div class="language-switcher">
+              <button id="lang-br">🇧🇷</button>
+              <button id="lang-en">🇺🇸</button>
+          </div>
+          <div class="settings-controls">
+              <div class="theme-switcher">
+                  <span class="theme-switcher-label" data-translate-key="themeLabel"></span>
+                  <div class="toggle-track" id="theme-toggle">
+                      <div class="toggle-thumb"></div>
+                  </div>
+              </div>
+              <button id="btnLogout" data-translate-key="logoutButton">Sair</button>
           </div>
       </div>
-  </div>
 
-  <h2 data-translate-key="mainHeader">Calculadora de Tokens</h2>
-
-  <div class="input-group">
-    <label for="nomeCliente" data-translate-key="idLabel">Identificador / Nome</label>
-    <input type="text" id="nomeCliente" data-translate-key-placeholder="idPlaceholder">
-  </div>
-  <div class="input-group">
-    <label for="desconto" data-translate-key="discountLabel">Desconto (%)</label>
-    <input type="number" id="desconto" data-translate-key-placeholder="discountPlaceholder" min="0" max="100">
-  </div>
-
-  <div class="input-group">
-      <label data-translate-key="calculationMode">Modo de Cálculo</label>
-      <div class="mode-selector">
-          <input type="radio" id="mode-qty" name="calculation-mode" value="quantity" checked>
-          <label for="mode-qty" data-translate-key="modeQty">Por Quantidade</label>
-          <input type="radio" id="mode-mush" name="calculation-mode" value="mush">
-          <label for="mode-mush" data-translate-key="modeMush">Por Mush</label>
+      <h2 data-translate-key="mainHeader">Calculadora de Tokens</h2>
+      <div class="input-group">
+        <label for="nomeCliente" data-translate-key="idLabel">Identificador / Nome</label>
+        <input type="text" id="nomeCliente" data-translate-key-placeholder="idPlaceholder">
       </div>
-  </div>
-  
-  <div class="distributor-container" id="distributor-section" style="display: none;">
-      <div>
-          <label data-translate-key="distributeTokensLabel">Tokens Desejáveis para Distribuição</label>
-          <div class="token-filters" id="token-filters-container">
+      <div class="input-group">
+        <label for="desconto" data-translate-key="discountLabel">Desconto (%)</label>
+        <input type="number" id="desconto" data-translate-key-placeholder="discountPlaceholder" min="0" max="100">
+      </div>
+      <div class="input-group">
+          <label data-translate-key="calculationMode">Modo de Cálculo</label>
+          <div class="mode-selector">
+              <input type="radio" id="mode-qty" name="calculation-mode" value="quantity" checked>
+              <label for="mode-qty" data-translate-key="modeQty">Por Quantidade</label>
+              <input type="radio" id="mode-mush" name="calculation-mode" value="mush">
+              <label for="mode-mush" data-translate-key="modeMush">Por Mush</label>
           </div>
       </div>
-      <div class="distributor-controls">
-          <div class="input-group">
-              <label for="total-mush" data-translate-key="totalMushLabel">Total de Mush a Gastar</label>
-              <input type="number" id="total-mush" placeholder="30000">
+      <div class="distributor-container" id="distributor-section" style="display: none;">
+          <div>
+              <label data-translate-key="distributeTokensLabel">Tokens Desejáveis para Distribuição</label>
+              <div class="token-filters" id="token-filters-container"></div>
           </div>
-          <button id="btnDistribute" data-translate-key="btnDistribute">Distribuir</button>
+          <div class="distributor-controls">
+              <div class="input-group">
+                  <label for="total-mush" data-translate-key="totalMushLabel">Total de Mush a Gastar</label>
+                  <input type="number" id="total-mush" placeholder="30000">
+              </div>
+              <button id="btnDistribute" data-translate-key="btnDistribute">Distribuir</button>
+          </div>
+          <div id="leftover-mush"></div>
       </div>
-      <div id="leftover-mush"></div>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th data-translate-key="tableItem">Item</th>
-        <th data-translate-key="tablePrice">Preço Unitário</th>
-        <th data-translate-key="tableQty">Quantidade</th>
-        <th data-translate-key="tableTotal">Valor Total</th>
-      </tr>
-    </thead>
-    <tbody id="tabela-itens">
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="3"><b data-translate-key="tableGrandTotal">TOTAL GERAL</b></td>
-        <td id="totalGeral" style="text-align: center;"><b>0.00</b></td>
-      </tr>
-    </tfoot>
-  </table>
-
-  <div class="buttons">
-    <button id="btnCalcular" data-translate-key="btnCalculate">Calcular</button>
-    <button id="btnResetar" data-translate-key="btnReset">Resetar</button>
-    <button id="btnGerarImagem" data-translate-key="btnExport">Exportar para PNG</button>
-  </div>
+      <table>
+        <thead>
+          <tr>
+            <th data-translate-key="tableItem">Item</th>
+            <th data-translate-key="tablePrice">Preço Unitário</th>
+            <th data-translate-key="tableQty">Quantidade</th>
+            <th data-translate-key="tableTotal">Valor Total</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-itens"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3"><b data-translate-key="tableGrandTotal">TOTAL GERAL</b></td>
+            <td id="totalGeral" style="text-align: center;"><b>0.00</b></td>
+          </tr>
+        </tfoot>
+      </table>
+      <div class="buttons">
+        <button id="btnCalcular" data-translate-key="btnCalculate">Calcular</button>
+        <button id="btnResetar" data-translate-key="btnReset">Resetar</button>
+        <button id="btnGerarImagem" data-translate-key="btnExport">Exportar para PNG</button>
+      </div>
+    </div>
 </div>
 
 <div id="resultado">
@@ -288,19 +270,18 @@
 
 <script>
   // --- INICIALIZAÇÃO DO FIREBASE ---
-  // Cole a sua configuração do Firebase que você copiou aqui dentro.
   const firebaseConfig = {
     apiKey: "AIzaSyDgeTU4YmFpZIwcmE2-cxGKTkO2KqeQotE",
     authDomain: "token-calculator-a45d6.firebaseapp.com",
     projectId: "token-calculator-a45d6",
     storageBucket: "token-calculator-a45d6.firebasestorage.app",
-    messagingSenderId: "COLE_SEU_MESSAGING_SENDER_ID_AQUI",
+    messagingSenderId: "597974335563",
     appId: "1:597974335563:web:9d07ada2708d61b7d30dce"
   };
 
-  // Inicializa o Firebase usando a sintaxe de compatibilidade
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  const auth = firebase.auth();
 
   // --- LÓGICA DA APLICAÇÃO ---
   document.addEventListener('DOMContentLoaded', () => {
@@ -326,8 +307,15 @@
           calculationMode: "Modo de Cálculo", modeQty: "Por Quantidade", modeMush: "Por Mush",
           distributeTokensLabel: "Tokens Desejáveis para Distribuição", totalMushLabel: "Total de Mush a Gastar",
           btnDistribute: "Distribuir", leftoverMushText: "Sobrou:",
-          leftoverConfirm1: "Sobraram",
-          leftoverConfirm2: "Deseja distribuir este valor nos itens restantes:"
+          leftoverConfirm1: "Sobraram", leftoverConfirm2: "Deseja distribuir este valor nos itens restantes:",
+          // Novas traduções de login
+          loginHeader: "Acessar Calculadora",
+          usernameLabel: "Nome de Usuário",
+          passwordLabel: "Senha",
+          loginButton: "Entrar",
+          logoutButton: "Sair",
+          errorInvalidCredentials: "Usuário ou senha inválidos.",
+          errorGeneric: "Ocorreu um erro. Tente novamente."
       },
       en: {
           pageTitle: "Token Calculator", mainHeader: "Token Calculator", themeLabel: "Light Theme",
@@ -341,12 +329,31 @@
           calculationMode: "Calculation Mode", modeQty: "By Quantity", modeMush: "By Mush",
           distributeTokensLabel: "Desirable Tokens for Distribution", totalMushLabel: "Total Mush to Spend",
           btnDistribute: "Distribute", leftoverMushText: "Leftover:",
-          leftoverConfirm1: "There is",
-          leftoverConfirm2: "leftover. Do you want to distribute this amount to the remaining items:"
+          leftoverConfirm1: "There is", leftoverConfirm2: "leftover. Do you want to distribute this amount to the remaining items:",
+          // Novas traduções de login
+          loginHeader: "Calculator Login",
+          usernameLabel: "Username",
+          passwordLabel: "Password",
+          loginButton: "Login",
+          logoutButton: "Logout",
+          errorInvalidCredentials: "Invalid username or password.",
+          errorGeneric: "An error occurred. Please try again."
       }
-  };
+    };
     
     const dom = {
+      // Containers principais
+      authContainer: document.getElementById('auth-container'),
+      appContainer: document.getElementById('app-container'),
+      
+      // Elementos de autenticação
+      usernameInput: document.getElementById('username-input'),
+      passwordInput: document.getElementById('password-input'),
+      btnLogin: document.getElementById('btnLogin'),
+      btnLogout: document.getElementById('btnLogout'),
+      authError: document.getElementById('auth-error'),
+
+      // Elementos da calculadora (existentes)
       html: document.documentElement,
       nomeClienteInput: document.getElementById('nomeCliente'),
       descontoInput: document.getElementById('desconto'),
@@ -375,19 +382,71 @@
 
     const app = {
       init() {
-          this.loadPreferences();
-          this.addEventListeners();
-          this.setLanguage(currentLang);
+        this.addAuthListeners();
+        this.loadPreferences(); // Carrega tema e idioma
+        this.setLanguage(currentLang); // Aplica o idioma carregado ou padrão
+      },
+      
+      addAuthListeners() {
+        // O "gatekeeper" da aplicação
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Usuário está logado
+                dom.authContainer.classList.add('hidden');
+                dom.appContainer.classList.remove('hidden');
+                // Inicializa a lógica da calculadora APENAS se não foi inicializada antes
+                if (!this.calculatorInitialized) {
+                    this.addAppEventListeners();
+                    this.calculatorInitialized = true;
+                }
+            } else {
+                // Usuário está deslogado
+                dom.authContainer.classList.remove('hidden');
+                dom.appContainer.classList.add('hidden');
+            }
+        });
+        
+        dom.btnLogin.addEventListener('click', this.handleLogin.bind(this));
+        dom.btnLogout.addEventListener('click', this.handleLogout.bind(this));
+      },
+      
+      async handleLogin() {
+          const username = dom.usernameInput.value.trim();
+          const password = dom.passwordInput.value;
+          const t = TRANSLATIONS[currentLang];
+
+          if (!username || !password) {
+              dom.authError.textContent = t.errorInvalidCredentials;
+              return;
+          }
+          
+          // O truque do email fictício
+          const email = `${username}@calculadora.app`;
+          
+          try {
+              dom.authError.textContent = ''; // Limpa erros antigos
+              await auth.signInWithEmailAndPassword(email, password);
+              // onAuthStateChanged vai cuidar de mostrar a tela da calculadora
+          } catch (error) {
+              console.error("Erro de login:", error.code);
+              if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                  dom.authError.textContent = t.errorInvalidCredentials;
+              } else {
+                  dom.authError.textContent = t.errorGeneric;
+              }
+          }
+      },
+      
+      handleLogout() {
+          auth.signOut();
       },
 
       loadPreferences() {
-          const savedTheme = localStorage.getItem('theme') || 'dark';
-          this.setTheme(savedTheme);
-          const savedLang = localStorage.getItem('language') || 'br';
-          currentLang = savedLang;
+          this.setTheme(localStorage.getItem('theme') || 'dark');
+          currentLang = localStorage.getItem('language') || 'br';
       },
 
-      addEventListeners() {
+      addAppEventListeners() {
           dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
           dom.btnCalcular.addEventListener('click', this.updateUI.bind(this));
           dom.btnResetar.addEventListener('click', this.reset.bind(this));
@@ -403,23 +462,24 @@
           dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
       },
 
+      // ... (todas as outras funções da calculadora: toggleMode, setTheme, setLanguage, etc. continuam aqui)...
+      // As funções abaixo são as mesmas da versão anterior, sem alterações.
+      
       toggleMode(mode) {
-          if (mode === 'quantity') {
-              dom.distributorSection.style.display = 'none';
-              dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
-              dom.btnCalcular.style.display = 'inline-block';
-          } else {
-              dom.distributorSection.style.display = 'flex';
-              dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
-              dom.btnCalcular.style.display = 'none';
-          }
+        if (mode === 'quantity') {
+            dom.distributorSection.style.display = 'none';
+            dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
+            dom.btnCalcular.style.display = 'inline-block';
+        } else {
+            dom.distributorSection.style.display = 'flex';
+            dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
+            dom.btnCalcular.style.display = 'none';
+        }
       },
-
       setTheme(theme) {
           dom.html.setAttribute('data-theme', theme);
           localStorage.setItem('theme', theme);
       },
-
       setLanguage(lang) {
           currentLang = lang;
           localStorage.setItem('language', lang);
@@ -438,40 +498,27 @@
           this.buildTokenFilters();
           this.updateUI();
       },
-      
       buildTokenFilters() {
           dom.tokenFiltersContainer.innerHTML = '';
           for (const key in ITENS_CATALOGO) {
               const item = ITENS_CATALOGO[key];
               const label = document.createElement('label');
-              label.innerHTML = `
-                  <input type="checkbox" value="${key}" checked>
-                  <span>${item[`name_${currentLang}`]}</span>
-              `;
+              label.innerHTML = `<input type="checkbox" value="${key}" checked><span>${item[`name_${currentLang}`]}</span>`;
               dom.tokenFiltersContainer.appendChild(label);
           }
       },
-
       distributeMush() {
           let totalMush = parseInt(dom.totalMushInput.value) || 0;
           const discount = parseFloat(dom.descontoInput.value) || 0;
           const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
-
           this.reset(false);
-
           if (selectedTokenKeys.length === 0) return;
-
           const itemsToConsider = selectedTokenKeys.map(key => ({ 
-              key, 
-              ...ITENS_CATALOGO[key],
-              priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100))
+              key, ...ITENS_CATALOGO[key], priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100))
           }));
-          
           const t = TRANSLATIONS[currentLang];
           let remainingMush = totalMush;
-
           const fairShare = totalMush / itemsToConsider.length;
-
           itemsToConsider.forEach(item => {
               if (item.priceWithDiscount > 0 && fairShare >= item.priceWithDiscount) {
                   const quantityFromShare = Math.floor(fairShare / item.priceWithDiscount);
@@ -480,7 +527,6 @@
                   remainingMush -= quantityFromShare * item.priceWithDiscount;
               }
           });
-
           const sortedForLeftover = itemsToConsider.sort((a, b) => b.priceWithDiscount - a.priceWithDiscount);
           for (const item of sortedForLeftover) {
               if (remainingMush < item.priceWithDiscount) continue;
@@ -489,19 +535,15 @@
               if (qtyInput) qtyInput.value = parseInt(qtyInput.value || 0) + additionalQuantity;
               remainingMush -= additionalQuantity * item.priceWithDiscount;
           }
-
           const allTokenKeys = Object.keys(ITENS_CATALOGO);
           const unselectedTokenKeys = allTokenKeys.filter(key => !selectedTokenKeys.includes(key));
-
           if (remainingMush > 1 && unselectedTokenKeys.length > 0) {
               const unselectedNames = unselectedTokenKeys.map(key => ITENS_CATALOGO[key][`name_${currentLang}`]).join(', ');
               const confirmMessage = `${t.leftoverConfirm1} ${remainingMush.toFixed(2)} mush. ${t.leftoverConfirm2} ${unselectedNames}?`;
-              
               if (window.confirm(confirmMessage)) {
                   const leftoverItems = unselectedTokenKeys
                       .map(key => ({ key, ...ITENS_CATALOGO[key], priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100)) }))
                       .sort((a, b) => b.priceWithDiscount - a.priceWithDiscount);
-                  
                   for (const item of leftoverItems) {
                       if (remainingMush < item.priceWithDiscount) continue;
                       const leftoverQuantity = Math.floor(remainingMush / item.priceWithDiscount);
@@ -511,12 +553,10 @@
                   }
               }
           }
-
           dom.leftoverMushDiv.innerHTML = `${t.leftoverMushText} <span>${remainingMush.toFixed(2)}</span>`;
           dom.leftoverMushDiv.querySelector('span').appendChild(this.createCoinIcon());
           this.updateUI();
       },
-
       calculateValues() {
           const descontoPercentual = parseFloat(dom.descontoInput.value) || 0;
           const resultados = {
@@ -538,7 +578,6 @@
           resultados.valorDescontoTotal = resultados.totalBruto - resultados.totalFinal;
           return resultados;
       },
-
       createCoinIcon() {
           const img = document.createElement('img');
           img.src = MOEDA_BASE64;
@@ -546,7 +585,6 @@
           img.alt = 'mush';
           return img;
       },
-
       loadTable() {
           const currentValues = {};
           document.querySelectorAll('#tabela-itens input[type="number"]').forEach(input => {
@@ -557,19 +595,13 @@
             const item = ITENS_CATALOGO[key];
             const tr = document.createElement('tr');
             const savedQty = currentValues[`qtd-${key}`] || 0;
-            tr.innerHTML = `
-              <td>${item[`name_${currentLang}`]}</td>
-              <td>${item.preco.toFixed(2)}</td>
-              <td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td>
-              <td style="text-align: center;">0.00</td>
-            `;
+            tr.innerHTML = `<td>${item[`name_${currentLang}`]}</td><td>${item.preco.toFixed(2)}</td><td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td><td style="text-align: center;">0.00</td>`;
             tr.querySelector(`td:nth-child(2)`).appendChild(this.createCoinIcon());
             tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
             dom.tabelaItensBody.appendChild(tr);
             tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
           }
       },
-
       updateUI() {
           const calculo = this.calculateValues();
           const rows = dom.tabelaItensBody.getElementsByTagName('tr');
@@ -591,7 +623,6 @@
           dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b>`;
           dom.totalGeralCell.appendChild(this.createCoinIcon());
       },
-      
       reset(clearDistributor = true) {
           dom.nomeClienteInput.value = '';
           dom.descontoInput.value = '';
@@ -605,78 +636,75 @@
           }
           this.updateUI();
       },
-      
       async generateImage() {
-          const calculo = this.calculateValues();
-          const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
-          let temItens = false;
-          const t = TRANSLATIONS[currentLang];
+        const calculo = this.calculateValues();
+        const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+        let temItens = false;
+        const t = TRANSLATIONS[currentLang];
 
-          const itemsToSave = {};
-          for(const key in calculo.itens) {
-              if(calculo.itens[key].quantidade > 0) {
-                  itemsToSave[key] = calculo.itens[key].quantidade;
-                  temItens = true;
-              }
-          }
-          if(temItens) {
-              const receiptData = {
-                  customerName: nome,
-                  discountApplied: calculo.descontoPercentual,
-                  grandTotal: calculo.totalFinal,
-                  items: itemsToSave
-              };
-              // Salva no Firebase
-              try {
-                  const docRef = await db.collection("receipts").add({
-                      ...receiptData,
-                      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                  });
-                  console.log("Recibo salvo com o ID: ", docRef.id);
-              } catch(e) {
-                  console.error("Erro ao salvar no Firestore: ", e);
-                  alert("Houve um erro ao salvar o recibo no banco de dados.");
-              }
-          }
-          
-          dom.resultadoDiv.querySelector('h3').innerHTML = `${t.receiptHeader} - <span id="resNome">${nome}</span>`;
-          dom.resumoItensDiv.innerHTML = `<h4 class="receipt-section-title">${t.receiptItemsHeader}</h4>`;
-          dom.resumoTotaisDiv.innerHTML = '';
-          
-          let hasItemsForReceipt = false;
-          for(const key in calculo.itens) {
-            const item = calculo.itens[key];
-            if (item.quantidade > 0) {
-              hasItemsForReceipt = true;
-              const itemLine = document.createElement('div');
-              itemLine.className = 'receipt-line';
-              const precoComMoeda = document.createElement('span');
-              precoComMoeda.className = 'receipt-value';
-              precoComMoeda.textContent = item.subtotal.toFixed(2);
-              precoComMoeda.appendChild(this.createCoinIcon());
-              itemLine.innerHTML = `<span class="receipt-label">${item.nome} (x${item.quantidade})</span>`;
-              itemLine.appendChild(precoComMoeda);
-              dom.resumoItensDiv.appendChild(itemLine);
+        const itemsToSave = {};
+        for(const key in calculo.itens) {
+            if(calculo.itens[key].quantidade > 0) {
+                itemsToSave[key] = calculo.itens[key].quantidade;
+                temItens = true;
             }
-          }
-          if (!hasItemsForReceipt) { alert(t.alertNoItems); return; }
-          if (calculo.descontoPercentual > 0) {
-              dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line"><span class="receipt-label">${t.receiptSubtotal}</span><span class="receipt-value">${calculo.totalBruto.toFixed(2)}</span></div><div class="receipt-line"><span class="receipt-label">${t.receiptDiscount} (${calculo.descontoPercentual.toFixed(2)}%)</span><span class="receipt-value">- ${calculo.valorDescontoTotal.toFixed(2)}</span></div>`;
-          }
-          dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line final-total"><span class="receipt-label">${t.receiptFinalTotal}</span><span class="receipt-value">${calculo.totalFinal.toFixed(2)}</span></div>`;
-          dom.resumoTotaisDiv.querySelectorAll('.receipt-value').forEach(el => el.appendChild(this.createCoinIcon()));
-          dom.resultadoDiv.style.display = 'block';
-          setTimeout(() => {
-              html2canvas(dom.resultadoDiv, { backgroundColor: null, scale: 2 }).then(canvas => {
-                const link = document.createElement('a');
-                const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
-                link.download = `${nomeSanitizado}_recibo.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                dom.resultadoDiv.style.display = 'none';
-              });
-          }, 300);
         }
+        if(temItens) {
+            const receiptData = {
+                customerName: nome,
+                discountApplied: calculo.descontoPercentual,
+                grandTotal: calculo.totalFinal,
+                items: itemsToSave,
+                seller: auth.currentUser.displayName || auth.currentUser.email, // Salva quem fez a venda
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            try {
+                await db.collection("receipts").add(receiptData);
+                console.log("Recibo salvo no Firestore");
+            } catch(e) {
+                console.error("Erro ao salvar no Firestore: ", e);
+                alert("Houve um erro ao salvar o recibo no banco de dados.");
+            }
+        }
+          
+        dom.resultadoDiv.querySelector('h3').innerHTML = `${t.receiptHeader} - <span id="resNome">${nome}</span>`;
+        dom.resumoItensDiv.innerHTML = `<h4 class="receipt-section-title">${t.receiptItemsHeader}</h4>`;
+        dom.resumoTotaisDiv.innerHTML = '';
+          
+        let hasItemsForReceipt = false;
+        for(const key in calculo.itens) {
+          const item = calculo.itens[key];
+          if (item.quantidade > 0) {
+            hasItemsForReceipt = true;
+            const itemLine = document.createElement('div');
+            itemLine.className = 'receipt-line';
+            const precoComMoeda = document.createElement('span');
+            precoComMoeda.className = 'receipt-value';
+            precoComMoeda.textContent = item.subtotal.toFixed(2);
+            precoComMoeda.appendChild(this.createCoinIcon());
+            itemLine.innerHTML = `<span class="receipt-label">${item.nome} (x${item.quantidade})</span>`;
+            itemLine.appendChild(precoComMoeda);
+            dom.resumoItensDiv.appendChild(itemLine);
+          }
+        }
+        if (!hasItemsForReceipt) { alert(t.alertNoItems); return; }
+        if (calculo.descontoPercentual > 0) {
+            dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line"><span class="receipt-label">${t.receiptSubtotal}</span><span class="receipt-value">${calculo.totalBruto.toFixed(2)}</span></div><div class="receipt-line"><span class="receipt-label">${t.receiptDiscount} (${calculo.descontoPercentual.toFixed(2)}%)</span><span class="receipt-value">- ${calculo.valorDescontoTotal.toFixed(2)}</span></div>`;
+        }
+        dom.resumoTotaisDiv.innerHTML += `<div class="receipt-line final-total"><span class="receipt-label">${t.receiptFinalTotal}</span><span class="receipt-value">${calculo.totalFinal.toFixed(2)}</span></div>`;
+        dom.resumoTotaisDiv.querySelectorAll('.receipt-value').forEach(el => el.appendChild(this.createCoinIcon()));
+        dom.resultadoDiv.style.display = 'block';
+        setTimeout(() => {
+            html2canvas(dom.resultadoDiv, { backgroundColor: null, scale: 2 }).then(canvas => {
+              const link = document.createElement('a');
+              const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+              link.download = `${nomeSanitizado}_recibo.png`;
+              link.href = canvas.toDataURL('image/png');
+              link.click();
+              dom.resultadoDiv.style.display = 'none';
+            });
+        }, 300);
+      }
     };
     
     app.init();
