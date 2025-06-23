@@ -354,23 +354,28 @@
       },
       
       addAuthListeners() {
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                dom.authContainer.classList.add('hidden');
-                dom.appContainer.classList.remove('hidden');
-                if (!this.calculatorInitialized) {
-                    this.addAppEventListeners();
-                    this.setLanguage(currentLang);
-                    this.calculatorInitialized = true;
-                }
-            } else {
-                dom.authContainer.classList.remove('hidden');
-                dom.appContainer.classList.add('hidden');
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // Usuário está logado
+            dom.authContainer.classList.add('hidden');
+            dom.appContainer.classList.remove('hidden');
+
+            // Só inicializa a calculadora UMA VEZ
+            if (!this.calculatorInitialized) {
+                this.addAppEventListeners();
+                this.setLanguage(currentLang); // Traduz e carrega a calculadora
+                this.calculatorInitialized = true;
             }
-        });
-        dom.btnLogin.addEventListener('click', this.handleLogin.bind(this));
-        dom.btnLogout.addEventListener('click', this.handleLogout.bind(this));
-      },
+        } else {
+            // Usuário está deslogado
+            dom.authContainer.classList.remove('hidden');
+            dom.appContainer.classList.add('hidden');
+            this.calculatorInitialized = false; // "Reseta" o estado de inicialização
+        }
+    });
+    dom.btnLogin.addEventListener('click', this.handleLogin.bind(this));
+    dom.btnLogout.addEventListener('click', this.handleLogout.bind(this));
+},
       
       async handleLogin() {
           const username = dom.usernameInput.value.trim();
