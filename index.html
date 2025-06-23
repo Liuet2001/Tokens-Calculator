@@ -56,7 +56,6 @@
     min-height: 100vh;
   }
 
-  /* --- ESTRUTURA PRINCIPAL --- */
   .hidden { display: none !important; }
 
   #auth-container {
@@ -89,31 +88,38 @@
     transition: background-color 0.3s ease, border-color 0.3s ease;
   }
   
-  /* --- ELEMENTOS --- */
+  .settings-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+  }
+  .settings-controls { display: flex; align-items: center; gap: 20px;}
+  .language-switcher button { background: none; border: none; padding: 4px; cursor: pointer; transition: all 0.3s ease; }
+  .language-switcher button:not(.active) { filter: grayscale(100%); opacity: 0.6; }
+  html[data-theme='dark'] .language-switcher button:not(.active) { filter: grayscale(100%) invert(100%); opacity: 0.8; }
+  .language-switcher button.active, .language-switcher button:not(.active):hover { filter: none; opacity: 1; transform: scale(1.1); }
+  .theme-switcher { display: flex; align-items: center; gap: 8px; }
+  .theme-switcher-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+  .toggle-track { width: 44px; height: 24px; background-color: var(--bg-tertiary); border-radius: 99px; position: relative; cursor: pointer; transition: background-color 0.3s ease; }
+  .toggle-thumb { width: 18px; height: 18px; background-color: white; border-radius: 50%; position: absolute; top: 3px; left: 4px; transition: transform 0.3s ease; }
+  html[data-theme='light'] .toggle-track { background-color: var(--accent-primary); }
+  html[data-theme='light'] .toggle-thumb { transform: translateX(19px); }
+
   h2 { font-family: var(--font-header); color: var(--accent-primary); font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px;}
   .input-group { display: flex; flex-direction: column; gap: 8px; }
   .input-group label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
 
   input[type="text"], input[type="number"], input[type="password"] {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    font-size: 16px;
-    transition: all 0.3s ease;
+    width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--bg-tertiary); color: var(--text-primary); font-size: 16px; transition: all 0.3s ease;
   }
-  
   input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
+    outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
   }
 
   #auth-error { color: var(--text-error); font-size: 14px; text-align: center; min-height: 20px; }
 
-  /* ABAS E CONTEÚDO */
   .tab-navigation { display: flex; border-bottom: 1px solid var(--border-color); }
   .tab-link { padding: 12px 20px; cursor: pointer; background: none; border: none; color: var(--text-secondary); font-weight: 600; font-size: 16px; border-bottom: 3px solid transparent; transition: all 0.3s ease; font-family: var(--font-body); }
   .tab-link:hover { color: var(--text-primary); }
@@ -135,6 +141,8 @@
   #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover { background: var(--accent-hover); }
   #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
   #btnGerarImagem, #btnLogout { background: var(--bg-tertiary); color: var(--text-primary); }
+  
+  #resultado { display: none; position: absolute; left: -9999px; top: 0; width: 600px; background-color: var(--bg-secondary); color: var(--text-primary); padding: 32px; border-radius: 16px; border: 1px solid var(--border-color); }
 </style>
 </head>
 <body>
@@ -244,21 +252,23 @@
   </div>
 
 <script>
+  // --- INICIALIZAÇÃO DO FIREBASE ---
   const firebaseConfig = {
     apiKey: "AIzaSyDgeTU4YmFpZIwcmE2-cxGKTkO2KqeQotE",
     authDomain: "token-calculator-a45d6.firebaseapp.com",
     projectId: "token-calculator-a45d6",
     storageBucket: "token-calculator-a45d6.firebasestorage.app",
     messagingSenderId: "597974335563",
-    appId: "1:597974335563:web:9d07ada2708d61b7d30dce""
+    appId: "1:597974335563:web:9d07ada2708d61b7d30dce"
   };
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   const auth = firebase.auth();
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // Todas as outras constantes e a lógica do app vão aqui dentro
+  // --- LÓGICA DA APLICAÇÃO ---
+  // Removido o DOMContentLoaded para uma inicialização mais direta
+    
     const MOEDA_BASE64 = ""; // COLE SUA STRING BASE64 AQUI
     const DUMMY_DOMAIN = '@painelriciv.com'; // SEU DOMÍNIO FICTÍCIO
 
@@ -290,7 +300,7 @@
           historyCustomer: "Cliente", historyDate: "Data", historyTotal: "Total", historySeller: "Vendedor",
           historyNoRecords: "Nenhum registro encontrado.", historyLoading: "Carregando histórico..."
       },
-      en: {
+      en: { // ... (traduções em inglês mantidas)
           pageTitle: "Token Calculator", mainHeader: "Token Calculator", themeLabel: "Light Theme",
           idLabel: "Identifier / Name", idPlaceholder: "Enter your name or ID", discountLabel: "Discount (%)",
           discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Unit Price", tableQty: "Quantity",
@@ -346,38 +356,8 @@
 
     const app = {
       calculatorInitialized: false,
-
-      init() {
-        this.addAuthListeners();
-        this.loadPreferences(); 
-        this.setLanguage(currentLang, true);
-      },
       
-      addAuthListeners() {
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            // Usuário está logado
-            dom.authContainer.classList.add('hidden');
-            dom.appContainer.classList.remove('hidden');
-
-            // Só inicializa a calculadora UMA VEZ
-            if (!this.calculatorInitialized) {
-                this.addAppEventListeners();
-                this.setLanguage(currentLang); // Traduz e carrega a calculadora
-                this.calculatorInitialized = true;
-            }
-        } else {
-            // Usuário está deslogado
-            dom.authContainer.classList.remove('hidden');
-            dom.appContainer.classList.add('hidden');
-            this.calculatorInitialized = false; // "Reseta" o estado de inicialização
-        }
-    });
-    dom.btnLogin.addEventListener('click', this.handleLogin.bind(this));
-    dom.btnLogout.addEventListener('click', this.handleLogout.bind(this));
-},
-      
-      async handleLogin() {
+      handleLogin: async function() {
           const username = dom.usernameInput.value.trim();
           const password = dom.passwordInput.value;
           const t = TRANSLATIONS[currentLang];
@@ -399,14 +379,9 @@
           }
       },
       
-      handleLogout() { auth.signOut(); },
+      handleLogout: function() { auth.signOut(); },
 
-      loadPreferences() {
-          this.setTheme(localStorage.getItem('theme') || 'dark');
-          currentLang = localStorage.getItem('language') || 'br';
-      },
-
-      addAppEventListeners() {
+      addAppEventListeners: function() {
           dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
           dom.btnCalcular.addEventListener('click', this.updateUI.bind(this));
           dom.btnResetar.addEventListener('click', this.reset.bind(this));
@@ -423,7 +398,7 @@
           dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
       },
 
-      handleTabClick(event) {
+      handleTabClick: function(event) {
           const clickedTab = event.target.closest('.tab-link');
           if (!clickedTab) return;
           const tabId = clickedTab.dataset.tab;
@@ -436,7 +411,7 @@
           }
       },
 
-      async loadHistory() {
+      loadHistory: async function() {
           const t = TRANSLATIONS[currentLang];
           dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
           try {
@@ -461,7 +436,7 @@
           }
       },
       
-      setLanguage(lang, isInitialLoad = false) {
+      setLanguage: function(lang, isInitialLoad = false) {
           currentLang = lang;
           localStorage.setItem('language', lang);
           document.querySelectorAll('[data-translate-key]').forEach(el => {
@@ -482,65 +457,131 @@
           }
       },
       
-      toggleMode(mode) {
-        if (mode === 'quantity') {
-            dom.distributorSection.style.display = 'none';
-            dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
-            dom.btnCalcular.style.display = 'inline-block';
-        } else {
-            dom.distributorSection.style.display = 'flex';
-            dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
-            dom.btnCalcular.style.display = 'none';
-        }
-      },
-      setTheme(theme) {
+      setTheme: function(theme) {
           dom.html.setAttribute('data-theme', theme);
           localStorage.setItem('theme', theme);
       },
-      buildTokenFilters() {
-          dom.tokenFiltersContainer.innerHTML = '';
-          for (const key in ITENS_CATALOGO) {
-              const item = ITENS_CATALOGO[key];
-              const label = document.createElement('label');
-              label.innerHTML = `<input type="checkbox" value="${key}" checked><span>${item[`name_${currentLang}`]}</span>`;
-              dom.tokenFiltersContainer.appendChild(label);
-          }
-      },
-      distributeMush() {
-        // ... (função mantida da versão anterior)
-      },
-      calculateValues() {
-        // ... (função mantida da versão anterior)
-      },
-      createCoinIcon() {
-        // ... (função mantida da versão anterior)
-      },
-      loadTable() {
-        // ... (função mantida da versão anterior)
-      },
-      updateUI() {
-        // ... (função mantida da versão anterior)
-      },
-      reset(clearDistributor = true) {
-        // ... (função mantida da versão anterior)
-      },
-      async generateImage() {
-        // ... (função mantida da versão anterior)
-      }
+      
+      // ... (todas as outras funções da calculadora, como `calculateValues`, `distributeMush`, etc. vão aqui)
+      // Para manter a organização, o resto das funções está dentro do Object.assign
     };
     
-    // Anexando o restante das funções ao objeto 'app'
     Object.assign(app, {
-      distributeMush: app.distributeMush, // Necessário para garantir o escopo correto do 'this'
-      calculateValues: app.calculateValues,
-      createCoinIcon: app.createCoinIcon,
-      loadTable: app.loadTable,
-      updateUI: app.updateUI,
-      reset: app.reset,
-      generateImage: app.generateImage,
+        toggleMode: function(mode) {
+            if (mode === 'quantity') {
+                dom.distributorSection.style.display = 'none';
+                dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
+                dom.btnCalcular.style.display = 'inline-block';
+            } else {
+                dom.distributorSection.style.display = 'flex';
+                dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
+                dom.btnCalcular.style.display = 'none';
+            }
+        },
+        buildTokenFilters: function() {
+            dom.tokenFiltersContainer.innerHTML = '';
+            for (const key in ITENS_CATALOGO) {
+                const item = ITENS_CATALOGO[key];
+                const label = document.createElement('label');
+                label.innerHTML = `<input type="checkbox" value="${key}" checked><span>${item[`name_${currentLang}`]}</span>`;
+                dom.tokenFiltersContainer.appendChild(label);
+            }
+        },
+        distributeMush: function() {
+            // Lógica de distribuição...
+        },
+        calculateValues: function() {
+            // Lógica de cálculo...
+        },
+        createCoinIcon: function() {
+            const img = document.createElement('img');
+            img.src = MOEDA_BASE64;
+            img.className = 'moeda-img';
+            img.alt = 'mush';
+            return img;
+        },
+        loadTable: function() {
+            const currentValues = {};
+            document.querySelectorAll('#tabela-itens input[type="number"]').forEach(input => {
+                currentValues[input.id] = input.value;
+            });
+            dom.tabelaItensBody.innerHTML = '';
+            for (const key in ITENS_CATALOGO) {
+                const item = ITENS_CATALOGO[key];
+                const tr = document.createElement('tr');
+                const savedQty = currentValues[`qtd-${key}`] || 0;
+                tr.innerHTML = `<td>${item[`name_${currentLang}`]}</td><td>${item.preco.toFixed(2)}</td><td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td><td style="text-align: center;">0.00</td>`;
+                tr.querySelector(`td:nth-child(2)`).appendChild(this.createCoinIcon());
+                tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
+                dom.tabelaItensBody.appendChild(tr);
+                tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
+            }
+        },
+        updateUI: function() {
+            const calculo = this.calculateValues();
+            const rows = dom.tabelaItensBody.getElementsByTagName('tr');
+            Array.from(rows).forEach((row, index) => {
+                const key = Object.keys(ITENS_CATALOGO)[index];
+                if (!calculo.itens[key]) return;
+                const itemCalculado = calculo.itens[key];
+                const precoCell = row.querySelector(`td:nth-child(2)`);
+                const totalCell = row.querySelector(`td:nth-child(4)`);
+                if (calculo.descontoPercentual > 0) {
+                    precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)} ➝ ${itemCalculado.precoComDesconto.toFixed(2)}`;
+                } else {
+                    precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)}`;
+                }
+                precoCell.appendChild(this.createCoinIcon());
+                totalCell.innerHTML = `${itemCalculado.subtotal.toFixed(2)}`;
+                totalCell.appendChild(this.createCoinIcon());
+            });
+            dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b>`;
+            dom.totalGeralCell.appendChild(this.createCoinIcon());
+        },
+        reset: function(clearDistributor = true) {
+            dom.nomeClienteInput.value = '';
+            dom.descontoInput.value = '';
+            if(clearDistributor) {
+                dom.totalMushInput.value = '';
+                dom.leftoverMushDiv.innerHTML = '';
+            }
+            for (const key in ITENS_CATALOGO) {
+                const input = document.getElementById(`qtd-${key}`);
+                if (input) input.value = 0;
+            }
+            this.updateUI();
+        },
+        generateImage: async function() {
+            // Lógica para gerar imagem e salvar no Firestore...
+        }
     });
 
-    app.init();
+    // --- PONTO DE ENTRADA PRINCIPAL DA APLICAÇÃO ---
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // USUÁRIO LOGADO
+            dom.authContainer.classList.add('hidden');
+            dom.appContainer.classList.remove('hidden');
+            // Inicializa a aplicação principal se for a primeira vez
+            if (!app.calculatorInitialized) {
+                app.loadPreferences();
+                app.addAppEventListeners();
+                app.setLanguage(localStorage.getItem('language') || 'br');
+                app.calculatorInitialized = true;
+            }
+        } else {
+            // USUÁRIO DESLOGADO
+            dom.authContainer.classList.remove('hidden');
+            dom.appContainer.classList.add('hidden');
+            app.calculatorInitialized = false; // Permite reiniciar quando logar de novo
+            // Configura apenas o necessário para a tela de login
+            app.setTheme(localStorage.getItem('theme') || 'dark');
+            app.setLanguage(localStorage.getItem('language') || 'br', true);
+            dom.btnLogin.addEventListener('click', app.handleLogin.bind(app));
+            dom.btnLogout.addEventListener('click', app.handleLogout.bind(app));
+        }
+    });
+
   });
 </script>
 </body>
