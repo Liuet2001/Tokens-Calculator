@@ -12,7 +12,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 
-
 <style>
   :root {
     --font-header: 'Poppins', sans-serif;
@@ -85,7 +84,6 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
   
   .settings-bar {
@@ -95,7 +93,9 @@
       padding-bottom: 16px;
       border-bottom: 1px solid var(--border-color);
   }
-  .settings-controls { display: flex; align-items: center; gap: 20px;}
+  .settings-controls { display: flex; align-items: center; gap: 16px;}
+  #logged-in-user { font-size: 14px; color: var(--text-secondary); }
+  #logged-in-user .username { font-weight: 700; color: var(--text-primary); }
   .language-switcher button { background: none; border: none; padding: 4px; cursor: pointer; transition: all 0.3s ease; }
   .language-switcher button:not(.active) { filter: grayscale(100%); opacity: 0.6; }
   html[data-theme='dark'] .language-switcher button:not(.active) { filter: grayscale(100%) invert(100%); opacity: 0.8; }
@@ -127,6 +127,19 @@
   .tab-link.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); }
   .tab-content { padding-top: 24px; display: flex; flex-direction: column; gap: 24px; }
   
+  .mode-selector { display: flex; gap: 20px; background-color: var(--bg-tertiary); padding: 6px; border-radius: 10px; width: fit-content; }
+  .mode-selector label { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; }
+  .mode-selector input[type="radio"] { display: none; }
+  .mode-selector input[type="radio"]:checked + label { background-color: var(--bg-secondary); color: var(--accent-primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+  .distributor-container { background-color: rgba(120, 120, 120, 0.05); border: 1px dashed var(--border-color); padding: 24px; border-radius: 12px; display: flex; flex-direction: column; gap: 20px; }
+  .token-filters { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+  .token-filters label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+  .distributor-controls { display: flex; gap: 16px; align-items: center; }
+  .distributor-controls .input-group { flex-grow: 1; }
+  #leftover-mush { margin-top: 16px; font-weight: 500; color: var(--text-secondary); }
+  #leftover-mush span { color: var(--accent-primary); font-weight: 700; }
+  
   table { width: 100%; border-collapse: collapse; }
   th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); transition: background-color 0.3s ease; }
   td:nth-child(3), td:nth-child(4), th:nth-child(3), th:nth-child(4) { text-align: center; }
@@ -141,7 +154,7 @@
   #btnCalcular, #btnDistribute, #btnLogin { background: var(--accent-primary); color: #fff; }
   #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover { background: var(--accent-hover); }
   #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
-  #btnGerarImagem, #btnLogout { background: var(--bg-tertiary); color: var(--text-primary); }
+  #btnGerarImagem, #btnLogout, #btnDistributeLeftover { background: var(--bg-tertiary); color: var(--text-primary); }
 </style>
 </head>
 <body>
@@ -174,13 +187,16 @@
                       <div class="toggle-thumb"></div>
                   </div>
               </div>
+              <div id="logged-in-user"></div>
               <button id="btnLogout" data-translate-key="logoutButton">Sair</button>
           </div>
       </div>
+
       <div class="tab-navigation">
           <button class="tab-link active" data-tab="calculator-view" data-translate-key="tabCalculator">Calculadora</button>
           <button class="tab-link" data-tab="history-view" data-translate-key="tabHistory">Histórico</button>
       </div>
+
       <div id="calculator-view" class="tab-content active">
           <h2 data-translate-key="mainHeader">Calculadora de Tokens</h2>
           <div class="input-group">
@@ -205,6 +221,17 @@
                   <label data-translate-key="distributeTokensLabel">Tokens Desejáveis para Distribuição</label>
                   <div class="token-filters" id="token-filters-container"></div>
               </div>
+
+              <div id="two-token-options" class="hidden" style="margin-top: 10px;">
+                  <label>Estratégia para 2 tokens:</label>
+                  <div class="mode-selector">
+                      <input type="radio" id="strategy-fair" name="two-token-strategy" value="fair" checked>
+                      <label for="strategy-fair">Justa (Padrão)</label>
+                      <input type="radio" id="strategy-split" name="two-token-strategy" value="split">
+                      <label for="strategy-split">Dividir 50/50</label>
+                  </div>
+              </div>
+              
               <div class="distributor-controls">
                   <div class="input-group">
                       <label for="total-mush" data-translate-key="totalMushLabel">Total de Mush a Gastar</label>
@@ -213,6 +240,14 @@
                   <button id="btnDistribute" data-translate-key="btnDistribute">Distribuir</button>
               </div>
               <div id="leftover-mush"></div>
+              
+              <div id="leftover-distributor-section" class="hidden" style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
+                  <label>Distribuir o troco para:</label>
+                  <div class="token-filters" id="leftover-token-filters-container"></div>
+                  <div class="buttons" style="margin-top: 10px;">
+                       <button id="btnDistributeLeftover">Distribuir Troco</button>
+                  </div>
+              </div>
           </div>
           <table>
             <thead>
@@ -237,6 +272,7 @@
             <button id="btnGerarImagem" data-translate-key="btnExport">Exportar para PNG</button>
           </div>
       </div>
+      
       <div id="history-view" class="tab-content hidden">
           <h2 data-translate-key="historyHeader">Histórico de Vendas</h2>
           <div id="history-table-container"></div>
@@ -244,8 +280,9 @@
     </div>
 </div>
 
-<div id="resultado" style="display: none; position: absolute; left: -9999px; top: 0; width: 600px; background-color: var(--bg-secondary); color: var(--text-primary); padding: 32px; border-radius: 16px;">
-  </div>
+<div id="resultado" style="display: none; padding: 20px; background: var(--bg-secondary); color: var(--text-primary); width: 400px; border-radius: 15px; border: 1px solid var(--border-color); position: fixed; top: -100%; left: 50%; transform: translateX(-50%); z-index: -1;">
+</div>
+
 
 <script>
   // --- INICIALIZAÇÃO DO FIREBASE ---
@@ -263,9 +300,7 @@
   const auth = firebase.auth();
 
   // --- LÓGICA DA APLICAÇÃO ---
-  document.addEventListener('DOMContentLoaded', () => {
-    
-    const MOEDA_BASE64 = ""; // COLE SUA STRING BASE64 AQUI
+    const MOEDA_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACUSURBVDhPY/j//z8DJYCJgUJWCiDPmPrP4P/fv//f//79//Pnx/+/f/8DNlDrAKSkG4B84BTg//+fA5AAYs4A5gA1zwBC/v/79w8gCajhF0D+jAar4f9/fv8DksAqsX4A8gNTAf8ZGP5/YOD5/wz8//P/D/gMWQBL/x/g/x8Y/v9g+P+DAAATz2sNmmNYXAAAAABJRU5ErkJggg==";
     const DUMMY_DOMAIN = '@painelriciv.com'; 
 
     const ITENS_CATALOGO = {
@@ -282,19 +317,18 @@
           discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Preço Unitário", tableQty: "Quantidade",
           tableTotal: "Valor Total", tableGrandTotal: "TOTAL GERAL", btnCalculate: "Calcular", btnReset: "Resetar",
           btnExport: "Exportar para PNG", alertNoItems: "Nenhum item foi selecionado para gerar o recibo.",
-          alertInsufficientMush: "Mush insuficiente para comprar ao menos um de cada item selecionado.",
           receiptHeader: "Recibo", receiptItemsHeader: "Itens Comprados", receiptSubtotal: "Subtotal",
           receiptDiscount: "Desconto", receiptFinalTotal: "Total Final", receiptThanks: "✨ Agradecemos a preferência! ✨",
           calculationMode: "Modo de Cálculo", modeQty: "Por Quantidade", modeMush: "Por Mush",
           distributeTokensLabel: "Tokens Desejáveis para Distribuição", totalMushLabel: "Total de Mush a Gastar",
           btnDistribute: "Distribuir", leftoverMushText: "Sobrou:",
-          leftoverConfirm1: "Sobraram", leftoverConfirm2: "Deseja distribuir este valor nos itens restantes:",
           loginHeader: "Acessar Calculadora", usernameLabel: "Usuário", passwordLabel: "Senha",
           loginButton: "Entrar", logoutButton: "Sair", errorInvalidCredentials: "Usuário ou senha inválidos.",
           errorGeneric: "Ocorreu um erro. Tente novamente.",
           tabCalculator: "Calculadora", tabHistory: "Histórico", historyHeader: "Histórico de Vendas",
           historyCustomer: "Cliente", historyDate: "Data", historyTotal: "Total", historySeller: "Vendedor",
-          historyNoRecords: "Nenhum registro encontrado.", historyLoading: "Carregando histórico..."
+          historyNoRecords: "Nenhum registro encontrado.", historyLoading: "Carregando histórico...",
+          loggedInAs: "Usuário:"
       },
       en: {
           pageTitle: "Token Calculator", mainHeader: "Token Calculator", themeLabel: "Light Theme",
@@ -302,19 +336,18 @@
           discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Unit Price", tableQty: "Quantity",
           tableTotal: "Total Value", tableGrandTotal: "GRAND TOTAL", btnCalculate: "Calculate", btnReset: "Reset",
           btnExport: "Export to PNG", alertNoItems: "No items were selected to generate the receipt.",
-          alertInsufficientMush: "Insufficient mush to purchase at least one of each selected item.",
           receiptHeader: "Receipt", receiptItemsHeader: "Purchased Items", receiptSubtotal: "Subtotal",
           receiptDiscount: "Discount", receiptFinalTotal: "Final Total", receiptThanks: "✨ Thank you for your preference! ✨",
           calculationMode: "Calculation Mode", modeQty: "By Quantity", modeMush: "By Mush",
           distributeTokensLabel: "Desirable Tokens for Distribution", totalMushLabel: "Total Mush to Spend",
           btnDistribute: "Distribute", leftoverMushText: "Leftover:",
-          leftoverConfirm1: "There is", leftoverConfirm2: "leftover. Do you want to distribute this amount to the remaining items:",
           loginHeader: "Calculator Login", usernameLabel: "Username", passwordLabel: "Password",
           loginButton: "Login", logoutButton: "Logout", errorInvalidCredentials: "Invalid username or password.",
           errorGeneric: "An error occurred. Please try again.",
           tabCalculator: "Calculator", tabHistory: "History", historyHeader: "Sales History",
           historyCustomer: "Customer", historyDate: "Date", historyTotal: "Total", historySeller: "Seller",
-          historyNoRecords: "No records found.", historyLoading: "Loading history..."
+          historyNoRecords: "No records found.", historyLoading: "Loading history...",
+          loggedInAs: "User:"
       }
     };
     
@@ -331,7 +364,6 @@
       descontoInput: document.getElementById('desconto'),
       tabelaItensBody: document.getElementById('tabela-itens'),
       totalGeralCell: document.getElementById('totalGeral'),
-      resultadoDiv: document.getElementById('resultado'),
       themeToggle: document.getElementById('theme-toggle'),
       langBr: document.getElementById('lang-br'),
       langEn: document.getElementById('lang-en'),
@@ -339,24 +371,29 @@
       modeMushRadio: document.getElementById('mode-mush'),
       distributorSection: document.getElementById('distributor-section'),
       tokenFiltersContainer: document.getElementById('token-filters-container'),
+      leftoverTokenFiltersContainer: document.getElementById('leftover-token-filters-container'),
       totalMushInput: document.getElementById('total-mush'),
       btnDistribute: document.getElementById('btnDistribute'),
+      btnDistributeLeftover: document.getElementById('btnDistributeLeftover'),
       leftoverMushDiv: document.getElementById('leftover-mush'),
+      leftoverDistributorSection: document.getElementById('leftover-distributor-section'),
       tabNavigation: document.querySelector('.tab-navigation'),
       tabLinks: document.querySelectorAll('.tab-link'),
       tabContents: document.querySelectorAll('.tab-content'),
       historyTableContainer: document.getElementById('history-table-container'),
+      loggedInUserDiv: document.getElementById('logged-in-user'),
     };
 
     let currentLang = 'br';
 
     const app = {
       calculatorInitialized: false,
+      currentLeftover: 0,
 
       init() {
-        this.addAuthListeners();
         this.loadPreferences();
         this.setLanguage(currentLang, true);
+        this.addAuthListeners();
       },
       
       addAuthListeners() {
@@ -364,6 +401,8 @@
             if (user) {
                 dom.authContainer.classList.add('hidden');
                 dom.appContainer.classList.remove('hidden');
+                const username = user.email.split('@')[0];
+                dom.loggedInUserDiv.innerHTML = `<span>${TRANSLATIONS[currentLang].loggedInAs}</span> <span class="username">${username}</span>`;
                 if (!this.calculatorInitialized) {
                     this.addAppEventListeners();
                     this.setLanguage(currentLang);
@@ -392,7 +431,6 @@
               dom.authError.textContent = '';
               await auth.signInWithEmailAndPassword(email, password);
           } catch (error) {
-              console.error("Erro de login:", error.code, error.message);
               if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
                   dom.authError.textContent = t.errorInvalidCredentials;
               } else {
@@ -413,16 +451,19 @@
           document.getElementById('btnCalcular').addEventListener('click', this.updateUI.bind(this));
           document.getElementById('btnResetar').addEventListener('click', this.reset.bind(this));
           document.getElementById('btnGerarImagem').addEventListener('click', this.generateImage.bind(this));
-          dom.themeToggle.addEventListener('click', () => {
-              const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-              this.setTheme(newTheme);
-          });
+          dom.themeToggle.addEventListener('click', () => this.setTheme(dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
           dom.langBr.addEventListener('click', () => this.setLanguage('br'));
           dom.langEn.addEventListener('click', () => this.setLanguage('en'));
           dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
           dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
           dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
+          dom.btnDistributeLeftover.addEventListener('click', this.distributeLeftoverMush.bind(this));
           dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
+
+          dom.tokenFiltersContainer.addEventListener('change', () => {
+              const selectedCount = dom.tokenFiltersContainer.querySelectorAll('input:checked').length;
+              document.getElementById('two-token-options').classList.toggle('hidden', selectedCount !== 2);
+          });
       },
 
       handleTabClick(event) {
@@ -433,9 +474,7 @@
           dom.tabContents.forEach(content => content.classList.add('hidden'));
           clickedTab.classList.add('active');
           document.getElementById(tabId).classList.remove('hidden');
-          if (tabId === 'history-view') {
-              this.loadHistory();
-          }
+          if (tabId === 'history-view') this.loadHistory();
       },
 
       async loadHistory() {
@@ -450,15 +489,10 @@
               let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th><th>${t.historySeller}</th><th>${t.historyTotal}</th><th>${t.historyDate}</th></tr></thead><tbody>`;
               querySnapshot.forEach(doc => {
                   const data = doc.data();
-                  const date = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A';
-                  const sellerEmail = data.seller || 'N/A';
-                  const sellerUsername = sellerEmail.split('@')[0];
-                  tableHTML += `<tr><td>${data.customerName || 'N/A'}</td><td>${sellerUsername}</td><td>${data.grandTotal?.toFixed(2) || '0.00'}</td><td>${date}</td></tr>`;
+                  tableHTML += `<tr><td>${data.customerName || 'N/A'}</td><td>${(data.seller || 'N/A').split('@')[0]}</td><td>${(data.grandTotal || 0).toFixed(2)}</td><td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td></tr>`;
               });
-              tableHTML += `</tbody></table>`;
-              dom.historyTableContainer.innerHTML = tableHTML;
+              dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
           } catch (error) {
-              console.error("Erro ao buscar histórico: ", error);
               dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
           }
       },
@@ -475,256 +509,282 @@
               if (TRANSLATIONS[lang][key]) el.placeholder = TRANSLATIONS[lang][key];
           });
           document.title = TRANSLATIONS[lang].pageTitle;
-          if (dom.langBr) dom.langBr.classList.toggle('active', lang === 'br');
-          if (dom.langEn) dom.langEn.classList.toggle('active', lang === 'en');
+          dom.langBr.classList.toggle('active', lang === 'br');
+          dom.langEn.classList.toggle('active', lang === 'en');
           if (!isLoginScreenOnly) {
             this.loadTable();
-            this.buildTokenFilters();
+            this.buildTokenFilters(dom.tokenFiltersContainer);
             this.updateUI();
           }
       },
       
       toggleMode(mode) {
-        if (mode === 'quantity') {
-            dom.distributorSection.style.display = 'none';
-            dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
-            document.getElementById('btnCalcular').style.display = 'inline-block';
-        } else {
-            dom.distributorSection.style.display = 'flex';
-            dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
-            document.getElementById('btnCalcular').style.display = 'none';
-        }
+        dom.distributorSection.style.display = mode === 'mush' ? 'flex' : 'none';
+        dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = (mode === 'mush'));
+        document.getElementById('btnCalcular').style.display = mode === 'quantity' ? 'inline-block' : 'none';
+        if (mode === 'mush') this.buildTokenFilters(dom.tokenFiltersContainer);
       },
+
       setTheme(theme) {
           dom.html.setAttribute('data-theme', theme);
           localStorage.setItem('theme', theme);
       },
-      buildTokenFilters() {
-          dom.tokenFiltersContainer.innerHTML = '';
+
+      buildTokenFilters(container) {
+          container.innerHTML = '';
           for (const key in ITENS_CATALOGO) {
               const item = ITENS_CATALOGO[key];
               const label = document.createElement('label');
               label.innerHTML = `<input type="checkbox" value="${key}" checked><span>${item[`name_${currentLang}`]}</span>`;
-              dom.tokenFiltersContainer.appendChild(label);
+              container.appendChild(label);
+          }
+          if (container.id === 'token-filters-container') {
+              container.dispatchEvent(new Event('change'));
           }
       },
-      distributeMush() {
-            let totalMush = parseInt(dom.totalMushInput.value) || 0;
-            const discount = parseFloat(dom.descontoInput.value) || 0;
-            const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
-
-            this.reset(false);
-
-            if (selectedTokenKeys.length === 0) return;
-
-            const itemsToConsider = selectedTokenKeys.map(key => ({ 
-                key, 
-                ...ITENS_CATALOGO[key],
-                priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100))
-            }));
-            
-            const t = TRANSLATIONS[currentLang];
-            let remainingMush = totalMush;
-
-            const fairShare = totalMush / itemsToConsider.length;
-
-            itemsToConsider.forEach(item => {
-                if (item.priceWithDiscount > 0 && fairShare >= item.priceWithDiscount) {
-                    const quantityFromShare = Math.floor(fairShare / item.priceWithDiscount);
-                    const qtyInput = document.getElementById(`qtd-${item.key}`);
-                    if (qtyInput) qtyInput.value = quantityFromShare;
-                    remainingMush -= quantityFromShare * item.priceWithDiscount;
-                }
-            });
-
-            const sortedForLeftover = itemsToConsider.sort((a, b) => b.priceWithDiscount - a.priceWithDiscount);
-            for (const item of sortedForLeftover) {
-                if (remainingMush < item.priceWithDiscount) continue;
-                const additionalQuantity = Math.floor(remainingMush / item.priceWithDiscount);
-                const qtyInput = document.getElementById(`qtd-${item.key}`);
-                if (qtyInput) qtyInput.value = parseInt(qtyInput.value || 0) + additionalQuantity;
-                remainingMush -= additionalQuantity * item.priceWithDiscount;
-            }
-
-            const allTokenKeys = Object.keys(ITENS_CATALOGO);
-            const unselectedTokenKeys = allTokenKeys.filter(key => !selectedTokenKeys.includes(key));
-
-            if (remainingMush > 1 && unselectedTokenKeys.length > 0) {
-                const unselectedNames = unselectedTokenKeys.map(key => ITENS_CATALOGO[key][`name_${currentLang}`]).join(', ');
-                const confirmMessage = `${t.leftoverConfirm1} ${remainingMush.toFixed(2)} mush. ${t.leftoverConfirm2} ${unselectedNames}?`;
-                
-                if (window.confirm(confirmMessage)) {
-                    const leftoverItems = unselectedTokenKeys
-                        .map(key => ({ key, ...ITENS_CATALOGO[key], priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100)) }))
-                        .sort((a, b) => b.priceWithDiscount - a.priceWithDiscount);
-                    
-                    for (const item of leftoverItems) {
-                        if (remainingMush < item.priceWithDiscount) continue;
-                        const leftoverQuantity = Math.floor(remainingMush / item.priceWithDiscount);
-                        const qtyInput = document.getElementById(`qtd-${item.key}`);
-                        if (qtyInput) qtyInput.value = parseInt(qtyInput.value || 0) + leftoverQuantity;
-                        remainingMush -= leftoverQuantity * item.priceWithDiscount;
-                    }
-                }
-            }
-
-            dom.leftoverMushDiv.innerHTML = `${t.leftoverMushText} <span>${remainingMush.toFixed(2)}</span>`;
-            dom.leftoverMushDiv.querySelector('span').appendChild(this.createCoinIcon());
-            this.updateUI();
-        },
+      
       calculateValues() {
           const descontoPercentual = parseFloat(dom.descontoInput.value) || 0;
-          const resultados = {
-            itens: {}, totalBruto: 0, totalFinal: 0, valorDescontoTotal: 0, descontoPercentual
-          };
+          const fatorDesconto = 1 - (descontoPercentual / 100);
+          let totalFinal = 0;
+          const itensCalculados = {};
+
           for (const key in ITENS_CATALOGO) {
-            const item = ITENS_CATALOGO[key];
-            const qtdInput = document.getElementById(`qtd-${key}`);
-            const quantidade = qtdInput ? parseInt(qtdInput.value) || 0 : 0;
-            const precoOriginal = item.preco;
-            const precoComDesconto = precoOriginal * (1 - (descontoPercentual / 100));
-            const subtotal = quantidade * precoComDesconto;
-            resultados.itens[key] = {
-              nome: item[`name_${currentLang}`], quantidade, precoOriginal, precoComDesconto, subtotal
-            };
-            resultados.totalBruto += quantidade * precoOriginal;
-            resultados.totalFinal += subtotal;
+              const item = ITENS_CATALOGO[key];
+              const quantidade = parseInt(document.getElementById(`qtd-${key}`)?.value || 0);
+              const subtotal = quantidade * (item.preco * fatorDesconto);
+              totalFinal += subtotal;
+              itensCalculados[key] = {
+                  quantidade,
+                  precoOriginal: item.preco,
+                  precoComDesconto: item.preco * fatorDesconto,
+                  subtotal
+              };
           }
-          resultados.valorDescontoTotal = resultados.totalBruto - resultados.totalFinal;
-          return resultados;
+          return { totalFinal, descontoPercentual, itens: itensCalculados };
       },
+
+      distributeMush() {
+          this.reset(false);
+          const totalMush = parseFloat(dom.totalMushInput.value) || 0;
+          if (totalMush <= 0) { this.updateUI(); return; }
+
+          const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+          if (selectedTokenKeys.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
+          
+          let tokens = selectedTokenKeys.map(key => ({ key, preco: ITENS_CATALOGO[key].preco, quantidade: 0 }));
+          
+          if (tokens.length === 2 && document.querySelector('input[name="two-token-strategy"]:checked').value === 'split') {
+              const mushPerToken = totalMush / 2;
+              tokens.forEach(token => token.quantidade = Math.floor(mushPerToken / token.preco));
+          } else {
+              this.runFairDistribution(tokens, totalMush);
+          }
+          this.updateDistributionUI(tokens);
+      },
+
+      distributeLeftoverMush() {
+          const selectedTokenKeys = Array.from(dom.leftoverTokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+           if (selectedTokenKeys.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
+
+          let tokens = selectedTokenKeys.map(key => ({
+              key,
+              preco: ITENS_CATALOGO[key].preco,
+              quantidade: parseInt(document.getElementById(`qtd-${key}`).value) || 0 // Pega a quantidade atual
+          }));
+          
+          this.runFairDistribution(tokens, this.currentLeftover);
+          this.updateDistributionUI(tokens);
+      },
+      
+      runFairDistribution(tokens, totalMush) {
+          tokens.sort(() => Math.random() - 0.5);
+          let mushRestante = totalMush;
+          let possivelComprar = true;
+          while (possivelComprar) {
+              let comprouNestaRodada = false;
+              for (const token of tokens) {
+                  if (mushRestante >= token.preco) {
+                      token.quantidade++;
+                      mushRestante -= token.preco;
+                      comprouNestaRodada = true;
+                  }
+              }
+              if (!comprouNestaRodada) possivelComprar = false;
+          }
+      },
+
+      updateDistributionUI(tokens) {
+          let mushGasto = 0;
+          tokens.forEach(token => {
+              document.getElementById(`qtd-${token.key}`).value = token.quantidade;
+              mushGasto += token.quantidade * ITENS_CATALOGO[token.key].preco;
+          });
+          
+          const mushTotal = parseFloat(dom.totalMushInput.value) || 0;
+          this.currentLeftover = mushTotal - mushGasto;
+          
+          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.currentLeftover.toFixed(2)}</b> `;
+          dom.leftoverMushDiv.appendChild(this.createCoinIcon());
+
+          const cheapestPrice = Math.min(...Object.values(ITENS_CATALOGO).map(t => t.preco));
+          if (this.currentLeftover >= cheapestPrice) {
+              dom.leftoverDistributorSection.classList.remove('hidden');
+              this.buildTokenFilters(dom.leftoverTokenFiltersContainer);
+          } else {
+              dom.leftoverDistributorSection.classList.add('hidden');
+          }
+
+          this.updateUI();
+      },
+
       createCoinIcon() {
           const img = document.createElement('img');
           img.src = MOEDA_BASE64;
-          img.className = 'moeda-img';
+          img.style.cssText = 'width: 16px; height: 16px; vertical-align: middle; margin-left: 4px;';
           img.alt = 'mush';
           return img;
       },
+
       loadTable() {
-          const currentValues = {};
-          document.querySelectorAll('#tabela-itens input[type="number"]').forEach(input => {
-              currentValues[input.id] = input.value;
-          });
           dom.tabelaItensBody.innerHTML = '';
           for (const key in ITENS_CATALOGO) {
             const item = ITENS_CATALOGO[key];
             const tr = document.createElement('tr');
-            const savedQty = currentValues[`qtd-${key}`] || 0;
-            tr.innerHTML = `<td>${item[`name_${currentLang}`]}</td><td>${item.preco.toFixed(2)}</td><td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td><td style="text-align: center;">0.00</td>`;
+            tr.innerHTML = `<td>${item[`name_${currentLang}`]}</td><td>${item.preco.toFixed(2)}</td><td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="0" min="0"></div></td><td style="text-align: center;">0.00</td>`;
             tr.querySelector(`td:nth-child(2)`).appendChild(this.createCoinIcon());
             tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
             dom.tabelaItensBody.appendChild(tr);
             tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
           }
+          this.updateUI();
       },
+
       updateUI() {
           const calculo = this.calculateValues();
-          const rows = dom.tabelaItensBody.getElementsByTagName('tr');
-          Array.from(rows).forEach((row, index) => {
+          if (!calculo) return;
+          Array.from(dom.tabelaItensBody.rows).forEach((row, index) => {
             const key = Object.keys(ITENS_CATALOGO)[index];
-            if (!calculo.itens[key]) return;
             const itemCalculado = calculo.itens[key];
-            const precoCell = row.querySelector(`td:nth-child(2)`);
-            const totalCell = row.querySelector(`td:nth-child(4)`);
-            if (calculo.descontoPercentual > 0) {
-              precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)} ➝ ${itemCalculado.precoComDesconto.toFixed(2)}`;
-            } else {
-              precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)}`;
-            }
-            precoCell.appendChild(this.createCoinIcon());
-            totalCell.innerHTML = `${itemCalculado.subtotal.toFixed(2)}`;
-            totalCell.appendChild(this.createCoinIcon());
+            row.cells[1].innerHTML = `${itemCalculado.precoOriginal.toFixed(2)} ${calculo.descontoPercentual > 0 ? `➝ ${itemCalculado.precoComDesconto.toFixed(2)}` : ''} `;
+            row.cells[1].appendChild(this.createCoinIcon());
+            row.cells[3].innerHTML = `${itemCalculado.subtotal.toFixed(2)} `;
+            row.cells[3].appendChild(this.createCoinIcon());
           });
-          dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b>`;
+          dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b> `;
           dom.totalGeralCell.appendChild(this.createCoinIcon());
       },
+
       reset(clearDistributor = true) {
           dom.nomeClienteInput.value = '';
           dom.descontoInput.value = '';
-          if(clearDistributor) {
+          if (clearDistributor) {
               dom.totalMushInput.value = '';
               dom.leftoverMushDiv.innerHTML = '';
+              dom.leftoverDistributorSection.classList.add('hidden');
           }
-          for (const key in ITENS_CATALOGO) {
-              const input = document.getElementById(`qtd-${key}`);
-              if (input) input.value = 0;
-          }
+          Object.keys(ITENS_CATALOGO).forEach(key => document.getElementById(`qtd-${key}`).value = 0);
           this.updateUI();
       },
+
       async generateImage() {
         const calculo = this.calculateValues();
-        const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
-        let temItens = false;
+        if(!calculo) return;
         const t = TRANSLATIONS[currentLang];
 
+        let temItens = Object.values(calculo.itens).some(item => item.quantidade > 0);
+        if (!temItens) {
+            alert(t.alertNoItems);
+            return;
+        }
+
+        const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
         const itemsToSave = {};
+        
+        // 1. Prepara os dados e salva no Firestore
         for(const key in calculo.itens) {
             if(calculo.itens[key].quantidade > 0) {
                 itemsToSave[key] = calculo.itens[key].quantidade;
-                temItens = true;
             }
         }
-        if(temItens) {
-            const receiptData = {
-                customerName: nome,
-                discountApplied: calculo.descontoPercentual,
-                grandTotal: calculo.totalFinal,
-                items: itemsToSave,
-                seller: auth.currentUser.displayName || auth.currentUser.email,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            try {
-                await db.collection("receipts").add(receiptData);
-                console.log("Recibo salvo no Firestore");
-            } catch(e) {
-                console.error("Erro ao salvar no Firestore: ", e);
-                alert("Houve um erro ao salvar o recibo no banco de dados.");
-            }
-        }
-          
-        const resultadoDiv = document.getElementById('resultado');
-        resultadoDiv.innerHTML = `<h3>${t.receiptHeader} - <span>${nome}</span></h3><div id="resumo-itens" style="display: flex; flex-direction: column; gap: 12px;"><h4 class="receipt-section-title">${t.receiptItemsHeader}</h4></div><div id="resumo-totais" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px;"></div><p class="agradecimento" style="text-align: center; margin-top: 32px; font-size: 14px; color: var(--text-secondary);">${t.receiptThanks}</p>`;
-        const resumoItensDiv = resultadoDiv.querySelector('#resumo-itens');
-        const resumoTotaisDiv = resultadoDiv.querySelector('#resumo-totais');
 
-        let hasItemsForReceipt = false;
+        const receiptData = {
+            customerName: nome,
+            discountApplied: calculo.descontoPercentual,
+            grandTotal: calculo.totalFinal,
+            items: itemsToSave,
+            seller: auth.currentUser.email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        try {
+            await db.collection("receipts").add(receiptData);
+            console.log("Recibo salvo no Firestore com sucesso!");
+        } catch(e) {
+            console.error("Erro ao salvar no Firestore: ", e);
+            alert("Houve um erro ao salvar o recibo no banco de dados.");
+        }
+
+        // 2. Gera o HTML visual para o recibo
+        let receiptHtml = `
+            <h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">${nome}</p>
+            <h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3>
+            <table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>`;
+        
         for(const key in calculo.itens) {
-          const item = calculo.itens[key];
-          if (item.quantidade > 0) {
-            hasItemsForReceipt = true;
-            const itemLine = document.createElement('div');
-            itemLine.className = 'receipt-line';
-            const precoComMoeda = document.createElement('span');
-            precoComMoeda.className = 'receipt-value';
-            precoComMoeda.textContent = item.subtotal.toFixed(2);
-            precoComMoeda.appendChild(this.createCoinIcon());
-            itemLine.innerHTML = `<span class="receipt-label">${item.nome} (x${item.quantidade})</span>`;
-            itemLine.appendChild(precoComMoeda);
-            resumoItensDiv.appendChild(itemLine);
-          }
+            const item = calculo.itens[key];
+            if(item.quantidade > 0) {
+                receiptHtml += `<tr>
+                    <td style="padding: 5px 0;">${ITENS_CATALOGO[key][`name_${currentLang}`]} x ${item.quantidade}</td>
+                    <td style="padding: 5px 0; text-align: right;">${item.subtotal.toFixed(2)}</td>
+                </tr>`;
+            }
         }
-        if (!hasItemsForReceipt) { alert(t.alertNoItems); return; }
-        if (calculo.descontoPercentual > 0) {
-            resumoTotaisDiv.innerHTML += `<div class="receipt-line"><span class="receipt-label">${t.receiptSubtotal}</span><span class="receipt-value">${calculo.totalBruto.toFixed(2)}</span></div><div class="receipt-line"><span class="receipt-label">${t.receiptDiscount} (${calculo.descontoPercentual.toFixed(2)}%)</span><span class="receipt-value">- ${calculo.valorDescontoTotal.toFixed(2)}</span></div>`;
-        }
-        resumoTotaisDiv.innerHTML += `<div class="receipt-line final-total"><span class="receipt-label">${t.receiptFinalTotal}</span><span class="receipt-value">${calculo.totalFinal.toFixed(2)}</span></div>`;
-        resumoTotaisDiv.querySelectorAll('.receipt-value').forEach(el => el.appendChild(this.createCoinIcon()));
+        
+        const subtotalBruto = calculo.totalFinal / (1 - calculo.descontoPercentual / 100);
+        const valorDesconto = subtotalBruto - calculo.totalFinal;
+
+        receiptHtml += `</tbody></table>
+            <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.9em;">
+                <p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${subtotalBruto.toFixed(2)}</span></p>
+                <p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${calculo.descontoPercentual}%):</span> <span>-${valorDesconto.toFixed(2)}</span></p>
+                <p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${calculo.totalFinal.toFixed(2)}</span></p>
+            </div>
+            <p style="text-align: center; margin-top: 20px; font-size: 0.9em;">${t.receiptThanks}</p>`;
+
+        // 3. Renderiza o HTML, captura com html2canvas e inicia o download
+        const resultadoDiv = document.getElementById('resultado');
+        resultadoDiv.innerHTML = receiptHtml;
         resultadoDiv.style.display = 'block';
+        resultadoDiv.style.position = 'fixed';
+        resultadoDiv.style.top = '50%';
+        resultadoDiv.style.left = '50%';
+        resultadoDiv.style.transform = 'translate(-50%, -50%)';
+        resultadoDiv.style.zIndex = '1000'; // Garante que esteja visível para captura
+
+        // Pequeno atraso para garantir que o DOM foi atualizado com o HTML do recibo
         setTimeout(() => {
-            html2canvas(resultadoDiv, { backgroundColor: null, scale: 2 }).then(canvas => {
+            html2canvas(resultadoDiv, { 
+                backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'),
+                scale: 2 // Aumenta a resolução da imagem
+            }).then(canvas => {
               const link = document.createElement('a');
               const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
               link.download = `${nomeSanitizado}_recibo.png`;
               link.href = canvas.toDataURL('image/png');
               link.click();
+              
+              // Limpa o div de resultado
               resultadoDiv.style.display = 'none';
+              resultadoDiv.style.top = '-100%';
+              resultadoDiv.style.zIndex = '-1';
             });
         }, 300);
       }
     };
     
     app.init();
-  });
 </script>
 </body>
 </html>
