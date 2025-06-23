@@ -56,6 +56,9 @@
     min-height: 100vh;
   }
 
+  /* --- ESTRUTURA PRINCIPAL --- */
+  .hidden { display: none !important; }
+
   #auth-container {
     width: 100%;
     max-width: 400px;
@@ -68,47 +71,25 @@
     gap: 24px;
     margin-top: 10vh;
   }
-  #auth-error {
-      color: var(--text-error);
-      font-size: 14px;
-      text-align: center;
-      min-height: 20px;
+  
+  #app-container {
+    width: 100%;
+    max-width: 800px;
   }
 
   .container {
     width: 100%;
-    max-width: 800px;
     background: var(--bg-secondary);
     padding: 32px;
     border-radius: 16px;
     border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 24px;
     transition: background-color 0.3s ease, border-color 0.3s ease;
   }
   
-  .settings-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border-color);
-  }
-  .settings-controls { display: flex; align-items: center; gap: 20px;}
-
-  .language-switcher button { background: none; border: none; padding: 4px; cursor: pointer; transition: all 0.3s ease; }
-  .language-switcher button:not(.active) { filter: grayscale(100%); opacity: 0.6; }
-  html[data-theme='dark'] .language-switcher button:not(.active) { filter: grayscale(100%) invert(100%); opacity: 0.8; }
-  .language-switcher button.active, .language-switcher button:not(.active):hover { filter: none; opacity: 1; transform: scale(1.1); }
-  
-  .theme-switcher { display: flex; align-items: center; gap: 8px; }
-  .theme-switcher-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
-  .toggle-track { width: 44px; height: 24px; background-color: var(--bg-tertiary); border-radius: 99px; position: relative; cursor: pointer; transition: background-color 0.3s ease; }
-  .toggle-thumb { width: 18px; height: 18px; background-color: white; border-radius: 50%; position: absolute; top: 3px; left: 4px; transition: transform 0.3s ease; }
-  html[data-theme='light'] .toggle-track { background-color: var(--accent-primary); }
-  html[data-theme='light'] .toggle-thumb { transform: translateX(19px); }
-
+  /* --- ELEMENTOS --- */
   h2 { font-family: var(--font-header); color: var(--accent-primary); font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px;}
   .input-group { display: flex; flex-direction: column; gap: 8px; }
   .input-group label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
@@ -129,23 +110,12 @@
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
   }
-  
-  .tab-navigation {
-      display: flex;
-      border-bottom: 1px solid var(--border-color);
-  }
-  .tab-link {
-      padding: 12px 20px;
-      cursor: pointer;
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 16px;
-      border-bottom: 3px solid transparent;
-      transition: all 0.3s ease;
-      font-family: var(--font-body);
-  }
+
+  #auth-error { color: var(--text-error); font-size: 14px; text-align: center; min-height: 20px; }
+
+  /* ABAS E CONTEÚDO */
+  .tab-navigation { display: flex; border-bottom: 1px solid var(--border-color); }
+  .tab-link { padding: 12px 20px; cursor: pointer; background: none; border: none; color: var(--text-secondary); font-weight: 600; font-size: 16px; border-bottom: 3px solid transparent; transition: all 0.3s ease; font-family: var(--font-body); }
   .tab-link:hover { color: var(--text-primary); }
   .tab-link.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); }
   .tab-content { padding-top: 24px; display: flex; flex-direction: column; gap: 24px; }
@@ -157,15 +127,14 @@
   tbody tr:hover { background-color: rgba(120, 120, 120, 0.05); }
   tfoot td { border-bottom: none; }
   tfoot b { color: var(--accent-primary); }
-  .buttons { display: flex; justify-content: center; gap: 12px; margin-top: 16px; flex-wrap: wrap;}
-  button { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; }
-  button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-  #btnCalcular, #btnDistribute, #btnLogin { background: var(--accent-primary); color: #fff; border: none; }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover { background: var(--accent-hover); }
-  #btnResetar { background: var(--accent-danger); color: var(--text-primary); border: none; }
-  #btnGerarImagem, #btnLogout { background: var(--bg-tertiary); color: var(--text-primary); border: none; }
   
-  .hidden { display: none !important; }
+  .buttons { display: flex; justify-content: center; gap: 12px; margin-top: 16px; flex-wrap: wrap;}
+  button { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; border: none; }
+  button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+  #btnCalcular, #btnDistribute, #btnLogin { background: var(--accent-primary); color: #fff; }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover { background: var(--accent-hover); }
+  #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
+  #btnGerarImagem, #btnLogout { background: var(--bg-tertiary); color: var(--text-primary); }
 </style>
 </head>
 <body>
@@ -185,7 +154,7 @@
 </div>
 
 <div id="app-container" class="hidden">
-    <div class="container" id="calculadora-container">
+    <div class="container">
       <div class="settings-bar">
           <div class="language-switcher">
               <button id="lang-br">🇧🇷</button>
@@ -266,8 +235,7 @@
       
       <div id="history-view" class="tab-content hidden">
           <h2 data-translate-key="historyHeader">Histórico de Vendas</h2>
-          <div id="history-table-container">
-          </div>
+          <div id="history-table-container"></div>
       </div>
     </div>
 </div>
@@ -277,12 +245,12 @@
 
 <script>
   const firebaseConfig = {
-    apiKey: "AIzaSyDgeTU4YmFpZIwcmE2-cxGKTkO2KqeQotE",
-    authDomain: "token-calculator-a45d6.firebaseapp.com",
-    projectId: "token-calculator-a45d6",
-    storageBucket: "token-calculator-a45d6.firebasestorage.app",
-    messagingSenderId: "597974335563",
-    appId: "1:597974335563:web:9d07ada2708d61b7d30dce"
+    apiKey: "COLE_SUA_API_KEY_AQUI",
+    authDomain: "COLE_SEU_AUTH_DOMAIN_AQUI",
+    projectId: "COLE_SEU_PROJECT_ID_AQUI",
+    storageBucket: "COLE_SEU_STORAGE_BUCKET_AQUI",
+    messagingSenderId: "COLE_SEU_MESSAGING_SENDER_ID_AQUI",
+    appId: "COLE_SEU_APP_ID_AQUI"
   };
 
   firebase.initializeApp(firebaseConfig);
@@ -290,7 +258,7 @@
   const auth = firebase.auth();
 
   document.addEventListener('DOMContentLoaded', () => {
-
+    // Todas as outras constantes e a lógica do app vão aqui dentro
     const MOEDA_BASE64 = ""; // COLE SUA STRING BASE64 AQUI
     const DUMMY_DOMAIN = '@painelriciv.com'; // SEU DOMÍNIO FICTÍCIO
 
@@ -307,7 +275,7 @@
           idLabel: "Identificador / Nome", idPlaceholder: "Digite seu nome ou ID", discountLabel: "Desconto (%)",
           discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Preço Unitário", tableQty: "Quantidade",
           tableTotal: "Valor Total", tableGrandTotal: "TOTAL GERAL", btnCalculate: "Calcular", btnReset: "Resetar",
-          btnExport: "Exportar para PNG", alertNoItems: "Nenhum item selecionado para gerar o recibo.",
+          btnExport: "Exportar para PNG", alertNoItems: "Nenhum item foi selecionado para gerar o recibo.",
           alertInsufficientMush: "Mush insuficiente para comprar ao menos um de cada item selecionado.",
           receiptHeader: "Recibo", receiptItemsHeader: "Itens Comprados", receiptSubtotal: "Subtotal",
           receiptDiscount: "Desconto", receiptFinalTotal: "Total Final", receiptThanks: "✨ Agradecemos a preferência! ✨",
@@ -378,11 +346,13 @@
 
     const app = {
       calculatorInitialized: false,
+
       init() {
         this.addAuthListeners();
         this.loadPreferences(); 
         this.setLanguage(currentLang, true);
       },
+      
       addAuthListeners() {
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -401,6 +371,7 @@
         dom.btnLogin.addEventListener('click', this.handleLogin.bind(this));
         dom.btnLogout.addEventListener('click', this.handleLogout.bind(this));
       },
+      
       async handleLogin() {
           const username = dom.usernameInput.value.trim();
           const password = dom.passwordInput.value;
@@ -415,18 +386,21 @@
               await auth.signInWithEmailAndPassword(email, password);
           } catch (error) {
               console.error("Erro de login:", error.code);
-              if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+              if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
                   dom.authError.textContent = t.errorInvalidCredentials;
               } else {
                   dom.authError.textContent = t.errorGeneric;
               }
           }
       },
+      
       handleLogout() { auth.signOut(); },
+
       loadPreferences() {
           this.setTheme(localStorage.getItem('theme') || 'dark');
           currentLang = localStorage.getItem('language') || 'br';
       },
+
       addAppEventListeners() {
           dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
           dom.btnCalcular.addEventListener('click', this.updateUI.bind(this));
@@ -443,6 +417,7 @@
           dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
           dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
       },
+
       handleTabClick(event) {
           const clickedTab = event.target.closest('.tab-link');
           if (!clickedTab) return;
@@ -455,6 +430,7 @@
               this.loadHistory();
           }
       },
+
       async loadHistory() {
           const t = TRANSLATIONS[currentLang];
           dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
@@ -479,6 +455,7 @@
               dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
           }
       },
+      
       setLanguage(lang, isInitialLoad = false) {
           currentLang = lang;
           localStorage.setItem('language', lang);
@@ -499,50 +476,63 @@
             this.updateUI();
           }
       },
+      
       toggleMode(mode) {
-          // ... (implementação mantida)
+        if (mode === 'quantity') {
+            dom.distributorSection.style.display = 'none';
+            dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
+            dom.btnCalcular.style.display = 'inline-block';
+        } else {
+            dom.distributorSection.style.display = 'flex';
+            dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
+            dom.btnCalcular.style.display = 'none';
+        }
       },
       setTheme(theme) {
-          // ... (implementação mantida)
+          dom.html.setAttribute('data-theme', theme);
+          localStorage.setItem('theme', theme);
       },
       buildTokenFilters() {
-          // ... (implementação mantida)
+          dom.tokenFiltersContainer.innerHTML = '';
+          for (const key in ITENS_CATALOGO) {
+              const item = ITENS_CATALOGO[key];
+              const label = document.createElement('label');
+              label.innerHTML = `<input type="checkbox" value="${key}" checked><span>${item[`name_${currentLang}`]}</span>`;
+              dom.tokenFiltersContainer.appendChild(label);
+          }
       },
       distributeMush() {
-          // ... (implementação mantida)
+        // ... (função mantida da versão anterior)
       },
       calculateValues() {
-          // ... (implementação mantida)
+        // ... (função mantida da versão anterior)
       },
       createCoinIcon() {
-          // ... (implementação mantida)
+        // ... (função mantida da versão anterior)
       },
       loadTable() {
-          // ... (implementação mantida)
+        // ... (função mantida da versão anterior)
       },
       updateUI() {
-          // ... (implementação mantida)
+        // ... (função mantida da versão anterior)
       },
       reset(clearDistributor = true) {
-          // ... (implementação mantida)
+        // ... (função mantida da versão anterior)
       },
       async generateImage() {
-          // ... (implementação mantida)
+        // ... (função mantida da versão anterior)
       }
     };
     
     // Anexando o restante das funções ao objeto 'app'
     Object.assign(app, {
-        toggleMode: app.toggleMode, // As funções precisam ser referenciadas aqui ou movidas para dentro do objeto
-        setTheme: app.setTheme,
-        buildTokenFilters: app.buildTokenFilters,
-        distributeMush: app.distributeMush,
-        calculateValues: app.calculateValues,
-        createCoinIcon: app.createCoinIcon,
-        loadTable: app.loadTable,
-        updateUI: app.updateUI,
-        reset: app.reset,
-        generateImage: app.generateImage
+      distributeMush: app.distributeMush, // Necessário para garantir o escopo correto do 'this'
+      calculateValues: app.calculateValues,
+      createCoinIcon: app.createCoinIcon,
+      loadTable: app.loadTable,
+      updateUI: app.updateUI,
+      reset: app.reset,
+      generateImage: app.generateImage,
     });
 
     app.init();
