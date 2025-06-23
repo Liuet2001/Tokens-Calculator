@@ -51,12 +51,11 @@
     padding: 40px 20px;
     transition: background-color 0.3s ease, color 0.3s ease;
     display: flex;
-    align-items: flex-start; /* Alinha no topo para quando a calculadora estiver visível */
+    align-items: flex-start;
     justify-content: center;
     min-height: 100vh;
   }
 
-  /* ESTILOS PARA O CONTAINER DE LOGIN */
   #auth-container {
     width: 100%;
     max-width: 400px;
@@ -67,7 +66,7 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
-    margin-top: 10vh; /* Centraliza um pouco na vertical */
+    margin-top: 10vh;
   }
   #auth-error {
       color: var(--text-error);
@@ -79,7 +78,7 @@
   .container {
     width: 100%;
     max-width: 800px;
-    margin: auto;
+    /* Removido o margin: auto para não conflitar com a visibilidade do #app-container */
     background: var(--bg-secondary);
     padding: 32px;
     border-radius: 16px;
@@ -137,7 +136,6 @@
     box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
   }
   
-  /* --- ESTILOS PARA O SISTEMA DE ABAS --- */
   .tab-navigation {
       display: flex;
       border-bottom: 1px solid var(--border-color);
@@ -164,7 +162,22 @@
       padding-top: 24px;
   }
 
-  /* ... O resto dos estilos ... */
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); transition: background-color 0.3s ease; }
+  td:nth-child(3), td:nth-child(4), th:nth-child(3), th:nth-child(4) { text-align: center; }
+  th { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+  tbody tr:hover { background-color: rgba(120, 120, 120, 0.05); }
+  tfoot td { border-bottom: none; }
+  tfoot b { color: var(--accent-primary); }
+  .buttons { display: flex; justify-content: center; gap: 12px; margin-top: 16px; flex-wrap: wrap;}
+  button { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; }
+  button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+  #btnCalcular, #btnDistribute, #btnLogin { background: var(--accent-primary); color: #fff; }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover { background: var(--accent-hover); }
+  #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
+  #btnGerarImagem, #btnLogout { background: var(--bg-tertiary); color: var(--text-primary); }
+  
+  #resultado { display: none; position: absolute; left: -9999px; top: 0; width: 600px; background-color: var(--bg-secondary); color: var(--text-primary); padding: 32px; border-radius: 16px; border: 1px solid var(--border-color); }
   
   .hidden { display: none !important; }
 
@@ -185,7 +198,6 @@
     <p id="auth-error"></p>
     <button id="btnLogin" data-translate-key="loginButton">Entrar</button>
 </div>
-
 
 <div id="app-container" class="hidden">
     <div class="container" id="calculadora-container">
@@ -212,7 +224,6 @@
 
       <div id="calculator-view" class="tab-content">
           <h2 data-translate-key="mainHeader">Calculadora de Tokens</h2>
-          
           <div class="input-group">
             <label for="nomeCliente" data-translate-key="idLabel">Identificador / Nome</label>
             <input type="text" id="nomeCliente" data-translate-key-placeholder="idPlaceholder">
@@ -271,7 +282,7 @@
       <div id="history-view" class="tab-content hidden">
           <h2 data-translate-key="historyHeader">Histórico de Vendas</h2>
           <div id="history-table-container">
-              </div>
+          </div>
       </div>
 
     </div>
@@ -291,7 +302,7 @@
     projectId: "token-calculator-a45d6",
     storageBucket: "token-calculator-a45d6.firebasestorage.app",
     messagingSenderId: "597974335563",
-    appId: "1:597974335563:web:9d07ada2708d61b7d30dce""
+    appId: "1:597974335563:web:9d07ada2708d61b7d30dce"
   };
 
   firebase.initializeApp(firebaseConfig);
@@ -301,6 +312,8 @@
   document.addEventListener('DOMContentLoaded', () => {
 
     const MOEDA_BASE64 = ""; // COLE SUA STRING BASE64 AQUI
+    const DUMMY_DOMAIN = '@painelriciv.com'; // SEU DOMÍNIO FICTÍCIO
+
     const ITENS_CATALOGO = {
       revive: { preco: 790, name_br: 'Revive Token', name_en: 'Revive Token' },
       max: { preco: 570, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
@@ -327,7 +340,7 @@
           errorGeneric: "Ocorreu um erro. Tente novamente.",
           tabCalculator: "Calculadora", tabHistory: "Histórico", historyHeader: "Histórico de Vendas",
           historyCustomer: "Cliente", historyDate: "Data", historyTotal: "Total", historySeller: "Vendedor",
-          historyNoRecords: "Nenhum registro encontrado."
+          historyNoRecords: "Nenhum registro encontrado.", historyLoading: "Carregando histórico..."
       },
       en: {
           pageTitle: "Token Calculator", mainHeader: "Token Calculator", themeLabel: "Light Theme",
@@ -347,12 +360,11 @@
           errorGeneric: "An error occurred. Please try again.",
           tabCalculator: "Calculator", tabHistory: "History", historyHeader: "Sales History",
           historyCustomer: "Customer", historyDate: "Date", historyTotal: "Total", historySeller: "Seller",
-          historyNoRecords: "No records found."
+          historyNoRecords: "No records found.", historyLoading: "Loading history..."
       }
     };
     
     const dom = {
-      // ... (todos os seletores DOM existentes)
       authContainer: document.getElementById('auth-container'),
       appContainer: document.getElementById('app-container'),
       usernameInput: document.getElementById('username-input'),
@@ -366,12 +378,6 @@
       tabelaItensBody: document.getElementById('tabela-itens'),
       totalGeralCell: document.getElementById('totalGeral'),
       resultadoDiv: document.getElementById('resultado'),
-      resNomeSpan: document.getElementById('resNome'),
-      resumoItensDiv: document.getElementById('resumo-itens'),
-      resumoTotaisDiv: document.getElementById('resumo-totais'),
-      btnCalcular: document.getElementById('btnCalcular'),
-      btnResetar: document.getElementById('btnResetar'),
-      btnGerarImagem: document.getElementById('btnGerarImagem'),
       themeToggle: document.getElementById('theme-toggle'),
       langBr: document.getElementById('lang-br'),
       langEn: document.getElementById('lang-en'),
@@ -382,7 +388,6 @@
       totalMushInput: document.getElementById('total-mush'),
       btnDistribute: document.getElementById('btnDistribute'),
       leftoverMushDiv: document.getElementById('leftover-mush'),
-      // Novos seletores para abas
       tabNavigation: document.querySelector('.tab-navigation'),
       tabLinks: document.querySelectorAll('.tab-link'),
       tabContents: document.querySelectorAll('.tab-content'),
@@ -392,13 +397,14 @@
     let currentLang = 'br';
 
     const app = {
-      // ... (todas as funções existentes de init a reset) ...
-      
+      calculatorInitialized: false,
+
       init() {
         this.addAuthListeners();
         this.loadPreferences(); 
-        this.setLanguage(currentLang); 
+        this.setLanguage(currentLang, true);
       },
+      
       addAuthListeners() {
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -406,6 +412,7 @@
                 dom.appContainer.classList.remove('hidden');
                 if (!this.calculatorInitialized) {
                     this.addAppEventListeners();
+                    this.setLanguage(currentLang);
                     this.calculatorInitialized = true;
                 }
             } else {
@@ -416,6 +423,7 @@
         dom.btnLogin.addEventListener('click', this.handleLogin.bind(this));
         dom.btnLogout.addEventListener('click', this.handleLogout.bind(this));
       },
+      
       async handleLogin() {
           const username = dom.usernameInput.value.trim();
           const password = dom.passwordInput.value;
@@ -424,7 +432,7 @@
               dom.authError.textContent = t.errorInvalidCredentials;
               return;
           }
-          const email = `${username}@painelriciv.com`;
+          const email = username + DUMMY_DOMAIN;
           try {
               dom.authError.textContent = '';
               await auth.signInWithEmailAndPassword(email, password);
@@ -437,11 +445,14 @@
               }
           }
       },
+      
       handleLogout() { auth.signOut(); },
+
       loadPreferences() {
           this.setTheme(localStorage.getItem('theme') || 'dark');
           currentLang = localStorage.getItem('language') || 'br';
       },
+
       addAppEventListeners() {
           dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
           dom.btnCalcular.addEventListener('click', this.updateUI.bind(this));
@@ -456,22 +467,17 @@
           dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
           dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
           dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
-          // Event listener para as abas
           dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
       },
-      
+
       handleTabClick(event) {
           const clickedTab = event.target.closest('.tab-link');
           if (!clickedTab) return;
-
           const tabId = clickedTab.dataset.tab;
-
           dom.tabLinks.forEach(link => link.classList.remove('active'));
           dom.tabContents.forEach(content => content.classList.add('hidden'));
-
           clickedTab.classList.add('active');
           document.getElementById(tabId).classList.remove('hidden');
-
           if (tabId === 'history-view') {
               this.loadHistory();
           }
@@ -479,57 +485,285 @@
 
       async loadHistory() {
           const t = TRANSLATIONS[currentLang];
-          dom.historyTableContainer.innerHTML = `<p>${t.historyLoading || 'Carregando histórico...'}</p>`;
-
+          dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
           try {
               const querySnapshot = await db.collection("receipts").orderBy("createdAt", "desc").get();
               if (querySnapshot.empty) {
                   dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
                   return;
               }
-
-              let tableHTML = `
-                  <table>
-                      <thead>
-                          <tr>
-                              <th>${t.historyCustomer}</th>
-                              <th>${t.historySeller}</th>
-                              <th>${t.historyTotal}</th>
-                              <th>${t.historyDate}</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-              `;
-
+              let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th><th>${t.historySeller}</th><th>${t.historyTotal}</th><th>${t.historyDate}</th></tr></thead><tbody>`;
               querySnapshot.forEach(doc => {
                   const data = doc.data();
                   const date = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A';
-                  tableHTML += `
-                      <tr>
-                          <td>${data.customerName || 'N/A'}</td>
-                          <td>${data.seller || 'N/A'}</td>
-                          <td>${data.grandTotal?.toFixed(2) || '0.00'}</td>
-                          <td>${date}</td>
-                      </tr>
-                  `;
+                  const sellerEmail = data.seller || 'N/A';
+                  const sellerUsername = sellerEmail.split('@')[0];
+                  tableHTML += `<tr><td>${data.customerName || 'N/A'}</td><td>${sellerUsername}</td><td>${data.grandTotal?.toFixed(2) || '0.00'}</td><td>${date}</td></tr>`;
               });
-
               tableHTML += `</tbody></table>`;
               dom.historyTableContainer.innerHTML = tableHTML;
-
           } catch (error) {
               console.error("Erro ao buscar histórico: ", error);
               dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
           }
       },
-      // ... (O resto das funções, de toggleMode até generateImage, permanecem as mesmas da versão anterior)
-      // Vou omiti-las aqui para brevidade, mas elas estarão no código completo abaixo
-    };
+      
+      setLanguage(lang, isInitialLoad = false) {
+          currentLang = lang;
+          localStorage.setItem('language', lang);
+          document.querySelectorAll('[data-translate-key]').forEach(el => {
+              const key = el.dataset.translateKey;
+              if (TRANSLATIONS[lang][key]) el.innerText = TRANSLATIONS[lang][key];
+          });
+          document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
+              const key = el.dataset.translateKeyPlaceholder;
+              if (TRANSLATIONS[lang][key]) el.placeholder = TRANSLATIONS[lang][key];
+          });
+          document.title = TRANSLATIONS[lang].pageTitle;
+          dom.langBr.classList.toggle('active', lang === 'br');
+          dom.langEn.classList.toggle('active', lang === 'en');
+          if (!isInitialLoad) {
+            this.loadTable();
+            this.buildTokenFilters();
+            this.updateUI();
+          }
+      },
 
-    // Cole o resto das funções aqui (do `toggleMode` ao `generateImage`)
-    // Ou simplesmente use o bloco de script completo abaixo
+      // Resto das funções da aplicação (calculateValues, etc.)
+      // O código aqui é o mesmo da versão anterior, então foi omitido por brevidade.
+      // O bloco completo está no código final.
+      
+    };
     
-    // Inicia a aplicação
+    // Anexando o restante das funções ao objeto 'app'
+    const appMethods = {
+        toggleMode(mode) {
+          if (mode === 'quantity') {
+              dom.distributorSection.style.display = 'none';
+              dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = false);
+              dom.btnCalcular.style.display = 'inline-block';
+          } else {
+              dom.distributorSection.style.display = 'flex';
+              dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = true);
+              dom.btnCalcular.style.display = 'none';
+          }
+        },
+        setTheme(theme) {
+            dom.html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        },
+        buildTokenFilters() {
+            dom.tokenFiltersContainer.innerHTML = '';
+            for (const key in ITENS_CATALOGO) {
+                const item = ITENS_CATALOGO[key];
+                const label = document.createElement('label');
+                label.innerHTML = `<input type="checkbox" value="${key}" checked><span>${item[`name_${currentLang}`]}</span>`;
+                dom.tokenFiltersContainer.appendChild(label);
+            }
+        },
+        distributeMush() {
+          let totalMush = parseInt(dom.totalMushInput.value) || 0;
+          const discount = parseFloat(dom.descontoInput.value) || 0;
+          const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+          this.reset(false);
+          if (selectedTokenKeys.length === 0) return;
+          const itemsToConsider = selectedTokenKeys.map(key => ({ 
+              key, ...ITENS_CATALOGO[key], priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100))
+          }));
+          const t = TRANSLATIONS[currentLang];
+          let remainingMush = totalMush;
+          const fairShare = totalMush / itemsToConsider.length;
+          itemsToConsider.forEach(item => {
+              if (item.priceWithDiscount > 0 && fairShare >= item.priceWithDiscount) {
+                  const quantityFromShare = Math.floor(fairShare / item.priceWithDiscount);
+                  const qtyInput = document.getElementById(`qtd-${item.key}`);
+                  if (qtyInput) qtyInput.value = quantityFromShare;
+                  remainingMush -= quantityFromShare * item.priceWithDiscount;
+              }
+          });
+          const sortedForLeftover = itemsToConsider.sort((a, b) => b.priceWithDiscount - a.priceWithDiscount);
+          for (const item of sortedForLeftover) {
+              if (remainingMush < item.priceWithDiscount) continue;
+              const additionalQuantity = Math.floor(remainingMush / item.priceWithDiscount);
+              const qtyInput = document.getElementById(`qtd-${item.key}`);
+              if (qtyInput) qtyInput.value = parseInt(qtyInput.value || 0) + additionalQuantity;
+              remainingMush -= additionalQuantity * item.priceWithDiscount;
+          }
+          const allTokenKeys = Object.keys(ITENS_CATALOGO);
+          const unselectedTokenKeys = allTokenKeys.filter(key => !selectedTokenKeys.includes(key));
+          if (remainingMush > 1 && unselectedTokenKeys.length > 0) {
+              const unselectedNames = unselectedTokenKeys.map(key => ITENS_CATALOGO[key][`name_${currentLang}`]).join(', ');
+              const confirmMessage = `${t.leftoverConfirm1} ${remainingMush.toFixed(2)} mush. ${t.leftoverConfirm2} ${unselectedNames}?`;
+              if (window.confirm(confirmMessage)) {
+                  const leftoverItems = unselectedTokenKeys
+                      .map(key => ({ key, ...ITENS_CATALOGO[key], priceWithDiscount: ITENS_CATALOGO[key].preco * (1 - (discount / 100)) }))
+                      .sort((a, b) => b.priceWithDiscount - a.priceWithDiscount);
+                  for (const item of leftoverItems) {
+                      if (remainingMush < item.priceWithDiscount) continue;
+                      const leftoverQuantity = Math.floor(remainingMush / item.priceWithDiscount);
+                      const qtyInput = document.getElementById(`qtd-${item.key}`);
+                      if (qtyInput) qtyInput.value = parseInt(qtyInput.value || 0) + leftoverQuantity;
+                      remainingMush -= leftoverQuantity * item.priceWithDiscount;
+                  }
+              }
+          }
+          dom.leftoverMushDiv.innerHTML = `${t.leftoverMushText} <span>${remainingMush.toFixed(2)}</span>`;
+          dom.leftoverMushDiv.querySelector('span').appendChild(this.createCoinIcon());
+          this.updateUI();
+        },
+        calculateValues() {
+            const descontoPercentual = parseFloat(dom.descontoInput.value) || 0;
+            const resultados = {
+              itens: {}, totalBruto: 0, totalFinal: 0, valorDescontoTotal: 0, descontoPercentual: descontoPercentual
+            };
+            for (const key in ITENS_CATALOGO) {
+              const item = ITENS_CATALOGO[key];
+              const qtdInput = document.getElementById(`qtd-${key}`);
+              const quantidade = qtdInput ? parseInt(qtdInput.value) || 0 : 0;
+              const precoOriginal = item.preco;
+              const precoComDesconto = precoOriginal * (1 - (descontoPercentual / 100));
+              const subtotal = quantidade * precoComDesconto;
+              resultados.itens[key] = {
+                nome: item[`name_${currentLang}`], quantidade: quantidade, precoOriginal: precoOriginal, precoComDesconto: precoComDesconto, subtotal: subtotal
+              };
+              resultados.totalBruto += quantidade * precoOriginal;
+              resultados.totalFinal += subtotal;
+            }
+            resultados.valorDescontoTotal = resultados.totalBruto - resultados.totalFinal;
+            return resultados;
+        },
+        createCoinIcon() {
+            const img = document.createElement('img');
+            img.src = MOEDA_BASE64;
+            img.className = 'moeda-img';
+            img.alt = 'mush';
+            return img;
+        },
+        loadTable() {
+            const currentValues = {};
+            document.querySelectorAll('#tabela-itens input[type="number"]').forEach(input => {
+                currentValues[input.id] = input.value;
+            });
+            dom.tabelaItensBody.innerHTML = '';
+            for (const key in ITENS_CATALOGO) {
+              const item = ITENS_CATALOGO[key];
+              const tr = document.createElement('tr');
+              const savedQty = currentValues[`qtd-${key}`] || 0;
+              tr.innerHTML = `<td>${item[`name_${currentLang}`]}</td><td>${item.preco.toFixed(2)}</td><td style="text-align: center;"><div style="width: 80px; margin: 0 auto;"><input type="number" id="qtd-${key}" value="${savedQty}" min="0"></div></td><td style="text-align: center;">0.00</td>`;
+              tr.querySelector(`td:nth-child(2)`).appendChild(this.createCoinIcon());
+              tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
+              dom.tabelaItensBody.appendChild(tr);
+              tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
+            }
+        },
+        updateUI() {
+            const calculo = this.calculateValues();
+            const rows = dom.tabelaItensBody.getElementsByTagName('tr');
+            Array.from(rows).forEach((row, index) => {
+              const key = Object.keys(ITENS_CATALOGO)[index];
+              if (!calculo.itens[key]) return;
+              const itemCalculado = calculo.itens[key];
+              const precoCell = row.querySelector(`td:nth-child(2)`);
+              const totalCell = row.querySelector(`td:nth-child(4)`);
+              if (calculo.descontoPercentual > 0) {
+                precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)} ➝ ${itemCalculado.precoComDesconto.toFixed(2)}`;
+              } else {
+                precoCell.innerHTML = `${itemCalculado.precoOriginal.toFixed(2)}`;
+              }
+              precoCell.appendChild(this.createCoinIcon());
+              totalCell.innerHTML = `${itemCalculado.subtotal.toFixed(2)}`;
+              totalCell.appendChild(this.createCoinIcon());
+            });
+            dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b>`;
+            dom.totalGeralCell.appendChild(this.createCoinIcon());
+        },
+        reset(clearDistributor = true) {
+            dom.nomeClienteInput.value = '';
+            dom.descontoInput.value = '';
+            if(clearDistributor) {
+                dom.totalMushInput.value = '';
+                dom.leftoverMushDiv.innerHTML = '';
+            }
+            for (const key in ITENS_CATALOGO) {
+                const input = document.getElementById(`qtd-${key}`);
+                if (input) input.value = 0;
+            }
+            this.updateUI();
+        },
+        async generateImage() {
+          const calculo = this.calculateValues();
+          const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+          let temItens = false;
+          const t = TRANSLATIONS[currentLang];
+
+          const itemsToSave = {};
+          for(const key in calculo.itens) {
+              if(calculo.itens[key].quantidade > 0) {
+                  itemsToSave[key] = calculo.itens[key].quantidade;
+                  temItens = true;
+              }
+          }
+          if(temItens) {
+              const receiptData = {
+                  customerName: nome,
+                  discountApplied: calculo.descontoPercentual,
+                  grandTotal: calculo.totalFinal,
+                  items: itemsToSave,
+                  seller: auth.currentUser.displayName || auth.currentUser.email,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              };
+              try {
+                  await db.collection("receipts").add(receiptData);
+                  console.log("Recibo salvo no Firestore");
+              } catch(e) {
+                  console.error("Erro ao salvar no Firestore: ", e);
+                  alert("Houve um erro ao salvar o recibo no banco de dados.");
+              }
+          }
+            
+          const resultado = document.getElementById('resultado');
+          resultado.querySelector('h3').innerHTML = `${t.receiptHeader} - <span id="resNome">${nome}</span>`;
+          const resumoItensDiv = resultado.querySelector('#resumo-itens');
+          const resumoTotaisDiv = resultado.querySelector('#resumo-totais');
+          resumoItensDiv.innerHTML = `<h4 class="receipt-section-title">${t.receiptItemsHeader}</h4>`;
+          resumoTotaisDiv.innerHTML = '';
+            
+          let hasItemsForReceipt = false;
+          for(const key in calculo.itens) {
+            const item = calculo.itens[key];
+            if (item.quantidade > 0) {
+              hasItemsForReceipt = true;
+              const itemLine = document.createElement('div');
+              itemLine.className = 'receipt-line';
+              const precoComMoeda = document.createElement('span');
+              precoComMoeda.className = 'receipt-value';
+              precoComMoeda.textContent = item.subtotal.toFixed(2);
+              precoComMoeda.appendChild(this.createCoinIcon());
+              itemLine.innerHTML = `<span class="receipt-label">${item.nome} (x${item.quantidade})</span>`;
+              itemLine.appendChild(precoComMoeda);
+              resumoItensDiv.appendChild(itemLine);
+            }
+          }
+          if (!hasItemsForReceipt) { alert(t.alertNoItems); return; }
+          if (calculo.descontoPercentual > 0) {
+              resumoTotaisDiv.innerHTML += `<div class="receipt-line"><span class="receipt-label">${t.receiptSubtotal}</span><span class="receipt-value">${calculo.totalBruto.toFixed(2)}</span></div><div class="receipt-line"><span class="receipt-label">${t.receiptDiscount} (${calculo.descontoPercentual.toFixed(2)}%)</span><span class="receipt-value">- ${calculo.valorDescontoTotal.toFixed(2)}</span></div>`;
+          }
+          resumoTotaisDiv.innerHTML += `<div class="receipt-line final-total"><span class="receipt-label">${t.receiptFinalTotal}</span><span class="receipt-value">${calculo.totalFinal.toFixed(2)}</span></div>`;
+          resumoTotaisDiv.querySelectorAll('.receipt-value').forEach(el => el.appendChild(this.createCoinIcon()));
+          resultado.style.display = 'block';
+          setTimeout(() => {
+              html2canvas(resultado, { backgroundColor: null, scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+                link.download = `${nomeSanitizado}_recibo.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                resultado.style.display = 'none';
+              });
+          }, 300);
+        }
+    };
+    Object.assign(app, appMethods);
     app.init();
   });
 </script>
