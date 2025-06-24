@@ -173,11 +173,11 @@
   button { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; border: none; display: inline-flex; align-items: center; justify-content: center; }
   button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
   button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;}
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #btn-load-users, .btn-promote-admin { background: var(--accent-primary); color: #fff; }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #btn-load-users:hover, .btn-promote-admin:hover { background: var(--accent-hover); }
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, .btn-promote-admin, #generate-txt-file-btn { background: var(--accent-primary); color: #fff; }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #btn-load-users:hover, .btn-promote-admin:hover, #generate-txt-file-btn:hover { background: var(--accent-hover); }
   #btnResetar, .delete-history-btn, .btn-delete-user { background: var(--accent-danger); color: var(--text-primary); }
   .btn-demote-admin { background: var(--accent-warning); color: var(--text-primary); }
-  #btnGerarImagem, #btnLogout, #btnDistributeLeftover, #btn-prev-page, #btn-next-page { background: var(--bg-tertiary); color: var(--text-primary); }
+  #btnGerarImagem, #btnLogout, #btnDistributeLeftover, #btn-prev-page, #btn-next-page, #export-txt-modal-btn, #cancel-txt-export-btn, .btn-view-receipt { background: var(--bg-tertiary); color: var(--text-primary); }
 
   .admin-section {
     padding: 20px;
@@ -189,17 +189,17 @@
     gap: 16px;
   }
 
-  /* ========= INÍCIO DAS MELHORIAS DE DESIGN ========= */
+  /* --- INÍCIO DAS MELHORIAS DE DESIGN --- */
   .container {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
   }
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, .btn-promote-admin {
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, .btn-promote-admin, #generate-txt-file-btn {
     background-image: linear-gradient(to right, var(--accent-primary) 0%, var(--accent-hover) 100%);
     background-size: 200% auto;
     transition: all 0.4s ease-in-out;
     border: none;
   }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, .btn-promote-admin:hover {
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, .btn-promote-admin:hover, #generate-txt-file-btn:hover {
     background-position: right center;
     background-color: var(--accent-hover);
   }
@@ -253,7 +253,103 @@
     border: 1px solid var(--border-color);
     font-size: 14px;
   }
-  /* ========= FIM DAS MELHORIAS DE DESIGN ========= */
+
+  /* --- ESTILOS PARA O MODAL DE EXPORTAÇÃO --- */
+  .modal {
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+  }
+  .modal-content {
+    background-color: var(--bg-secondary);
+    padding: 24px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+  .modal-header h3 {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    color: var(--text-primary);
+  }
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .close-btn:hover {
+    color: var(--text-primary);
+  }
+  #customer-list-for-export {
+    overflow-y: auto;
+    flex-grow: 1;
+    margin-bottom: 16px;
+    padding-right: 8px;
+  }
+  #customer-list-for-export label {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+  }
+  #customer-list-for-export label:hover {
+    background-color: var(--bg-tertiary);
+  }
+  #customer-list-for-export input[type="checkbox"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+  }
+  #customer-list-for-export .customer-info {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+  #customer-list-for-export .customer-total {
+    color: var(--accent-primary);
+    font-weight: bold;
+  }
+  .modal-controls {
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 10px;
+  }
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 16px;
+    margin-top: auto;
+    border-top: 1px solid var(--border-color);
+  }
 </style>
 </head>
 <body>
@@ -265,6 +361,8 @@
   <symbol id="icon-image" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></symbol>
   <symbol id="icon-login" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd" /></symbol>
   <symbol id="icon-calculator" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 100 2h6a1 1 0 100-2H7zM6 7a1 1 0 011-1h2a1 1 0 110 2H7a1 1 0 01-1-1zm4 0a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1zM6 11a1 1 0 011-1h2a1 1 0 110 2H7a1 1 0 01-1-1zm4 0a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clip-rule="evenodd" /></symbol>
+  <symbol id="icon-export" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></symbol>
+  <symbol id="icon-receipt" viewBox="0 0 20 20" fill="currentColor"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm0 2h12v3H4V4zm0 5h12v2H4V9zm0 4h12v2H4v-2z" /></symbol>
 </svg>
 
 <div id="auth-container">
@@ -419,7 +517,10 @@
                   <label for="history-date-end">Data Fim</label>
                   <input type="date" id="history-date-end">
               </div>
-              <button id="history-apply-filter-btn">Aplicar Filtros</button>
+              <div class="buttons" style="margin-top:0;">
+                <button id="history-apply-filter-btn">Aplicar Filtros</button>
+                <button id="export-txt-modal-btn"><svg class="icon"><use xlink:href="#icon-export"></use></svg>Exportar TXT</button>
+              </div>
           </div>
           <div id="history-table-container"></div>
           <div id="history-pagination-controls" class="buttons hidden">
@@ -476,6 +577,27 @@
 </div>
 
 <div id="resultado" style="display: none; padding: 20px; background: var(--bg-secondary); color: var(--text-primary); width: 400px; border-radius: 15px; border: 1px solid var(--border-color); position: fixed; top: -100%; left: 50%; transform: translateX(-50%); z-index: -1;">
+</div>
+
+<div id="txt-export-modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Exportar Relatório de Clientes</h3>
+      <button class="close-btn" id="close-txt-export-modal">&times;</button>
+    </div>
+    <div class="modal-controls">
+      <label>
+        <input type="checkbox" id="select-all-customers-checkbox">
+        Selecionar Todos
+      </label>
+    </div>
+    <div id="customer-list-for-export">
+    </div>
+    <div class="modal-footer">
+      <button id="cancel-txt-export-btn">Cancelar</button>
+      <button id="generate-txt-file-btn">Gerar .TXT</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -622,6 +744,13 @@
       resellerCustomerSelectionContainer: document.getElementById('reseller-customer-selection-container'),
       resellerCustomerSelect: document.getElementById('reseller-customer-select'),
       resellerCustomerManualInput: document.getElementById('reseller-customer-manual-input'),
+      txtExportModal: document.getElementById('txt-export-modal'),
+      exportTxtModalBtn: document.getElementById('export-txt-modal-btn'),
+      closeTxtExportModalBtn: document.getElementById('close-txt-export-modal'),
+      cancelTxtExportBtn: document.getElementById('cancel-txt-export-btn'),
+      generateTxtFileBtn: document.getElementById('generate-txt-file-btn'),
+      customerListForExport: document.getElementById('customer-list-for-export'),
+      selectAllCustomersCheckbox: document.getElementById('select-all-customers-checkbox'),
     };
 
     let currentLang = 'br';
@@ -706,9 +835,7 @@
           dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
           dom.resellerModeToggle.addEventListener('change', this.toggleResellerMode.bind(this));
           
-          dom.nomeClienteInput.addEventListener('keyup', () => {
-              // This can be left for future use if limits are ever applied to normal mode.
-          });
+          dom.nomeClienteInput.addEventListener('keyup', () => {});
 
           dom.resellerCustomerSelect.addEventListener('change', () => {
               if (dom.resellerCustomerSelect.value === 'manual') {
@@ -736,14 +863,31 @@
           dom.btnPrevPage.addEventListener('click', () => this.loadHistory('prev'));
           dom.btnNextPage.addEventListener('click', () => this.loadHistory('next'));
           dom.historyTableContainer.addEventListener('click', (event) => {
-              if (event.target && event.target.matches('.delete-history-btn')) {
-                  this.handleHistoryDelete(event.target.dataset.id);
+              const target = event.target.closest('button');
+              if (!target) return;
+
+              if (target.classList.contains('delete-history-btn')) {
+                  this.handleHistoryDelete(target.dataset.id);
+              }
+              if (target.classList.contains('btn-view-receipt')) {
+                  this.regenerateReceipt(target.dataset.id);
               }
           });
           
           dom.btnLoadUsers.addEventListener('click', this.loadUsers.bind(this));
           dom.userListContainer.addEventListener('click', this.handleUserAction.bind(this));
           dom.btnCreateSeller.addEventListener('click', this.handleCreateSeller.bind(this));
+
+          dom.exportTxtModalBtn.addEventListener('click', this.openTxtExportModal.bind(this));
+          dom.closeTxtExportModalBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
+          dom.cancelTxtExportBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
+          dom.selectAllCustomersCheckbox.addEventListener('change', this.handleSelectAllCustomers.bind(this));
+          dom.generateTxtFileBtn.addEventListener('click', this.generateTxtFile.bind(this));
+          dom.txtExportModal.addEventListener('click', (e) => {
+            if (e.target === dom.txtExportModal) {
+              dom.txtExportModal.classList.add('hidden');
+            }
+          });
       },
       
       async handleLogin() {
@@ -1166,7 +1310,15 @@
                                   <td>${(data.grandTotal || 0).toFixed(2)}</td>
                                   <td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td>`;
               if (this.isCurrentUserAdmin) {
-                  tableHTML += `<td><button class="delete-history-btn" data-id="${doc.id}">Excluir</button></td>`;
+                  tableHTML += `
+                      <td style="display: flex; gap: 8px; justify-content: center;">
+                          <button class="btn-view-receipt" data-id="${doc.id}" title="Ver Recibo">
+                              <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-receipt"></use></svg>
+                          </button>
+                          <button class="delete-history-btn" data-id="${doc.id}" title="Excluir">
+                              <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-reset"></use></svg>
+                          </button>
+                      </td>`;
               }
               tableHTML += `</tr>`;
           });
@@ -1740,6 +1892,39 @@
           return img;
       },
 
+      buildReceiptHtml(receiptData) {
+          const t = TRANSLATIONS[currentLang];
+          let subtotalBrutoSemDesconto = 0;
+          let itemsHtml = '';
+
+          for (const key in receiptData.itemsData) {
+              const item = receiptData.itemsData[key];
+              const catalogoItem = ITENS_CATALOGO[key];
+              if (item.qty > 0 && catalogoItem) {
+                  const subtotalItem = item.qty * item.price;
+                  itemsHtml += `<tr><td style="padding: 5px 0;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td style="padding: 5px 0; text-align: right;">${subtotalItem.toFixed(2)}</td></tr>`;
+                  subtotalBrutoSemDesconto += item.qty * item.price; 
+              }
+          }
+          
+          const valorDesconto = subtotalBrutoSemDesconto - receiptData.grandTotal;
+          const dataVenda = receiptData.createdAt?.toDate ? receiptData.createdAt.toDate().toLocaleString(currentLang) : new Date().toLocaleString(currentLang);
+
+          let receiptHtml = `
+              <h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2>
+              <p style="text-align: center; color: var(--text-secondary); margin-bottom: 10px;">${receiptData.customerName}</p>
+              <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px; font-size: 0.8em;">${dataVenda}</p>
+              <h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3>
+              <table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>${itemsHtml}</tbody></table>
+              <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.9em;">
+                  <p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${subtotalBrutoSemDesconto.toFixed(2)}</span></p>
+                  <p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${valorDesconto.toFixed(2)}</span></p>
+                  <p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${receiptData.grandTotal.toFixed(2)}</span></p>
+              </div>
+              <p style="text-align: center; margin-top: 20px; font-size: 0.9em;">${t.receiptThanks}</p>`;
+          return receiptHtml;
+      },
+
       async generateImage() {
         const isResellerMode = dom.resellerModeToggle.checked;
         if (isResellerMode) {
@@ -1826,32 +2011,8 @@
             return;
         }
 
-        let receiptHtml = `<h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2><p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">${customerName}</p><h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3><table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>`;
-        let subtotalBrutoSemDesconto = 0;
-        for(const key in calculo.itens) {
-            const item = calculo.itens[key];
-            if(item.quantidade > 0) {
-                receiptHtml += `<tr><td style="padding: 5px 0;">${ITENS_CATALOGO[key][`name_${currentLang}`]} x ${item.quantidade}</td><td style="padding: 5px 0; text-align: right;">${item.subtotal.toFixed(2)}</td></tr>`;
-                
-                if (isResellerMode) {
-                    let precoOriginal = ITENS_CATALOGO[key].preco;
-                    let precoDeRevenda = PRECOS_RESELLER[key];
-                    if (key === 'revive' || key === 'max') {
-                         const limitRemaining = (key === 'revive') ? (RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive) : (RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max);
-                         const tokensDentroDoLimite = Math.max(0, Math.min(item.quantidade, limitRemaining));
-                         const tokensForaDoLimite = Math.max(0, item.quantidade - tokensDentroDoLimite);
-                         subtotalBrutoSemDesconto += (tokensDentroDoLimite * precoDeRevenda) + (tokensForaDoLimite * precoOriginal);
-                    } else {
-                         subtotalBrutoSemDesconto += item.quantidade * precoDeRevenda;
-                    }
-                } else {
-                    subtotalBrutoSemDesconto += item.quantidade * ITENS_CATALOGO[key].preco;
-                }
-            }
-        }
-        
-        const valorDesconto = subtotalBrutoSemDesconto - calculo.totalFinal;
-        receiptHtml += `</tbody></table><div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.9em;"><p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${subtotalBrutoSemDesconto.toFixed(2)}</span></p><p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${calculo.descontoPercentual}%):</span> <span>-${valorDesconto.toFixed(2)}</span></p><p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${calculo.totalFinal.toFixed(2)}</span></p></div><p style="text-align: center; margin-top: 20px; font-size: 0.9em;">${t.receiptThanks}</p>`;
+        const receiptHtml = this.buildReceiptHtml(receiptData);
+
         const resultadoDiv = document.getElementById('resultado');
         resultadoDiv.innerHTML = receiptHtml;
         resultadoDiv.style.display = 'block';
@@ -1872,7 +2033,158 @@
                 resultadoDiv.style.zIndex = '-1';
             });
         }, 300);
+      },
+      
+      async regenerateReceipt(docId) {
+        if (!docId) return;
+
+        try {
+          const docRef = db.collection('receipts').doc(docId);
+          const docSnap = await docRef.get();
+
+          if (!docSnap.exists) {
+            alert("Erro: Recibo não encontrado no banco de dados.");
+            return;
+          }
+
+          const receiptData = docSnap.data();
+          const receiptHtml = this.buildReceiptHtml(receiptData);
+          
+          const resultadoDiv = document.getElementById('resultado');
+          resultadoDiv.innerHTML = receiptHtml;
+          resultadoDiv.style.display = 'block';
+          resultadoDiv.style.position = 'fixed';
+          resultadoDiv.style.top = '50%';
+          resultadoDiv.style.left = '50%';
+          resultadoDiv.style.transform = 'translate(-50%, -50%)';
+          resultadoDiv.style.zIndex = '1000';
+
+          setTimeout(() => {
+              html2canvas(resultadoDiv, { backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), scale: 2 }).then(canvas => {
+                  const link = document.createElement('a');
+                  const customerName = receiptData.customerName || 'recibo';
+                  const date = receiptData.createdAt.toDate().toISOString().split('T')[0];
+                  const nomeSanitizado = customerName.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+                  link.download = `${nomeSanitizado}_recibo_${date}.png`;
+                  link.href = canvas.toDataURL('image/png');
+                  link.click();
+                  resultadoDiv.style.display = 'none';
+                  resultadoDiv.style.top = '-100%';
+                  resultadoDiv.style.zIndex = '-1';
+              });
+          }, 300);
+
+        } catch (error) {
+          console.error("Erro ao regenerar recibo:", error);
+          alert("Ocorreu um erro ao buscar os dados do recibo.");
+        }
+      },
+
+      async openTxtExportModal() {
+        dom.customerListForExport.innerHTML = `<p>${TRANSLATIONS[currentLang].historyLoading}</p>`;
+        dom.txtExportModal.classList.remove('hidden');
+
+        const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
+        let startDate = null;
+        if (dom.historyDateStart.value) {
+            const parts = dom.historyDateStart.value.split('-');
+            startDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        let endDate = null;
+        if (dom.historyDateEnd.value) {
+            const parts = dom.historyDateEnd.value.split('-');
+            endDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            endDate.setHours(23, 59, 59, 999);
+        }
+        
+        let query = db.collection("receipts");
+        if (startDate) query = query.where('createdAt', '>=', startDate);
+        if (endDate) query = query.where('createdAt', '<=', endDate);
+        
+        try {
+          const allDocsSnapshot = await query.get();
+          let docs = allDocsSnapshot.docs;
+          
+          if (searchTerm) {
+              docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
+          }
+          if (docs.length === 0) {
+              dom.customerListForExport.innerHTML = `<p>${TRANSLATIONS[currentLang].historyNoRecords}</p>`;
+              return;
+          }
+          const customerSummary = {};
+          docs.forEach(doc => {
+              const data = doc.data();
+              const customerName = data.customerName || 'Cliente Não Identificado';
+              if (!customerSummary[customerName]) {
+                  customerSummary[customerName] = { totalSpent: 0 };
+              }
+              customerSummary[customerName].totalSpent += data.grandTotal || 0;
+          });
+
+          const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
+          
+          dom.customerListForExport.innerHTML = '';
+          dom.selectAllCustomersCheckbox.checked = false;
+          summaryArray.forEach(summary => {
+            const label = document.createElement('label');
+            label.innerHTML = `
+              <input type="checkbox" value="${summary.name}" data-total="${summary.totalSpent.toFixed(2)}">
+              <div class="customer-info">
+                <span>${summary.name}</span>
+                <span class="customer-total">R$ ${summary.totalSpent.toFixed(2)}</span>
+              </div>
+            `;
+            dom.customerListForExport.appendChild(label);
+          });
+
+        } catch (error) {
+          console.error("Erro ao gerar resumo para exportação:", error);
+          dom.customerListForExport.innerHTML = `<p style="color: var(--text-error);">${TRANSLATIONS[currentLang].errorGeneric}</p>`;
+        }
+      },
+
+      handleSelectAllCustomers(event) {
+        const checkboxes = dom.customerListForExport.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+          checkbox.checked = event.target.checked;
+        });
+      },
+
+      generateTxtFile() {
+        const linesToExport = [];
+        const checkedCustomers = dom.customerListForExport.querySelectorAll('input[type="checkbox"]:checked');
+
+        if (checkedCustomers.length === 0) {
+          alert("Nenhum cliente selecionado para exportar.");
+          return;
+        }
+
+        checkedCustomers.forEach(checkbox => {
+          const customerName = checkbox.value;
+          const totalSpent = checkbox.dataset.total;
+          linesToExport.push(`${customerName}: R$ ${totalSpent}`);
+        });
+
+        const fileContent = linesToExport.join('\r\n');
+        const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const fileName = `Relatorio_Clientes_${dateStr}.txt`;
+        
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", fileName);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        dom.txtExportModal.classList.add('hidden');
       }
+
     };
     
     app.init();
