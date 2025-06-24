@@ -482,7 +482,7 @@
             <tfoot>
               <tr>
                 <td colspan="3"><b data-translate-key="tableGrandTotal">TOTAL GERAL</b></td>
-                <td id="totalGeral" style="text-align: center;"><b>0.00</b></td>
+                <td id="totalGeral" style="text-align: center;"><b>0,00</b></td>
               </tr>
             </tfoot>
           </table>
@@ -1307,7 +1307,7 @@
               tableHTML += `<tr>
                                   <td>${data.customerName || 'N/A'}</td>
                                   <td>${(data.seller || 'N/A').split('@')[0]}</td>
-                                  <td>${(data.grandTotal || 0).toFixed(2)}</td>
+                                  <td>${this.formatCurrency(data.grandTotal || 0)}</td>
                                   <td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td>`;
               if (this.isCurrentUserAdmin) {
                   tableHTML += `
@@ -1357,7 +1357,7 @@
           const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
           let tableHTML = `<table><thead><tr><th>Cliente</th><th>Total Gasto</th><th>Nº de Compras</th><th>Última Compra</th></tr></thead><tbody>`;
           summaryArray.forEach(summary => {
-              tableHTML += `<tr><td>${summary.name}</td><td>${summary.totalSpent.toFixed(2)}</td><td>${summary.salesCount}</td><td>${summary.lastSaleDate ? summary.lastSaleDate.toLocaleDateString(currentLang) : 'N/A'}</td></tr>`;
+              tableHTML += `<tr><td>${summary.name}</td><td>${this.formatCurrency(summary.totalSpent)}</td><td>${summary.salesCount}</td><td>${summary.lastSaleDate ? summary.lastSaleDate.toLocaleDateString(currentLang) : 'N/A'}</td></tr>`;
           });
           dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
       },
@@ -1420,11 +1420,29 @@
               options: {
                   responsive: true,
                   scales: {
-                      y: { ticks: { color: textColor }, grid: { color: gridColor } },
+                      y: { 
+                          ticks: { 
+                            color: textColor,
+                            callback: (value) => this.formatCurrency(value) // FORMATAR NÚMERO
+                          }, 
+                          grid: { color: gridColor } 
+                      },
                       x: { ticks: { color: textColor }, grid: { color: gridColor } }
                   },
                   plugins: {
-                      legend: { labels: { color: textColor } }
+                      legend: { labels: { color: textColor } },
+                      tooltip: {
+                          callbacks: {
+                            label: (context) => { // FORMATAR NÚMERO
+                              let label = context.dataset.label || '';
+                              if (label) { label += ': '; }
+                              if (context.parsed.y !== null) {
+                                label += this.formatCurrency(context.parsed.y);
+                              }
+                              return label;
+                            }
+                          }
+                      }
                   }
               }
           });
@@ -1661,7 +1679,7 @@
                           <input type="number" id="qtd-${key}" value="0" min="0">
                       </div>
                   </td>
-                  <td style="text-align: center;">0.00</td>
+                  <td style="text-align: center;">0,00</td>
               `;
               
               tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
@@ -1693,6 +1711,16 @@
 
           this.updateUI();
           this.triggerSavePreferences();
+      },
+
+      formatCurrency(number) { // FORMATAR NÚMERO
+          if (isNaN(number)) {
+            number = 0;
+          }
+          return number.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
       },
 
       calculateValues() {
@@ -1754,11 +1782,11 @@
               const itemCalculado = calculo.itens[key];
               
               const totalCell = row.cells[3];
-              totalCell.innerHTML = `${itemCalculado.subtotal.toFixed(2)} `;
+              totalCell.innerHTML = `${this.formatCurrency(itemCalculado.subtotal)} `; // FORMATAR NÚMERO
               totalCell.appendChild(this.createCoinIcon());
           });
           
-          dom.totalGeralCell.innerHTML = `<b>${calculo.totalFinal.toFixed(2)}</b> `;
+          dom.totalGeralCell.innerHTML = `<b>${this.formatCurrency(calculo.totalFinal)}</b> `; // FORMATAR NÚMERO
           dom.totalGeralCell.appendChild(this.createCoinIcon());
       },
 
@@ -1840,7 +1868,7 @@
           const newCalculo = this.calculateValues();
           const totalMushInputted = parseFloat(dom.totalMushInput.value) || 0;
           this.currentLeftover = totalMushInputted - newCalculo.totalFinal;
-          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.currentLeftover.toFixed(2)}</b> `;
+          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `; // FORMATAR NÚMERO
           dom.leftoverMushDiv.appendChild(this.createCoinIcon());
 
           this.updateUI();
@@ -1872,7 +1900,7 @@
           });
           const mushTotal = parseFloat(dom.totalMushInput.value) || 0;
           this.currentLeftover = mushTotal - mushGasto;
-          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.currentLeftover.toFixed(2)}</b> `;
+          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `; // FORMATAR NÚMERO
           dom.leftoverMushDiv.appendChild(this.createCoinIcon());
           const cheapestPrice = Math.min(...Object.values(ITENS_CATALOGO).map(t => t.preco));
           if (this.currentLeftover >= cheapestPrice) {
@@ -1894,7 +1922,7 @@
 
       buildReceiptHtml(receiptData) {
           const t = TRANSLATIONS[currentLang];
-          let subtotalBrutoSemDesconto = 0;
+          let subtotalBruto = 0;
           let itemsHtml = '';
 
           for (const key in receiptData.itemsData) {
@@ -1902,12 +1930,12 @@
               const catalogoItem = ITENS_CATALOGO[key];
               if (item.qty > 0 && catalogoItem) {
                   const subtotalItem = item.qty * item.price;
-                  itemsHtml += `<tr><td style="padding: 5px 0;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td style="padding: 5px 0; text-align: right;">${subtotalItem.toFixed(2)}</td></tr>`;
-                  subtotalBrutoSemDesconto += item.qty * item.price; 
+                  itemsHtml += `<tr><td style="padding: 5px 0;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td style="padding: 5px 0; text-align: right;">${this.formatCurrency(subtotalItem)}</td></tr>`; // FORMATAR NÚMERO
+                  subtotalBruto += item.qty * item.price;
               }
           }
           
-          const valorDesconto = subtotalBrutoSemDesconto - receiptData.grandTotal;
+          const valorDesconto = subtotalBruto - receiptData.grandTotal;
           const dataVenda = receiptData.createdAt?.toDate ? receiptData.createdAt.toDate().toLocaleString(currentLang) : new Date().toLocaleString(currentLang);
 
           let receiptHtml = `
@@ -1917,9 +1945,9 @@
               <h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3>
               <table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>${itemsHtml}</tbody></table>
               <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.9em;">
-                  <p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${subtotalBrutoSemDesconto.toFixed(2)}</span></p>
-                  <p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${valorDesconto.toFixed(2)}</span></p>
-                  <p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${receiptData.grandTotal.toFixed(2)}</span></p>
+                  <p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${this.formatCurrency(subtotalBruto)}</span></p>
+                  <p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${this.formatCurrency(valorDesconto)}</span></p>
+                  <p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${this.formatCurrency(receiptData.grandTotal)}</span></p>
               </div>
               <p style="text-align: center; margin-top: 20px; font-size: 0.9em;">${t.receiptThanks}</p>`;
           return receiptHtml;
@@ -2129,10 +2157,10 @@
           summaryArray.forEach(summary => {
             const label = document.createElement('label');
             label.innerHTML = `
-              <input type="checkbox" value="${summary.name}" data-total="${summary.totalSpent.toFixed(2)}">
+              <input type="checkbox" value="${summary.name}" data-total="${summary.totalSpent}">
               <div class="customer-info">
                 <span>${summary.name}</span>
-                <span class="customer-total">R$ ${summary.totalSpent.toFixed(2)}</span>
+                <span class="customer-total">R$ ${this.formatCurrency(summary.totalSpent)}</span>
               </div>
             `;
             dom.customerListForExport.appendChild(label);
@@ -2162,8 +2190,8 @@
 
         checkedCustomers.forEach(checkbox => {
           const customerName = checkbox.value;
-          const totalSpent = checkbox.dataset.total;
-          linesToExport.push(`${customerName}: R$ ${totalSpent}`);
+          const totalSpent = parseFloat(checkbox.dataset.total);
+          linesToExport.push(`${customerName}: R$ ${this.formatCurrency(totalSpent)}`);
         });
 
         const fileContent = linesToExport.join('\r\n');
