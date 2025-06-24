@@ -117,16 +117,22 @@
   h2 { font-family: var(--font-header); color: var(--accent-primary); font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px;}
   h3 { margin-bottom: 1rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
   .input-group { display: flex; flex-direction: column; gap: 8px; }
-  .input-group label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+  .input-group label { font-size: 14px; font-weight: 500; color: var(--text-secondary); transition: color 0.3s ease, font-weight 0.3s ease; }
 
-  input[type="text"], input[type="number"], input[type="password"], input[type="date"] {
+  .reseller-label {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  input[type="text"], input[type="number"], input[type="password"], input[type="date"], select {
     width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--bg-tertiary); color: var(--text-primary); font-size: 16px; transition: all 0.3s ease;
   }
-  input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, input[type="date"]:focus {
+  input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, input[type="date"]:focus, select:focus {
     outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
   }
 
-  /* Specific style for table inputs */
   td input[type="number"] {
       padding: 8px;
       text-align: center;
@@ -164,7 +170,7 @@
   tfoot b { color: var(--accent-primary); }
   
   .buttons { display: flex; justify-content: center; gap: 12px; margin-top: 16px; flex-wrap: wrap;}
-  button { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; border: none; }
+  button { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; border: none; display: inline-flex; align-items: center; justify-content: center; }
   button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
   button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;}
   #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #btn-load-users, .btn-promote-admin { background: var(--accent-primary); color: #fff; }
@@ -183,9 +189,83 @@
     gap: 16px;
   }
 
+  /* ========= INÍCIO DAS MELHORIAS DE DESIGN ========= */
+  .container {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  }
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, .btn-promote-admin {
+    background-image: linear-gradient(to right, var(--accent-primary) 0%, var(--accent-hover) 100%);
+    background-size: 200% auto;
+    transition: all 0.4s ease-in-out;
+    border: none;
+  }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, .btn-promote-admin:hover {
+    background-position: right center;
+    background-color: var(--accent-hover);
+  }
+  .input-group:focus-within label {
+    color: var(--accent-primary);
+    font-weight: 600;
+  }
+  button:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #auth-container, .container {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  tbody tr:nth-child(odd) {
+    background-color: rgba(120, 120, 120, 0.03);
+  }
+  tbody tr:hover {
+    background-color: rgba(52, 211, 153, 0.1);
+  }
+  .icon {
+    width: 1.1em;
+    height: 1.1em;
+    margin-right: 0.5em;
+    vertical-align: -0.2em;
+  }
+  label .icon {
+    vertical-align: -0.25em;
+  }
+  th {
+    letter-spacing: 0.8px;
+    font-weight: 700;
+  }
+  .input-group {
+    margin-bottom: 8px;
+  }
+  .tab-navigation {
+    margin-bottom: 16px;
+  }
+  .tab-link {
+    position: relative;
+    top: 1px;
+    margin-bottom: -1px;
+  }
+  #reseller-limit-status {
+    text-align: center;
+    border: 1px solid var(--border-color);
+    font-size: 14px;
+  }
+  /* ========= FIM DAS MELHORIAS DE DESIGN ========= */
 </style>
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="icon-user" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></symbol>
+  <symbol id="icon-discount" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a1 1 0 011-1h5a1 1 0 01.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></symbol>
+  <symbol id="icon-reset" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></symbol>
+  <symbol id="icon-image" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></symbol>
+  <symbol id="icon-login" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd" /></symbol>
+  <symbol id="icon-calculator" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 100 2h6a1 1 0 100-2H7zM6 7a1 1 0 011-1h2a1 1 0 110 2H7a1 1 0 01-1-1zm4 0a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1zM6 11a1 1 0 011-1h2a1 1 0 110 2H7a1 1 0 01-1-1zm4 0a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clip-rule="evenodd" /></symbol>
+</svg>
 
 <div id="auth-container">
     <h2 data-translate-key="loginHeader">Login</h2>
@@ -198,7 +278,7 @@
         <input type="password" id="password-input" autocomplete="current-password">
     </div>
     <p id="auth-error"></p>
-    <button id="btnLogin" data-translate-key="loginButton">Entrar</button>
+    <button id="btnLogin" data-translate-key="loginButton"><svg class="icon"><use xlink:href="#icon-login"></use></svg>Entrar</button>
 </div>
 
 <div id="app-container" class="hidden">
@@ -229,12 +309,20 @@
 
       <div id="calculator-view" class="tab-content">
           <h2 data-translate-key="mainHeader">Calculadora de Tokens</h2>
-          <div class="input-group">
-            <label for="nomeCliente" data-translate-key="idLabel">Identificador / Nome</label>
+          
+          <div class="input-group" id="customer-name-container">
+            <label for="nomeCliente" data-translate-key="idLabel"><svg class="icon"><use xlink:href="#icon-user"></use></svg>Identificador / Nome do Cliente</label>
             <input type="text" id="nomeCliente" data-translate-key-placeholder="idPlaceholder">
           </div>
+
+          <div class="input-group hidden" id="reseller-customer-selection-container">
+              <label for="reseller-customer-select" data-translate-key="resellerCustomerLabel"><svg class="icon"><use xlink:href="#icon-user"></use></svg>Cliente Revendedor</label>
+              <select id="reseller-customer-select"></select>
+              <input type="text" id="reseller-customer-manual-input" class="hidden" data-translate-key-placeholder="resellerCustomerManualPlaceholder">
+          </div>
+
           <div class="input-group">
-            <label for="desconto" data-translate-key="discountLabel">Desconto (%)</label>
+            <label for="desconto" data-translate-key="discountLabel"><svg class="icon"><use xlink:href="#icon-discount"></use></svg>Desconto (%)</label>
             <input type="number" id="desconto" data-translate-key-placeholder="discountPlaceholder" min="0" max="100">
           </div>
           <div class="input-group">
@@ -246,6 +334,13 @@
                   <label for="mode-mush" data-translate-key="modeMush">Por Mush</label>
               </div>
           </div>
+          <div class="input-group hidden" id="reseller-mode-container">
+              <label class="reseller-label">
+                  <input type="checkbox" id="reseller-mode-toggle">
+                  Modo Revendedor
+              </label>
+          </div>
+          <div id="reseller-limit-status" class="hidden"></div>
           <div class="distributor-container" id="distributor-section" style="display: none;">
               <div>
                   <label data-translate-key="distributeTokensLabel">Tokens Desejáveis para Distribuição</label>
@@ -294,9 +389,9 @@
             </tfoot>
           </table>
           <div class="buttons">
-            <button id="btnCalcular" data-translate-key="btnCalculate">Calcular</button>
-            <button id="btnResetar" data-translate-key="btnReset">Resetar</button>
-            <button id="btnGerarImagem" data-translate-key="btnExport">Exportar para PNG</button>
+            <button id="btnCalcular" data-translate-key="btnCalculate"><svg class="icon"><use xlink:href="#icon-calculator"></use></svg>Calcular</button>
+            <button id="btnResetar" data-translate-key="btnReset"><svg class="icon"><use xlink:href="#icon-reset"></use></svg>Resetar</button>
+            <button id="btnGerarImagem" data-translate-key="btnExport"><svg class="icon"><use xlink:href="#icon-image"></use></svg>Exportar para PNG</button>
           </div>
       </div>
       
@@ -383,7 +478,6 @@
 <div id="resultado" style="display: none; padding: 20px; background: var(--bg-secondary); color: var(--text-primary); width: 400px; border-radius: 15px; border: 1px solid var(--border-color); position: fixed; top: -100%; left: 50%; transform: translateX(-50%); z-index: -1;">
 </div>
 
-
 <script>
   // --- INICIALIZAÇÃO DO FIREBASE ---
   const firebaseConfig = {
@@ -401,14 +495,15 @@
   const functions = firebase.app().functions('us-central1');
 
   // --- LÓGICA DA APLICAÇÃO ---
-    const MOEDA_BASE64 = "data:image/webp;base64,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";
+    const MOEDA_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACUSURBVDhPY/j//z8DJYCJgUJWCiDPmPrP4P/fv//f//79//Pnx/+/f/8DNlDrAKSkG4B84BTg//+fA5AAYs4A5gA1zwBC/v/79w8gCajhF0D+jAar4f9/fv8DksAqsX4A8gNTAf8ZGP5/YOD5/wz8//P/D/gMWQBL/x/g/x8Y/v9g+P+DAAATz2sNmmNYXAAAAABJRU5ErkJggg==";
     const DUMMY_DOMAIN = '@painelriciv.com'; 
+    const RESELLER_DAILY_LIMIT = 750;
 
     const ITENS_CATALOGO = {
-      revive: { preco: 780, name_br: 'Revive Token', name_en: 'Revive Token' },
-      max: { preco: 540, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
-      partial: { preco: 180, name_br: 'Partial Growth Token', name_en: 'Partial Growth Token' },
-      change: { preco: 70, name_br: 'Appearance Change Token', name_en: 'Appearance Change Token' }
+      revive: { preco: 790, name_br: 'Revive Token', name_en: 'Revive Token' },
+      max: { preco: 570, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
+      partial: { preco: 195, name_br: 'Partial Growth Token', name_en: 'Partial Growth Token' },
+      change: { preco: 90, name_br: 'Appearance Change Token', name_en: 'Appearance Change Token' }
     };
     
     const PRECOS_MINIMOS = {
@@ -418,10 +513,17 @@
       change: 70
     };
 
+    const PRECOS_RESELLER = {
+      revive: 770,
+      max: 530,
+      partial: 175,
+      change: 65
+    };
+
     const TRANSLATIONS = {
       br: {
           pageTitle: "Painel", mainHeader: "Calculadora de Tokens", themeLabel: "Tema Claro",
-          idLabel: "Identificador / Nome", idPlaceholder: "Digite seu nome ou ID", discountLabel: "Desconto (%)",
+          idLabel: "Identificador / Nome do Cliente", idPlaceholder: "Digite o nome ou ID do cliente", discountLabel: "Desconto (%)",
           discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Preço Unitário", tableQty: "Quantidade",
           tableTotal: "Valor Total", tableGrandTotal: "TOTAL GERAL", btnCalculate: "Calcular", btnReset: "Resetar",
           btnExport: "Exportar para PNG", alertNoItems: "Nenhum item foi selecionado para gerar o recibo.",
@@ -430,17 +532,20 @@
           calculationMode: "Modo de Cálculo", modeQty: "Por Quantidade", modeMush: "Por Mush",
           distributeTokensLabel: "Tokens Desejáveis para Distribuição", totalMushLabel: "Total de Mush a Gastar",
           btnDistribute: "Distribuir", leftoverMushText: "Sobrou:",
-          loginHeader: "Acessar Painel", usernameLabel: "Usuário", passwordLabel: "Senha",
+          loginHeader: "Acessar Calculadora", usernameLabel: "Usuário", passwordLabel: "Senha",
           loginButton: "Entrar", logoutButton: "Sair", errorInvalidCredentials: "Usuário ou senha inválidos.",
           errorGeneric: "Ocorreu um erro. Tente novamente.",
           tabCalculator: "Calculadora", tabHistory: "Histórico", historyHeader: "Histórico de Vendas",
           historyCustomer: "Cliente", historyDate: "Data", historyTotal: "Total", historySeller: "Vendedor",
           historyNoRecords: "Nenhum registro encontrado.", historyLoading: "Carregando histórico...",
-          loggedInAs: "Usuário:"
+          loggedInAs: "Usuário:",
+          resellerCustomerLabel: "Cliente Revendedor", resellerCustomerManualPlaceholder: "Digite o nome do cliente revendedor",
+          resellerLimitStatus: (revive, max, total, time) => `Limite Cliente: <b>Revive</b> (${revive}/${total}) | <b>Max</b> (${max}/${total}). Reseta em <b>${time}</b>.`,
+          resellerLimitExceededWarning: "Atenção: O limite diário do cliente para um ou mais itens foi excedido. Itens acima do limite serão cobrados com o preço base."
       },
       en: {
           pageTitle: "Painel", mainHeader: "Token Calculator", themeLabel: "Light Theme",
-          idLabel: "Identifier / Name", idPlaceholder: "Enter your name or ID", discountLabel: "Discount (%)",
+          idLabel: "Customer Identifier / Name", idPlaceholder: "Enter customer's name or ID", discountLabel: "Discount (%)",
           discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Unit Price", tableQty: "Quantity",
           tableTotal: "Total Value", tableGrandTotal: "GRAND TOTAL", btnCalculate: "Calculate", btnReset: "Reset",
           btnExport: "Export to PNG", alertNoItems: "No items were selected to generate the receipt.",
@@ -455,7 +560,10 @@
           tabCalculator: "Calculator", tabHistory: "History", historyHeader: "Sales History",
           historyCustomer: "Customer", historyDate: "Date", historyTotal: "Total", historySeller: "Seller",
           historyNoRecords: "No records found.", historyLoading: "Loading history...",
-          loggedInAs: "User:"
+          loggedInAs: "User:",
+          resellerCustomerLabel: "Reseller Customer", resellerCustomerManualPlaceholder: "Enter reseller customer's name",
+          resellerLimitStatus: (revive, max, total, time) => `Customer Limit: <b>Revive</b> (${revive}/${total}) | <b>Max</b> (${max}/${total}). Resets in <b>${time}</b>.`,
+          resellerLimitExceededWarning: "Warning: The customer's daily limit for one or more items has been exceeded. Items above the limit will be charged at the base price."
       }
     };
     
@@ -500,7 +608,6 @@
       pageNumberDisplay: document.getElementById('page-number-display'),
       salesOverTimeChart: document.getElementById('sales-over-time-chart'),
       tokensSoldChart: document.getElementById('tokens-sold-chart'),
-      
       adminView: document.getElementById('admin-view'),
       adminActionStatus: document.getElementById('admin-action-status'),
       btnLoadUsers: document.getElementById('btn-load-users'),
@@ -508,6 +615,13 @@
       btnCreateSeller: document.getElementById('btn-create-seller'),
       newSellerUsernameInput: document.getElementById('new-seller-username'),
       newSellerPasswordInput: document.getElementById('new-seller-password'),
+      resellerModeContainer: document.getElementById('reseller-mode-container'),
+      resellerModeToggle: document.getElementById('reseller-mode-toggle'),
+      resellerLimitStatus: document.getElementById('reseller-limit-status'),
+      customerNameContainer: document.getElementById('customer-name-container'),
+      resellerCustomerSelectionContainer: document.getElementById('reseller-customer-selection-container'),
+      resellerCustomerSelect: document.getElementById('reseller-customer-select'),
+      resellerCustomerManualInput: document.getElementById('reseller-customer-manual-input'),
     };
 
     let currentLang = 'br';
@@ -523,42 +637,50 @@
       tokensChartInstance: null,
       isCurrentUserAdmin: false,
       currentUsername: null,
+      saveTimeout: null,
+      currentCustomerUsage: { revive: 0, max: 0 },
+      resellerLimitInterval: null, 
 
       init() {
-        this.loadPreferences();
+        this.loadDevicePreferences();
         this.setLanguage(currentLang, true);
         this.addAuthListeners();
       },
       
       addAuthListeners() {
-        auth.onAuthStateChanged(user => {
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
-                user.getIdTokenResult(true).then(idTokenResult => {
+                await user.getIdTokenResult(true).then(async (idTokenResult) => {
                     this.isCurrentUserAdmin = !!idTokenResult.claims.admin;
                     this.currentUsername = user.email.split('@')[0];
                     
                     document.querySelector('[data-tab="admin-view"]').style.display = this.isCurrentUserAdmin ? 'inline-block' : 'none';
+                    if (this.isCurrentUserAdmin) {
+                        dom.resellerModeContainer.classList.remove('hidden');
+                    } else {
+                        dom.resellerModeContainer.classList.add('hidden');
+                    }
 
                     dom.authContainer.classList.add('hidden');
                     dom.appContainer.classList.remove('hidden');
-                    dom.loggedInUserDiv.innerHTML = `<span>${TRANSLATIONS[currentLang].loggedInAs}</span> <span class="username">${this.currentUsername}</span>`;
                     
                     if (!this.calculatorInitialized) {
                         this.addAppEventListeners();
-                        this.setLanguage(currentLang);
+                        this.setLanguage(currentLang); 
+                        await this.loadUserPreferences(user);
                         this.setDefaultTab(); 
-                        
                         const initialMode = dom.modeQtyRadio.checked ? 'quantity' : 'mush';
                         this.toggleMode(initialMode);
-                        
                         this.calculatorInitialized = true;
                     }
+                    dom.loggedInUserDiv.innerHTML = `<span>${TRANSLATIONS[currentLang].loggedInAs}</span> <span class="username">${this.currentUsername}</span>`;
                 });
             } else {
                 this.isCurrentUserAdmin = false;
                 this.currentUsername = null;
                 dom.authContainer.classList.remove('hidden');
                 dom.appContainer.classList.add('hidden');
+                dom.resellerModeContainer.classList.add('hidden');
                 this.calculatorInitialized = false; 
             }
         });
@@ -582,6 +704,24 @@
           dom.langEn.addEventListener('click', () => this.setLanguage('en'));
           dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
           dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
+          dom.resellerModeToggle.addEventListener('change', this.toggleResellerMode.bind(this));
+          
+          dom.nomeClienteInput.addEventListener('keyup', () => {
+              // This can be left for future use if limits are ever applied to normal mode.
+          });
+
+          dom.resellerCustomerSelect.addEventListener('change', () => {
+              if (dom.resellerCustomerSelect.value === 'manual') {
+                  dom.resellerCustomerManualInput.classList.remove('hidden');
+                  dom.resellerCustomerManualInput.focus();
+              } else {
+                  dom.resellerCustomerManualInput.classList.add('hidden');
+              }
+              this.checkResellerLimit();
+          });
+
+          dom.resellerCustomerManualInput.addEventListener('keyup', this.checkResellerLimit.bind(this));
+          
           dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
           dom.btnDistributeLeftover.addEventListener('click', this.distributeLeftoverMush.bind(this));
           dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
@@ -607,33 +747,91 @@
       },
       
       async handleLogin() {
-          const username = dom.usernameInput.value.trim();
-          const password = dom.passwordInput.value;
-          const t = TRANSLATIONS[currentLang];
-          if (!username || !password) {
-              dom.authError.textContent = t.errorInvalidCredentials;
-              return;
-          }
-          const email = username + DUMMY_DOMAIN;
-          try {
-              dom.authError.textContent = '';
-              await auth.signInWithEmailAndPassword(email, password);
-          } catch (error) {
-              if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
-                  dom.authError.textContent = t.errorInvalidCredentials;
-              } else {
-                  dom.authError.textContent = t.errorGeneric;
-              }
-          }
+        const username = dom.usernameInput.value.trim();
+        const password = dom.passwordInput.value;
+        const t = TRANSLATIONS[currentLang];
+        if (!username || !password) {
+            dom.authError.textContent = t.errorInvalidCredentials;
+            return;
+        }
+        const email = username + DUMMY_DOMAIN;
+        try {
+            dom.authError.textContent = '';
+            await auth.signInWithEmailAndPassword(email, password);
+        } catch (error) {
+            if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+                dom.authError.textContent = t.errorInvalidCredentials;
+            } else {
+                dom.authError.textContent = t.errorGeneric;
+            }
+        }
       },
       
       handleLogout() {
         auth.signOut();
       },
 
-      loadPreferences() {
-          this.setTheme(localStorage.getItem('theme') || 'dark');
+      loadDevicePreferences() {
+          const theme = localStorage.getItem('theme') || 'dark';
+          this.setTheme(theme, false);
           currentLang = localStorage.getItem('language') || 'br';
+      },
+      
+      async loadUserPreferences(user) {
+        if (!user) return;
+        try {
+            const docRef = db.collection('userPreferences').doc(user.uid);
+            const docSnap = await docRef.get();
+            if (docSnap.exists) {
+                const prefs = docSnap.data();
+                if (prefs.theme) {
+                    this.setTheme(prefs.theme, false);
+                }
+                if (prefs.language) {
+                    this.setLanguage(prefs.language, false, true);
+                }
+                if (prefs.prices) {
+                    for (const key in prefs.prices) {
+                        const priceInput = document.getElementById(`price-${key}`);
+                        if (priceInput && prefs.prices[key]) {
+                            priceInput.value = prefs.prices[key];
+                        }
+                    }
+                    this.updateUI();
+                }
+            }
+        } catch (error) {
+            console.error("Erro ao carregar preferências do usuário:", error);
+        }
+      },
+
+      triggerSavePreferences() {
+          clearTimeout(this.saveTimeout);
+          this.saveTimeout = setTimeout(() => this.savePreferences(), 2000);
+      },
+
+      async savePreferences() {
+          if (!auth.currentUser || dom.resellerModeToggle.checked) return;
+
+          const pricesToSave = {};
+          for (const key in ITENS_CATALOGO) {
+              const priceInput = document.getElementById(`price-${key}`);
+              if (priceInput) {
+                  pricesToSave[key] = parseFloat(priceInput.value);
+              }
+          }
+
+          const prefs = {
+              theme: dom.html.getAttribute('data-theme'),
+              language: currentLang,
+              prices: pricesToSave
+          };
+          
+          try {
+              await db.collection('userPreferences').doc(auth.currentUser.uid).set(prefs, { merge: true });
+          } catch (error) {
+              console.error("Erro ao salvar preferências:", error);
+          }
       },
       
       setDefaultTab() {
@@ -724,7 +922,7 @@
               dom.btnCreateSeller.disabled = false;
           }
       },
-       
+      
       async loadUsers() {
           dom.userListContainer.innerHTML = '<p>Carregando usuários...</p>';
           try {
@@ -735,6 +933,35 @@
               console.error("Erro ao carregar usuários:", error);
               dom.userListContainer.innerHTML = `<p style="color: var(--text-error);">Erro ao carregar usuários: ${error.message}</p>`;
           }
+      },
+      
+      async populateResellerCustomerDropdown() {
+        try {
+            const listAllUsers = functions.httpsCallable('listAllUsers');
+            const result = await listAllUsers();
+            const users = result.data;
+            
+            dom.resellerCustomerSelect.innerHTML = '<option value="">Selecione um cliente...</option>'; 
+
+            users.forEach(user => {
+                if (user.email === auth.currentUser.email) return;
+
+                const username = user.email.split('@')[0];
+                const option = document.createElement('option');
+                option.value = username;
+                option.textContent = username;
+                dom.resellerCustomerSelect.appendChild(option);
+            });
+            
+            const manualOption = document.createElement('option');
+            manualOption.value = 'manual';
+            manualOption.textContent = 'Digitar nome manualmente...';
+            dom.resellerCustomerSelect.appendChild(manualOption);
+
+        } catch (error) {
+            console.error("Erro ao carregar lista de clientes revendedores:", error);
+            dom.resellerCustomerSelect.innerHTML = `<option value="">Erro ao carregar</option>`;
+        }
       },
 
       renderUserList(users) {
@@ -1005,9 +1232,9 @@
             this.renderSalesChart(salesLabels, salesData);
             const tokenCounts = {};
             receipts.forEach(receipt => {
-                if (receipt.items && typeof receipt.items === 'object') {
-                    for (const tokenKey in receipt.items) {
-                        tokenCounts[tokenKey] = (tokenCounts[tokenKey] || 0) + receipt.items[tokenKey];
+                if (receipt.itemsData && typeof receipt.itemsData === 'object') {
+                    for (const tokenKey in receipt.itemsData) {
+                        tokenCounts[tokenKey] = (tokenCounts[tokenKey] || 0) + receipt.itemsData[tokenKey].qty;
                     }
                 }
             });
@@ -1080,38 +1307,90 @@
           });
       },
       
-      setLanguage(lang, isLoginScreenOnly = false) {
+      setLanguage(lang, shouldSave = true, skipReload = false) {
           currentLang = lang;
           localStorage.setItem('language', lang);
           document.querySelectorAll('[data-translate-key]').forEach(el => {
               const key = el.dataset.translateKey;
-              if (TRANSLATIONS[lang][key]) el.innerText = TRANSLATIONS[lang][key];
+              const translation = TRANSLATIONS[lang][key];
+              if (translation && typeof translation !== 'function') {
+                  el.innerText = translation;
+              }
           });
           document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
               const key = el.dataset.translateKeyPlaceholder;
-              if (TRANSLATIONS[lang][key]) el.placeholder = TRANSLATIONS[lang][key];
+              if (TRANSLATIONS[lang][key]) {
+                  el.placeholder = TRANSLATIONS[lang][key];
+              }
           });
           document.title = TRANSLATIONS[lang].pageTitle;
           dom.langBr.classList.toggle('active', lang === 'br');
           dom.langEn.classList.toggle('active', lang === 'en');
           
-          if (!isLoginScreenOnly) {
+          if (!skipReload) {
               this.loadTable();
               this.buildTokenFilters(dom.tokenFiltersContainer);
               this.updateUI();
+          }
+
+          if (shouldSave) {
+              this.triggerSavePreferences();
           }
       },
       
       toggleMode(mode) {
         dom.distributorSection.style.display = mode === 'mush' ? 'flex' : 'none';
-        dom.tabelaItensBody.querySelectorAll('input').forEach(input => input.disabled = (mode === 'mush'));
-        document.getElementById('btnCalcular').style.display = mode === 'quantity' ? 'inline-block' : 'none';
-        if (mode === 'mush') this.buildTokenFilters(dom.tokenFiltersContainer);
+        const isMushMode = mode === 'mush';
+        dom.tabelaItensBody.querySelectorAll('input').forEach(input => {
+            if (input.id.startsWith('qtd-')) {
+                input.disabled = isMushMode;
+            }
+        });
+        document.getElementById('btnCalcular').style.display = isMushMode ? 'none' : 'inline-block';
+        if (isMushMode) this.buildTokenFilters(dom.tokenFiltersContainer);
       },
 
-      setTheme(theme) {
+      async toggleResellerMode(event) {
+          const isResellerMode = event.target.checked;
+          
+          if (isResellerMode) {
+              dom.customerNameContainer.classList.add('hidden');
+              dom.resellerCustomerSelectionContainer.classList.remove('hidden');
+              await this.populateResellerCustomerDropdown();
+              this.checkResellerLimit();
+          } else {
+              dom.customerNameContainer.classList.remove('hidden');
+              dom.resellerCustomerSelectionContainer.classList.add('hidden');
+              dom.resellerLimitStatus.classList.add('hidden');
+              clearInterval(this.resellerLimitInterval);
+          }
+
+          if (isResellerMode) {
+              for (const key in PRECOS_RESELLER) {
+                  const priceInput = document.getElementById(`price-${key}`);
+                  if (priceInput) {
+                      priceInput.value = PRECOS_RESELLER[key];
+                      priceInput.disabled = true;
+                  }
+              }
+          } else {
+              for (const key in ITENS_CATALOGO) {
+                  const priceInput = document.getElementById(`price-${key}`);
+                  if (priceInput) {
+                      priceInput.disabled = false;
+                  }
+              }
+              await this.loadUserPreferences(auth.currentUser);
+          }
+          this.updateUI();
+      },
+      
+      setTheme(theme, shouldSave = true) {
           dom.html.setAttribute('data-theme', theme);
           localStorage.setItem('theme', theme);
+          if (shouldSave) {
+            this.triggerSavePreferences();
+          }
       },
 
       buildTokenFilters(container) {
@@ -1125,6 +1404,91 @@
           if (container.id === 'token-filters-container') {
               container.dispatchEvent(new Event('change'));
           }
+      },
+
+      getFormattedDate() {
+          const today = new Date();
+          const year = today.getFullYear();
+          const month = String(today.getMonth() + 1).padStart(2, '0');
+          const day = String(today.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+      },
+
+      async checkResellerLimit() {
+          if (!dom.resellerModeToggle.checked) {
+              dom.resellerLimitStatus.classList.add('hidden');
+              clearInterval(this.resellerLimitInterval);
+              return;
+          }
+
+          let customerName;
+          if (dom.resellerCustomerSelect.value === 'manual') {
+              customerName = dom.resellerCustomerManualInput.value.trim().toLowerCase();
+          } else {
+              customerName = dom.resellerCustomerSelect.value.trim().toLowerCase();
+          }
+
+          if (!customerName) {
+              dom.resellerLimitStatus.classList.add('hidden');
+              clearInterval(this.resellerLimitInterval);
+              this.currentCustomerUsage = { revive: 0, max: 0 };
+              return;
+          }
+
+          const dateStr = this.getFormattedDate();
+          const docId = `${customerName}_${dateStr}`;
+          
+          try {
+              const docRef = db.collection('resellerLimits').doc(docId);
+              const docSnap = await docRef.get();
+
+              if (docSnap.exists) {
+                  const data = docSnap.data();
+                  this.currentCustomerUsage.revive = data.reviveCount || 0;
+                  this.currentCustomerUsage.max = data.maxCount || 0;
+              } else {
+                  this.currentCustomerUsage = { revive: 0, max: 0 };
+              }
+              
+              this.updateResellerLimitStatusUI();
+              dom.resellerLimitStatus.classList.remove('hidden');
+
+          } catch (error) {
+              console.error("Erro ao verificar limite do revendedor:", error);
+              this.currentCustomerUsage = { revive: 0, max: 0 };
+              dom.resellerLimitStatus.classList.add('hidden');
+          }
+      },
+      
+      updateResellerLimitStatusUI() {
+            clearInterval(this.resellerLimitInterval);
+
+            const updateTimer = () => {
+                const now = new Date();
+                const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+                const diff = endOfDay - now;
+
+                if (diff < 0) {
+                    this.checkResellerLimit();
+                    return;
+                }
+
+                const hours = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
+                const minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                const seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+                const timeString = `${hours}:${minutes}:${seconds}`;
+                
+                const t = TRANSLATIONS[currentLang];
+                dom.resellerLimitStatus.innerHTML = t.resellerLimitStatus(
+                    this.currentCustomerUsage.revive,
+                    this.currentCustomerUsage.max,
+                    RESELLER_DAILY_LIMIT,
+                    timeString
+                );
+            };
+
+            updateTimer();
+            this.resellerLimitInterval = setInterval(updateTimer, 1000);
       },
       
       loadTable() {
@@ -1176,6 +1540,7 @@
           }
 
           this.updateUI();
+          this.triggerSavePreferences();
       },
 
       calculateValues() {
@@ -1184,23 +1549,47 @@
           let totalFinal = 0;
           const itensCalculados = {};
           
+          const isResellerMode = dom.resellerModeToggle.checked;
+          
+          let reviveLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive;
+          let maxLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max;
+          
           for (const key in ITENS_CATALOGO) {
-              const precoAtualInput = document.getElementById(`price-${key}`);
-              const precoAtual = precoAtualInput ? parseFloat(precoAtualInput.value) : ITENS_CATALOGO[key].preco;
+              const precoBase = ITENS_CATALOGO[key].preco;
+              const precoRevendedor = PRECOS_RESELLER[key];
               
               const quantidadeInput = document.getElementById(`qtd-${key}`);
               const quantidade = quantidadeInput ? parseInt(quantidadeInput.value) || 0 : 0;
-              
-              const subtotal = quantidade * (precoAtual * fatorDesconto);
+              let subtotal = 0;
+              let precoAplicado = precoBase;
+
+              if (isResellerMode && (key === 'revive' || key === 'max')) {
+                  const limitRemaining = (key === 'revive') ? reviveLimitRemaining : maxLimitRemaining;
+                  
+                  const tokensDentroDoLimite = Math.max(0, Math.min(quantidade, limitRemaining));
+                  const tokensForaDoLimite = Math.max(0, quantidade - tokensDentroDoLimite);
+                  
+                  subtotal += tokensDentroDoLimite * precoRevendedor;
+                  subtotal += tokensForaDoLimite * precoBase;
+                  
+                  precoAplicado = precoRevendedor;
+
+              } else {
+                  const precoInput = document.getElementById(`price-${key}`);
+                  precoAplicado = isResellerMode ? PRECOS_RESELLER[key] : (precoInput ? parseFloat(precoInput.value) : precoBase);
+                  subtotal = quantidade * (precoAplicado * fatorDesconto);
+              }
+
               totalFinal += subtotal;
               
               itensCalculados[key] = {
                   quantidade,
-                  precoAtual: precoAtual,
-                  precoComDesconto: precoAtual * fatorDesconto,
+                  precoAtual: precoAplicado,
+                  precoComDesconto: subtotal / quantidade || 0,
                   subtotal
               };
           }
+
           return { totalFinal, descontoPercentual, itens: itensCalculados };
       },
       
@@ -1224,6 +1613,10 @@
       reset(clearDistributor = true) {
           dom.nomeClienteInput.value = '';
           dom.descontoInput.value = '';
+          dom.resellerCustomerSelect.value = '';
+          dom.resellerCustomerManualInput.value = '';
+          dom.resellerCustomerManualInput.classList.add('hidden');
+          
           if (clearDistributor) {
               dom.totalMushInput.value = '';
               dom.leftoverMushDiv.innerHTML = '';
@@ -1233,10 +1626,17 @@
               const qtdInput = document.getElementById(`qtd-${key}`);
               if (qtdInput) qtdInput.value = 0;
 
-              const priceInput = document.getElementById(`price-${key}`);
-              if (priceInput) priceInput.value = ITENS_CATALOGO[key].preco;
+              if (!dom.resellerModeToggle.checked) {
+                const priceInput = document.getElementById(`price-${key}`);
+                if (priceInput) priceInput.value = ITENS_CATALOGO[key].preco;
+              }
           });
+
+          this.checkResellerLimit();
           this.updateUI();
+          if(!dom.resellerModeToggle.checked) {
+            this.triggerSavePreferences();
+          }
       },
       
       distributeMush() {
@@ -1341,12 +1741,35 @@
       },
 
       async generateImage() {
+        const isResellerMode = dom.resellerModeToggle.checked;
+        if (isResellerMode) {
+            const reviveQty = parseInt(document.getElementById('qtd-revive').value) || 0;
+            const maxQty = parseInt(document.getElementById('qtd-max').value) || 0;
+            const reviveLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive;
+            const maxLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max;
+
+            if (reviveQty > reviveLimitRemaining || maxQty > maxLimitRemaining) {
+                 alert(TRANSLATIONS[currentLang].resellerLimitExceededWarning);
+            }
+        }
+
         const calculo = this.calculateValues();
         if(!calculo) return;
         const t = TRANSLATIONS[currentLang];
         let temItens = Object.values(calculo.itens).some(item => item.quantidade > 0);
         if (!temItens) { alert(t.alertNoItems); return; }
-        const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+        
+        let customerName;
+        if (isResellerMode) {
+            if (dom.resellerCustomerSelect.value === 'manual') {
+                customerName = dom.resellerCustomerManualInput.value.trim() || 'Revendedor_Nao_Identificado';
+            } else {
+                customerName = dom.resellerCustomerSelect.value || 'Revendedor_Nao_Identificado';
+            }
+        } else {
+            customerName = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+        }
+        
         const itemsToSave = {};
         for(const key in calculo.itens) {
             if(calculo.itens[key].quantidade > 0) {
@@ -1357,23 +1780,73 @@
             }
         }
         const receiptData = {
-            customerName: nome, discountApplied: calculo.descontoPercentual, grandTotal: calculo.totalFinal,
+            customerName: customerName, 
+            discountApplied: calculo.descontoPercentual, 
+            grandTotal: calculo.totalFinal,
             itemsData: itemsToSave, 
-            seller: auth.currentUser.email, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            seller: this.currentUsername, 
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
+
         try {
             await db.collection("receipts").add(receiptData);
+
+            if (isResellerMode && customerName !== 'Revendedor_Nao_Identificado') {
+                const reviveComprados = calculo.itens.revive?.quantidade || 0;
+                const maxComprados = calculo.itens.max?.quantidade || 0;
+
+                if (reviveComprados > 0 || maxComprados > 0) {
+                    const customerNameForDb = customerName.toLowerCase();
+                    const dateStr = this.getFormattedDate();
+                    const docId = `${customerNameForDb}_${dateStr}`;
+                    const docRef = db.collection('resellerLimits').doc(docId);
+                    
+                    const updateData = {
+                        customerName: customerNameForDb,
+                        date: dateStr,
+                        lastUpdatedBy: auth.currentUser.email
+                    };
+                    if (reviveComprados > 0) {
+                        updateData.reviveCount = firebase.firestore.FieldValue.increment(reviveComprados);
+                    }
+                    if (maxComprados > 0) {
+                        updateData.maxCount = firebase.firestore.FieldValue.increment(maxComprados);
+                    }
+                    
+                    await docRef.set(updateData, { merge: true });
+                    
+                    this.currentCustomerUsage.revive += reviveComprados;
+                    this.currentCustomerUsage.max += maxComprados;
+                    this.updateResellerLimitStatusUI();
+                }
+            }
         } catch(e) {
             console.error("Erro ao salvar no Firestore: ", e);
-            alert("Houve um erro ao salvar o recibo no banco de dados.");
+            alert("Houve um erro ao salvar o recibo ou atualizar o limite no banco de dados.");
+            return;
         }
-        let receiptHtml = `<h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2><p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">${nome}</p><h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3><table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>`;
+
+        let receiptHtml = `<h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2><p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">${customerName}</p><h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3><table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>`;
         let subtotalBrutoSemDesconto = 0;
         for(const key in calculo.itens) {
             const item = calculo.itens[key];
             if(item.quantidade > 0) {
                 receiptHtml += `<tr><td style="padding: 5px 0;">${ITENS_CATALOGO[key][`name_${currentLang}`]} x ${item.quantidade}</td><td style="padding: 5px 0; text-align: right;">${item.subtotal.toFixed(2)}</td></tr>`;
-                subtotalBrutoSemDesconto += item.quantidade * item.precoAtual;
+                
+                if (isResellerMode) {
+                    let precoOriginal = ITENS_CATALOGO[key].preco;
+                    let precoDeRevenda = PRECOS_RESELLER[key];
+                    if (key === 'revive' || key === 'max') {
+                         const limitRemaining = (key === 'revive') ? (RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive) : (RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max);
+                         const tokensDentroDoLimite = Math.max(0, Math.min(item.quantidade, limitRemaining));
+                         const tokensForaDoLimite = Math.max(0, item.quantidade - tokensDentroDoLimite);
+                         subtotalBrutoSemDesconto += (tokensDentroDoLimite * precoDeRevenda) + (tokensForaDoLimite * precoOriginal);
+                    } else {
+                         subtotalBrutoSemDesconto += item.quantidade * precoDeRevenda;
+                    }
+                } else {
+                    subtotalBrutoSemDesconto += item.quantidade * ITENS_CATALOGO[key].preco;
+                }
             }
         }
         
@@ -1390,7 +1863,7 @@
         setTimeout(() => {
             html2canvas(resultadoDiv, { backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
-                const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+                const nomeSanitizado = customerName.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
                 link.download = `${nomeSanitizado}_recibo.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
