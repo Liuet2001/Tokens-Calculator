@@ -577,7 +577,7 @@
                   dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
               }
           } catch (error) {
-              console.error("Erro ao buscar histórico: ", error);
+              console.error("MENSAGEM DO FIREBASE (copie o link abaixo, se houver): ", error.message);
               if (error.code === 'failed-precondition') {
                    dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro por data precisa de um índice no Firestore. Acesse o console do seu navegador (F12) para encontrar um link que cria este índice automaticamente. Após criá-lo (pode levar alguns minutos), a funcionalidade será liberada.</p>`;
                    console.log("Para criar o índice, acesse o link gerado pelo Firebase ou crie manualmente na coleção 'receipts' com o campo 'createdAt' (decrescente).");
