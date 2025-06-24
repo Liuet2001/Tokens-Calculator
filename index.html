@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Calculadora de Tokens</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
@@ -11,6 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-functions-compat.js"></script>
 
 <style>
   :root {
@@ -26,6 +28,7 @@
     --text-primary: #f8fafc;
     --text-secondary: #a1a1aa;
     --text-error: #fca5a5;
+    --grid-color: rgba(255, 255, 255, 0.15);
   }
 
   html[data-theme='light'] {
@@ -39,6 +42,7 @@
     --text-primary: #18181b;
     --text-secondary: #71717a;
     --text-error: #b91c1c;
+    --grid-color: rgba(0, 0, 0, 0.1);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -151,10 +155,11 @@
   .buttons { display: flex; justify-content: center; gap: 12px; margin-top: 16px; flex-wrap: wrap;}
   button { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; border: none; }
   button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn { background: var(--accent-primary); color: #fff; }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover { background: var(--accent-hover); }
-  #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
-  #btnGerarImagem, #btnLogout, #btnDistributeLeftover { background: var(--bg-tertiary); color: var(--text-primary); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;}
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller { background: var(--accent-primary); color: #fff; }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover { background: var(--accent-hover); }
+  #btnResetar, .delete-history-btn { background: var(--accent-danger); color: var(--text-primary); }
+  #btnGerarImagem, #btnLogout, #btnDistributeLeftover, #btn-prev-page, #btn-next-page { background: var(--bg-tertiary); color: var(--text-primary); }
 </style>
 </head>
 <body>
@@ -193,11 +198,13 @@
       </div>
 
       <div class="tab-navigation">
-          <button class="tab-link active" data-tab="calculator-view" data-translate-key="tabCalculator">Calculadora</button>
+          <button class="tab-link" data-tab="calculator-view" data-translate-key="tabCalculator">Calculadora</button>
           <button class="tab-link" data-tab="history-view" data-translate-key="tabHistory">Histórico</button>
+          <button class="tab-link" data-tab="dashboard-view">Dashboard</button>
+          <button class="tab-link" data-tab="management-view" style="display: none;">Gerência</button>
       </div>
 
-      <div id="calculator-view" class="tab-content active">
+      <div id="calculator-view" class="tab-content">
           <h2 data-translate-key="mainHeader">Calculadora de Tokens</h2>
           <div class="input-group">
             <label for="nomeCliente" data-translate-key="idLabel">Identificador / Nome</label>
@@ -221,7 +228,6 @@
                   <label data-translate-key="distributeTokensLabel">Tokens Desejáveis para Distribuição</label>
                   <div class="token-filters" id="token-filters-container"></div>
               </div>
-
               <div id="two-token-options" class="hidden" style="margin-top: 10px;">
                   <label>Estratégia para 2 tokens:</label>
                   <div class="mode-selector">
@@ -231,7 +237,6 @@
                       <label for="strategy-split">Dividir 50/50</label>
                   </div>
               </div>
-              
               <div class="distributor-controls">
                   <div class="input-group">
                       <label for="total-mush" data-translate-key="totalMushLabel">Total de Mush a Gastar</label>
@@ -240,7 +245,6 @@
                   <button id="btnDistribute" data-translate-key="btnDistribute">Distribuir</button>
               </div>
               <div id="leftover-mush"></div>
-              
               <div id="leftover-distributor-section" class="hidden" style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
                   <label>Distribuir o troco para:</label>
                   <div class="token-filters" id="leftover-token-filters-container"></div>
@@ -275,7 +279,6 @@
       
       <div id="history-view" class="tab-content hidden">
           <h2 data-translate-key="historyHeader">Histórico de Vendas</h2>
-
           <div class="input-group" style="align-items: center; margin-bottom: 20px;">
               <label>Visualizar:</label>
               <div class="mode-selector">
@@ -285,7 +288,6 @@
                   <label for="history-view-summary">Resumo por Cliente</label>
               </div>
           </div>
-
           <div id="history-filter-bar" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 20px; padding: 15px; border: 1px solid var(--border-color); border-radius: 12px;">
               <div class="input-group" style="flex-grow: 1;">
                   <label for="history-search-input">Buscar por Nome</label>
@@ -301,8 +303,45 @@
               </div>
               <button id="history-apply-filter-btn">Aplicar Filtros</button>
           </div>
-
           <div id="history-table-container"></div>
+          <div id="history-pagination-controls" class="buttons hidden">
+              <button id="btn-prev-page">Anterior</button>
+              <span id="page-number-display" style="align-self: center; font-weight: 500;"></span>
+              <button id="btn-next-page">Próxima</button>
+          </div>
+      </div>
+
+      <div id="dashboard-view" class="tab-content hidden">
+          <h2>Dashboard de Vendas</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+              <div class="chart-container" style="padding: 20px; background-color: var(--bg-primary); border-radius: 12px;">
+                  <h3 style="text-align: center; margin-bottom: 15px;">Vendas por Dia</h3>
+                  <canvas id="sales-over-time-chart"></canvas>
+              </div>
+              <div class="chart-container" style="padding: 20px; background-color: var(--bg-primary); border-radius: 12px;">
+                  <h3 style="text-align: center; margin-bottom: 15px;">Tokens Mais Vendidos</h3>
+                  <canvas id="tokens-sold-chart"></canvas>
+              </div>
+          </div>
+      </div>
+      
+      <div id="management-view" class="tab-content hidden">
+          <h2>Gerenciamento de Vendedores</h2>
+          <div class="distributor-container">
+              <h3 style="text-align: center; margin-bottom: 15px;">Criar Novo Vendedor</h3>
+              <div class="input-group">
+                  <label for="new-seller-username">Nome de Usuário do Vendedor</label>
+                  <input type="text" id="new-seller-username" placeholder="Ex: joao.silva">
+              </div>
+              <div class="input-group">
+                  <label for="new-seller-password">Senha Provisória</label>
+                  <input type="password" id="new-seller-password" placeholder="Mínimo 6 caracteres">
+              </div>
+              <div class="buttons">
+                  <button id="btn-create-seller">Criar Vendedor</button>
+              </div>
+              <p id="create-seller-feedback" style="text-align: center; min-height: 20px; font-weight: 500;"></p>
+          </div>
       </div>
     </div>
 </div>
@@ -325,6 +364,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   const auth = firebase.auth();
+  const functions = firebase.functions();
 
   // --- LÓGICA DA APLICAÇÃO ---
     const MOEDA_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACUSURBVDhPY/j//z8DJYCJgUJWCiDPmPrP4P/fv//f//79//Pnx/+/f/8DNlDrAKSkG4B84BTg//+fA5AAYs4A5gA1zwBC/v/79w8gCajhF0D+jAar4f9/fv8DksAqsX4A8gNTAf8ZGP5/YOD5/wz8//P/D/gMWQBL/x/g/x8Y/v9g+P+DAAATz2sNmmNYXAAAAABJRU5ErkJggg==";
@@ -413,6 +453,16 @@
       historyDateStart: document.getElementById('history-date-start'),
       historyDateEnd: document.getElementById('history-date-end'),
       historyApplyFilterBtn: document.getElementById('history-apply-filter-btn'),
+      historyPaginationControls: document.getElementById('history-pagination-controls'),
+      btnPrevPage: document.getElementById('btn-prev-page'),
+      btnNextPage: document.getElementById('btn-next-page'),
+      pageNumberDisplay: document.getElementById('page-number-display'),
+      salesOverTimeChart: document.getElementById('sales-over-time-chart'),
+      tokensSoldChart: document.getElementById('tokens-sold-chart'),
+      newSellerUsernameInput: document.getElementById('new-seller-username'),
+      newSellerPasswordInput: document.getElementById('new-seller-password'),
+      btnCreateSeller: document.getElementById('btn-create-seller'),
+      createSellerFeedback: document.getElementById('create-seller-feedback'),
     };
 
     let currentLang = 'br';
@@ -420,6 +470,13 @@
     const app = {
       calculatorInitialized: false,
       currentLeftover: 0,
+      historyPageSize: 15,
+      historyPageCursors: [null],
+      historyCurrentPage: 0,
+      historyHasNextPage: true,
+      salesChartInstance: null,
+      tokensChartInstance: null,
+      isCurrentUserAdmin: false,
 
       init() {
         this.loadPreferences();
@@ -430,16 +487,26 @@
       addAuthListeners() {
         auth.onAuthStateChanged(user => {
             if (user) {
-                dom.authContainer.classList.add('hidden');
-                dom.appContainer.classList.remove('hidden');
-                const username = user.email.split('@')[0];
-                dom.loggedInUserDiv.innerHTML = `<span>${TRANSLATIONS[currentLang].loggedInAs}</span> <span class="username">${username}</span>`;
-                if (!this.calculatorInitialized) {
-                    this.addAppEventListeners();
-                    this.setLanguage(currentLang);
-                    this.calculatorInitialized = true;
-                }
+                user.getIdTokenResult(true).then(idTokenResult => {
+                    this.isCurrentUserAdmin = !!idTokenResult.claims.admin;
+                    console.log(`Usuário logado. É admin? ${this.isCurrentUserAdmin}`);
+
+                    document.querySelector('[data-tab="management-view"]').style.display = this.isCurrentUserAdmin ? 'inline-block' : 'none';
+
+                    dom.authContainer.classList.add('hidden');
+                    dom.appContainer.classList.remove('hidden');
+                    const username = user.email.split('@')[0];
+                    dom.loggedInUserDiv.innerHTML = `<span>${TRANSLATIONS[currentLang].loggedInAs}</span> <span class="username">${username}</span>`;
+                    
+                    if (!this.calculatorInitialized) {
+                        this.addAppEventListeners();
+                        this.setLanguage(currentLang);
+                        this.setDefaultTab(); 
+                        this.calculatorInitialized = true;
+                    }
+                });
             } else {
+                this.isCurrentUserAdmin = false;
                 dom.authContainer.classList.remove('hidden');
                 dom.appContainer.classList.add('hidden');
                 this.calculatorInitialized = false; 
@@ -447,6 +514,43 @@
         });
         dom.btnLogin.addEventListener('click', this.handleLogin.bind(this));
         dom.btnLogout.addEventListener('click', this.handleLogout.bind(this));
+      },
+
+      addAppEventListeners() {
+          dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
+          document.getElementById('btnCalcular').addEventListener('click', this.updateUI.bind(this));
+          document.getElementById('btnResetar').addEventListener('click', this.reset.bind(this));
+          document.getElementById('btnGerarImagem').addEventListener('click', this.generateImage.bind(this));
+          dom.themeToggle.addEventListener('click', () => {
+              const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+              this.setTheme(newTheme);
+              if(document.getElementById('dashboard-view').classList.contains('active')) {
+                  this.loadDashboardData();
+              }
+          });
+          dom.langBr.addEventListener('click', () => this.setLanguage('br'));
+          dom.langEn.addEventListener('click', () => this.setLanguage('en'));
+          dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
+          dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
+          dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
+          dom.btnDistributeLeftover.addEventListener('click', this.distributeLeftoverMush.bind(this));
+          dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
+          dom.tokenFiltersContainer.addEventListener('change', () => {
+              const selectedCount = dom.tokenFiltersContainer.querySelectorAll('input:checked').length;
+              document.getElementById('two-token-options').classList.toggle('hidden', selectedCount !== 2);
+          });
+          document.querySelectorAll('input[name="history-view-mode"]').forEach(radio => {
+              radio.addEventListener('change', () => this.loadHistory('first'));
+          });
+          dom.historyApplyFilterBtn.addEventListener('click', () => this.loadHistory('first'));
+          dom.btnPrevPage.addEventListener('click', () => this.loadHistory('prev'));
+          dom.btnNextPage.addEventListener('click', () => this.loadHistory('next'));
+          dom.historyTableContainer.addEventListener('click', (event) => {
+              if (event.target && event.target.matches('.delete-history-btn')) {
+                  this.handleHistoryDelete(event.target.dataset.id);
+              }
+          });
+          dom.btnCreateSeller.addEventListener('click', this.handleCreateUser.bind(this));
       },
       
       async handleLogin() {
@@ -470,122 +574,326 @@
           }
       },
       
-      handleLogout() { auth.signOut(); },
+      handleLogout() {
+        auth.signOut();
+      },
 
       loadPreferences() {
           this.setTheme(localStorage.getItem('theme') || 'dark');
           currentLang = localStorage.getItem('language') || 'br';
       },
-
-      addAppEventListeners() {
-          dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
-          document.getElementById('btnCalcular').addEventListener('click', this.updateUI.bind(this));
-          document.getElementById('btnResetar').addEventListener('click', this.reset.bind(this));
-          document.getElementById('btnGerarImagem').addEventListener('click', this.generateImage.bind(this));
-          dom.themeToggle.addEventListener('click', () => this.setTheme(dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
-          dom.langBr.addEventListener('click', () => this.setLanguage('br'));
-          dom.langEn.addEventListener('click', () => this.setLanguage('en'));
-          dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
-          dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
-          dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
-          dom.btnDistributeLeftover.addEventListener('click', this.distributeLeftoverMush.bind(this));
-          dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
-
-          dom.tokenFiltersContainer.addEventListener('change', () => {
-              const selectedCount = dom.tokenFiltersContainer.querySelectorAll('input:checked').length;
-              document.getElementById('two-token-options').classList.toggle('hidden', selectedCount !== 2);
-          });
-          
-          document.querySelectorAll('input[name="history-view-mode"]').forEach(radio => {
-              radio.addEventListener('change', this.loadHistory.bind(this));
-          });
-          
-          dom.historyApplyFilterBtn.addEventListener('click', this.loadHistory.bind(this));
+      
+      setDefaultTab() {
+        dom.tabLinks.forEach(link => link.classList.remove('active'));
+        dom.tabContents.forEach(content => content.classList.add('hidden'));
+        document.querySelector('[data-tab="calculator-view"]').classList.add('active');
+        document.getElementById('calculator-view').classList.remove('hidden');
       },
 
       handleTabClick(event) {
           const clickedTab = event.target.closest('.tab-link');
-          if (!clickedTab) return;
-          const tabId = clickedTab.dataset.tab;
-          
-          if(tabId === 'history-view' && !document.getElementById(tabId).classList.contains('active')) {
-              this.loadHistory();
+          if (!clickedTab || clickedTab.classList.contains('active')) {
+              return;
           }
-
           dom.tabLinks.forEach(link => link.classList.remove('active'));
           dom.tabContents.forEach(content => content.classList.add('hidden'));
-          
           clickedTab.classList.add('active');
+          const tabId = clickedTab.dataset.tab;
           document.getElementById(tabId).classList.remove('hidden');
+          if (tabId === 'history-view') {
+              this.loadHistory('first');
+          } else if (tabId === 'dashboard-view') {
+              this.loadDashboardData();
+          }
       },
       
-      async loadHistory() {
+      async handleHistoryDelete(docId) {
+        if (!docId) return;
+        
+        const confirmDelete = confirm("Tem certeza que deseja excluir este registro de venda? Esta ação não pode ser desfeita.");
+        
+        if (confirmDelete) {
+            try {
+                await db.collection('receipts').doc(docId).delete();
+                alert('Registro excluído com sucesso!');
+                this.loadHistory('first');
+            } catch (error) {
+                console.error("Erro ao excluir registro:", error);
+                alert("Ocorreu um erro ao excluir o registro. Verifique suas permissões.");
+            }
+        }
+      },
+
+      async handleCreateUser() {
+        const username = dom.newSellerUsernameInput.value.trim();
+        const password = dom.newSellerPasswordInput.value;
+        const feedbackEl = dom.createSellerFeedback;
+
+        if (!username || !password) {
+            feedbackEl.textContent = "Por favor, preencha todos os campos.";
+            feedbackEl.style.color = 'var(--text-error)';
+            return;
+        }
+
+        feedbackEl.textContent = "Criando usuário...";
+        feedbackEl.style.color = 'var(--text-secondary)';
+
+        try {
+            const createUser = functions.httpsCallable('createUser');
+            const result = await createUser({ username: username, password: password });
+            feedbackEl.textContent = result.data.result;
+            feedbackEl.style.color = 'var(--accent-primary)';
+            dom.newSellerUsernameInput.value = '';
+            dom.newSellerPasswordInput.value = '';
+        } catch (error) {
+            console.error("Erro ao chamar a Cloud Function:", error);
+            feedbackEl.textContent = `Erro: ${error.message}`;
+            feedbackEl.style.color = 'var(--text-error)';
+        }
+     },
+      
+      async loadHistory(direction = 'first') {
           const t = TRANSLATIONS[currentLang];
           dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
+          dom.historyPaginationControls.classList.add('hidden');
+
+          if (direction === 'first') {
+              this.historyPageCursors = [null];
+              this.historyCurrentPage = 0;
+          }
+
+          let pageToLoad = this.historyCurrentPage;
+          if (direction === 'next') {
+              pageToLoad++;
+          } else if (direction === 'prev' && pageToLoad > 0) {
+              pageToLoad--;
+          }
           
+          const lastDoc = this.historyPageCursors[pageToLoad];
           const viewMode = document.querySelector('input[name="history-view-mode"]:checked').value;
           const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
-          const startDate = dom.historyDateStart.value ? new Date(dom.historyDateStart.value) : null;
-          const endDate = dom.historyDateEnd.value ? new Date(dom.historyDateEnd.value) : null;
-
-          if (endDate) endDate.setHours(23, 59, 59, 999);
+          
+          let startDate = null;
+          if (dom.historyDateStart.value) {
+              const parts = dom.historyDateStart.value.split('-');
+              startDate = new Date(parts[0], parts[1] - 1, parts[2]);
+          }
+          let endDate = null;
+          if (dom.historyDateEnd.value) {
+              const parts = dom.historyDateEnd.value.split('-');
+              endDate = new Date(parts[0], parts[1] - 1, parts[2]);
+              endDate.setHours(23, 59, 59, 999);
+          }
 
           try {
+              if (viewMode === 'summary') {
+                  this.renderSummaryView(searchTerm, startDate, endDate);
+                  return;
+              }
+
               let query = db.collection("receipts");
               if (startDate) query = query.where('createdAt', '>=', startDate);
               if (endDate) query = query.where('createdAt', '<=', endDate);
               query = query.orderBy('createdAt', 'desc');
+              if (lastDoc) query = query.startAfter(lastDoc);
+              query = query.limit(this.historyPageSize + 1);
 
               let querySnapshot = await query.get();
               let docs = querySnapshot.docs;
+              
+              this.historyHasNextPage = docs.length > this.historyPageSize;
+              if (this.historyHasNextPage) docs.pop();
+              
+              const lastVisibleDoc = docs[docs.length - 1];
+              if (direction === 'next' && lastVisibleDoc) {
+                  this.historyPageCursors[pageToLoad] = lastVisibleDoc;
+              }
+              this.historyCurrentPage = pageToLoad;
 
               if (searchTerm) {
                   docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
               }
 
-              if (docs.length === 0) {
+              if (docs.length === 0 && this.historyCurrentPage === 0) {
                   dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
                   return;
               }
+              
+              this.renderAllSalesView(docs);
+              
+              dom.historyPaginationControls.classList.remove('hidden');
+              dom.pageNumberDisplay.textContent = `Página ${this.historyCurrentPage + 1}`;
+              dom.btnPrevPage.disabled = this.historyCurrentPage === 0;
+              dom.btnNextPage.disabled = !this.historyHasNextPage;
 
-              if (viewMode === 'all') {
-                  let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th><th>${t.historySeller}</th><th>${t.historyTotal}</th><th>${t.historyDate}</th></tr></thead><tbody>`;
-                  docs.forEach(doc => {
-                      const data = doc.data();
-                      tableHTML += `<tr><td>${data.customerName || 'N/A'}</td><td>${(data.seller || 'N/A').split('@')[0]}</td><td>${(data.grandTotal || 0).toFixed(2)}</td><td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td></tr>`;
-                  });
-                  dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
-              } else if (viewMode === 'summary') {
-                  const customerSummary = {};
-                  docs.forEach(doc => {
-                      const data = doc.data();
-                      const customerName = data.customerName || 'Cliente Não Identificado';
-                      if (!customerSummary[customerName]) {
-                          customerSummary[customerName] = { totalSpent: 0, salesCount: 0, lastSaleDate: null };
-                      }
-                      customerSummary[customerName].totalSpent += data.grandTotal || 0;
-                      customerSummary[customerName].salesCount++;
-                      if (!customerSummary[customerName].lastSaleDate) {
-                          customerSummary[customerName].lastSaleDate = data.createdAt?.toDate ? data.createdAt.toDate() : null;
-                      }
-                  });
-                  const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
-                  let tableHTML = `<table><thead><tr><th>Cliente</th><th>Total Gasto</th><th>Nº de Compras</th><th>Última Compra</th></tr></thead><tbody>`;
-                  summaryArray.forEach(summary => {
-                      tableHTML += `<tr><td>${summary.name}</td><td>${summary.totalSpent.toFixed(2)}</td><td>${summary.salesCount}</td><td>${summary.lastSaleDate ? summary.lastSaleDate.toLocaleDateString(currentLang) : 'N/A'}</td></tr>`;
-                  });
-                  dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
-              }
           } catch (error) {
-              console.error("MENSAGEM DO FIREBASE (copie o link abaixo, se houver): ", error.message);
+              console.error("Erro ao buscar histórico: ", error);
               if (error.code === 'failed-precondition') {
-                   dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro por data precisa de um índice no Firestore. Acesse o console do seu navegador (F12) para encontrar um link que cria este índice automaticamente. Após criá-lo (pode levar alguns minutos), a funcionalidade será liberada.</p>`;
-                   console.log("Para criar o índice, acesse o link gerado pelo Firebase ou crie manualmente na coleção 'receipts' com o campo 'createdAt' (decrescente).");
+                   dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro por data precisa de um índice no Firestore. Acesse o console do seu navegador (F12) para encontrar um link que cria este índice automaticamente.</p>`;
+                   console.error("MENSAGEM DO FIREBASE (copie o link abaixo): ", error.message);
               } else {
                   dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
               }
           }
       },
+
+      renderAllSalesView(docs) {
+          const t = TRANSLATIONS[currentLang];
+          let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th><th>${t.historySeller}</th><th>${t.historyTotal}</th><th>${t.historyDate}</th>`;
+          
+          if (this.isCurrentUserAdmin) {
+              tableHTML += `<th>Ações</th>`;
+          }
+          tableHTML += `</tr></thead><tbody>`;
+
+          docs.forEach(doc => {
+              const data = doc.data();
+              tableHTML += `<tr>
+                              <td>${data.customerName || 'N/A'}</td>
+                              <td>${(data.seller || 'N/A').split('@')[0]}</td>
+                              <td>${(data.grandTotal || 0).toFixed(2)}</td>
+                              <td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td>`;
+              if (this.isCurrentUserAdmin) {
+                  tableHTML += `<td><button class="delete-history-btn" data-id="${doc.id}">Excluir</button></td>`;
+              }
+              tableHTML += `</tr>`;
+          });
+          dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
+      },
+
+      async renderSummaryView(searchTerm, startDate, endDate) {
+          let query = db.collection("receipts");
+          if (startDate) query = query.where('createdAt', '>=', startDate);
+          if (endDate) query = query.where('createdAt', '<=', endDate);
+          
+          const allDocsSnapshot = await query.get();
+          let docs = allDocsSnapshot.docs;
+          
+          if (searchTerm) {
+              docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
+          }
+          if (docs.length === 0) {
+              dom.historyTableContainer.innerHTML = `<p>${TRANSLATIONS[currentLang].historyNoRecords}</p>`;
+              return;
+          }
+          const customerSummary = {};
+          docs.forEach(doc => {
+              const data = doc.data();
+              const customerName = data.customerName || 'Cliente Não Identificado';
+              if (!customerSummary[customerName]) {
+                  customerSummary[customerName] = { totalSpent: 0, salesCount: 0, lastSaleDate: null };
+              }
+              customerSummary[customerName].totalSpent += data.grandTotal || 0;
+              customerSummary[customerName].salesCount++;
+              const saleDate = data.createdAt?.toDate;
+              if (saleDate && (!customerSummary[customerName].lastSaleDate || saleDate > customerSummary[customerName].lastSaleDate)) {
+                  customerSummary[customerName].lastSaleDate = saleDate;
+              }
+          });
+          const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
+          let tableHTML = `<table><thead><tr><th>Cliente</th><th>Total Gasto</th><th>Nº de Compras</th><th>Última Compra</th></tr></thead><tbody>`;
+          summaryArray.forEach(summary => {
+              tableHTML += `<tr><td>${summary.name}</td><td>${summary.totalSpent.toFixed(2)}</td><td>${summary.salesCount}</td><td>${summary.lastSaleDate ? summary.lastSaleDate.toLocaleDateString(currentLang) : 'N/A'}</td></tr>`;
+          });
+          dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
+      },
+
+      async loadDashboardData() {
+        try {
+            const querySnapshot = await db.collection("receipts").get();
+            const receipts = querySnapshot.docs.map(doc => doc.data());
+            const salesByDay = {};
+            receipts.forEach(receipt => {
+                if (receipt.createdAt) {
+                    const date = receipt.createdAt.toDate();
+                    const dateString = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toLocaleDateString(currentLang, { year: '2-digit', month: '2-digit', day: '2-digit' });
+                    salesByDay[dateString] = (salesByDay[dateString] || 0) + (receipt.grandTotal || 0);
+                }
+            });
+            const sortedSales = Object.entries(salesByDay).sort((a, b) => {
+                const dateA = new Date(a[0].split('/').reverse().join('-'));
+                const dateB = new Date(b[0].split('/').reverse().join('-'));
+                return dateA - dateB;
+            });
+            const salesLabels = sortedSales.map(entry => entry[0]);
+            const salesData = sortedSales.map(entry => entry[1]);
+            this.renderSalesChart(salesLabels, salesData);
+            const tokenCounts = {};
+            receipts.forEach(receipt => {
+                if (receipt.items && typeof receipt.items === 'object') {
+                    for (const tokenKey in receipt.items) {
+                        tokenCounts[tokenKey] = (tokenCounts[tokenKey] || 0) + receipt.items[tokenKey];
+                    }
+                }
+            });
+            const tokenLabels = Object.keys(tokenCounts).map(key => ITENS_CATALOGO[key]?.[`name_${currentLang}`] || key);
+            const tokenData = Object.values(tokenCounts);
+            this.renderTokensChart(tokenLabels, tokenData);
+        } catch (error) {
+            console.error("Erro ao carregar dados do dashboard:", error);
+        }
+    },
+    
+    renderSalesChart(labels, data) {
+        if (this.salesChartInstance) {
+            this.salesChartInstance.destroy();
+        }
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
+        const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
+        this.salesChartInstance = new Chart(dom.salesOverTimeChart, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total de Vendas (Mush)',
+                    data: data,
+                    borderColor: 'rgba(52, 211, 153, 1)',
+                    backgroundColor: 'rgba(52, 211, 153, 0.2)',
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { ticks: { color: textColor }, grid: { color: gridColor } },
+                    x: { ticks: { color: textColor }, grid: { color: gridColor } }
+                },
+                plugins: {
+                    legend: { labels: { color: textColor } }
+                }
+            }
+        });
+    },
+
+    renderTokensChart(labels, data) {
+        if (this.tokensChartInstance) {
+            this.tokensChartInstance.destroy();
+        }
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
+        this.tokensChartInstance = new Chart(dom.tokensSoldChart, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Quantidade Vendida',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(52, 211, 153, 0.7)', 'rgba(59, 130, 246, 0.7)',
+                        'rgba(239, 68, 68, 0.7)', 'rgba(245, 158, 11, 0.7)'
+                    ],
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary'),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top', labels: { color: textColor } }
+                }
+            }
+        });
+    },
       
       setLanguage(lang, isLoginScreenOnly = false) {
           currentLang = lang;
@@ -638,7 +946,6 @@
           const fatorDesconto = 1 - (descontoPercentual / 100);
           let totalFinal = 0;
           const itensCalculados = {};
-
           for (const key in ITENS_CATALOGO) {
               const item = ITENS_CATALOGO[key];
               const quantidade = parseInt(document.getElementById(`qtd-${key}`)?.value || 0);
@@ -658,12 +965,9 @@
           this.reset(false);
           const totalMush = parseFloat(dom.totalMushInput.value) || 0;
           if (totalMush <= 0) { this.updateUI(); return; }
-
           const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
           if (selectedTokenKeys.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
-          
           let tokens = selectedTokenKeys.map(key => ({ key, preco: ITENS_CATALOGO[key].preco, quantidade: 0 }));
-          
           if (tokens.length === 2 && document.querySelector('input[name="two-token-strategy"]:checked').value === 'split') {
               const mushPerToken = totalMush / 2;
               tokens.forEach(token => token.quantidade = Math.floor(mushPerToken / token.preco));
@@ -676,13 +980,11 @@
       distributeLeftoverMush() {
           const selectedTokenKeys = Array.from(dom.leftoverTokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
            if (selectedTokenKeys.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
-
           let tokens = selectedTokenKeys.map(key => ({
               key,
               preco: ITENS_CATALOGO[key].preco,
               quantidade: parseInt(document.getElementById(`qtd-${key}`).value) || 0
           }));
-          
           this.runFairDistribution(tokens, this.currentLeftover);
           this.updateDistributionUI(tokens);
           dom.leftoverDistributorSection.classList.add('hidden');
@@ -711,13 +1013,10 @@
               document.getElementById(`qtd-${token.key}`).value = token.quantidade;
               mushGasto += token.quantidade * ITENS_CATALOGO[token.key].preco;
           });
-          
           const mushTotal = parseFloat(dom.totalMushInput.value) || 0;
           this.currentLeftover = mushTotal - mushGasto;
-          
           dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.currentLeftover.toFixed(2)}</b> `;
           dom.leftoverMushDiv.appendChild(this.createCoinIcon());
-
           const cheapestPrice = Math.min(...Object.values(ITENS_CATALOGO).map(t => t.preco));
           if (this.currentLeftover >= cheapestPrice) {
               dom.leftoverDistributorSection.classList.remove('hidden');
@@ -725,7 +1024,6 @@
           } else {
               dom.leftoverDistributorSection.classList.add('hidden');
           }
-
           this.updateUI();
       },
 
@@ -774,7 +1072,10 @@
               dom.leftoverMushDiv.innerHTML = '';
               dom.leftoverDistributorSection.classList.add('hidden');
           }
-          Object.keys(ITENS_CATALOGO).forEach(key => document.getElementById(`qtd-${key}`).value = 0);
+          Object.keys(ITENS_CATALOGO).forEach(key => {
+            const input = document.getElementById(`qtd-${key}`);
+            if (input) input.value = 0;
+          });
           this.updateUI();
       },
 
