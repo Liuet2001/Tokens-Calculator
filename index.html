@@ -112,10 +112,10 @@
   .input-group { display: flex; flex-direction: column; gap: 8px; }
   .input-group label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
 
-  input[type="text"], input[type="number"], input[type="password"] {
+  input[type="text"], input[type="number"], input[type="password"], input[type="date"] {
     width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--bg-tertiary); color: var(--text-primary); font-size: 16px; transition: all 0.3s ease;
   }
-  input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus {
+  input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, input[type="date"]:focus {
     outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
   }
 
@@ -151,8 +151,8 @@
   .buttons { display: flex; justify-content: center; gap: 12px; margin-top: 16px; flex-wrap: wrap;}
   button { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; border: none; }
   button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-  #btnCalcular, #btnDistribute, #btnLogin { background: var(--accent-primary); color: #fff; }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover { background: var(--accent-hover); }
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn { background: var(--accent-primary); color: #fff; }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover { background: var(--accent-hover); }
   #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
   #btnGerarImagem, #btnLogout, #btnDistributeLeftover { background: var(--bg-tertiary); color: var(--text-primary); }
 </style>
@@ -275,6 +275,33 @@
       
       <div id="history-view" class="tab-content hidden">
           <h2 data-translate-key="historyHeader">Histórico de Vendas</h2>
+
+          <div class="input-group" style="align-items: center; margin-bottom: 20px;">
+              <label>Visualizar:</label>
+              <div class="mode-selector">
+                  <input type="radio" id="history-view-all" name="history-view-mode" value="all" checked>
+                  <label for="history-view-all">Todas as Vendas</label>
+                  <input type="radio" id="history-view-summary" name="history-view-mode" value="summary">
+                  <label for="history-view-summary">Resumo por Cliente</label>
+              </div>
+          </div>
+
+          <div id="history-filter-bar" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 20px; padding: 15px; border: 1px solid var(--border-color); border-radius: 12px;">
+              <div class="input-group" style="flex-grow: 1;">
+                  <label for="history-search-input">Buscar por Nome</label>
+                  <input type="text" id="history-search-input" placeholder="Digite o nome do cliente...">
+              </div>
+              <div class="input-group">
+                  <label for="history-date-start">Data Início</label>
+                  <input type="date" id="history-date-start">
+              </div>
+              <div class="input-group">
+                  <label for="history-date-end">Data Fim</label>
+                  <input type="date" id="history-date-end">
+              </div>
+              <button id="history-apply-filter-btn">Aplicar Filtros</button>
+          </div>
+
           <div id="history-table-container"></div>
       </div>
     </div>
@@ -382,6 +409,10 @@
       tabContents: document.querySelectorAll('.tab-content'),
       historyTableContainer: document.getElementById('history-table-container'),
       loggedInUserDiv: document.getElementById('logged-in-user'),
+      historySearchInput: document.getElementById('history-search-input'),
+      historyDateStart: document.getElementById('history-date-start'),
+      historyDateEnd: document.getElementById('history-date-end'),
+      historyApplyFilterBtn: document.getElementById('history-apply-filter-btn'),
     };
 
     let currentLang = 'br';
@@ -464,36 +495,95 @@
               const selectedCount = dom.tokenFiltersContainer.querySelectorAll('input:checked').length;
               document.getElementById('two-token-options').classList.toggle('hidden', selectedCount !== 2);
           });
+          
+          document.querySelectorAll('input[name="history-view-mode"]').forEach(radio => {
+              radio.addEventListener('change', this.loadHistory.bind(this));
+          });
+          
+          dom.historyApplyFilterBtn.addEventListener('click', this.loadHistory.bind(this));
       },
 
       handleTabClick(event) {
           const clickedTab = event.target.closest('.tab-link');
           if (!clickedTab) return;
           const tabId = clickedTab.dataset.tab;
+          
+          if(tabId === 'history-view' && !document.getElementById(tabId).classList.contains('active')) {
+              this.loadHistory();
+          }
+
           dom.tabLinks.forEach(link => link.classList.remove('active'));
           dom.tabContents.forEach(content => content.classList.add('hidden'));
+          
           clickedTab.classList.add('active');
           document.getElementById(tabId).classList.remove('hidden');
-          if (tabId === 'history-view') this.loadHistory();
       },
-
+      
       async loadHistory() {
           const t = TRANSLATIONS[currentLang];
           dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
+          
+          const viewMode = document.querySelector('input[name="history-view-mode"]:checked').value;
+          const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
+          const startDate = dom.historyDateStart.value ? new Date(dom.historyDateStart.value) : null;
+          const endDate = dom.historyDateEnd.value ? new Date(dom.historyDateEnd.value) : null;
+
+          if (endDate) endDate.setHours(23, 59, 59, 999);
+
           try {
-              const querySnapshot = await db.collection("receipts").orderBy("createdAt", "desc").get();
-              if (querySnapshot.empty) {
+              let query = db.collection("receipts");
+              if (startDate) query = query.where('createdAt', '>=', startDate);
+              if (endDate) query = query.where('createdAt', '<=', endDate);
+              query = query.orderBy('createdAt', 'desc');
+
+              let querySnapshot = await query.get();
+              let docs = querySnapshot.docs;
+
+              if (searchTerm) {
+                  docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
+              }
+
+              if (docs.length === 0) {
                   dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
                   return;
               }
-              let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th><th>${t.historySeller}</th><th>${t.historyTotal}</th><th>${t.historyDate}</th></tr></thead><tbody>`;
-              querySnapshot.forEach(doc => {
-                  const data = doc.data();
-                  tableHTML += `<tr><td>${data.customerName || 'N/A'}</td><td>${(data.seller || 'N/A').split('@')[0]}</td><td>${(data.grandTotal || 0).toFixed(2)}</td><td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td></tr>`;
-              });
-              dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
+
+              if (viewMode === 'all') {
+                  let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th><th>${t.historySeller}</th><th>${t.historyTotal}</th><th>${t.historyDate}</th></tr></thead><tbody>`;
+                  docs.forEach(doc => {
+                      const data = doc.data();
+                      tableHTML += `<tr><td>${data.customerName || 'N/A'}</td><td>${(data.seller || 'N/A').split('@')[0]}</td><td>${(data.grandTotal || 0).toFixed(2)}</td><td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td></tr>`;
+                  });
+                  dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
+              } else if (viewMode === 'summary') {
+                  const customerSummary = {};
+                  docs.forEach(doc => {
+                      const data = doc.data();
+                      const customerName = data.customerName || 'Cliente Não Identificado';
+                      if (!customerSummary[customerName]) {
+                          customerSummary[customerName] = { totalSpent: 0, salesCount: 0, lastSaleDate: null };
+                      }
+                      customerSummary[customerName].totalSpent += data.grandTotal || 0;
+                      customerSummary[customerName].salesCount++;
+                      if (!customerSummary[customerName].lastSaleDate) {
+                          customerSummary[customerName].lastSaleDate = data.createdAt?.toDate ? data.createdAt.toDate() : null;
+                      }
+                  });
+                  const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
+                  let tableHTML = `<table><thead><tr><th>Cliente</th><th>Total Gasto</th><th>Nº de Compras</th><th>Última Compra</th></tr></thead><tbody>`;
+                  summaryArray.forEach(summary => {
+                      tableHTML += `<tr><td>${summary.name}</td><td>${summary.totalSpent.toFixed(2)}</td><td>${summary.salesCount}</td><td>${summary.lastSaleDate ? summary.lastSaleDate.toLocaleDateString(currentLang) : 'N/A'}</td></tr>`;
+                  });
+                  dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
+              }
           } catch (error) {
-              dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
+              console.error("Erro ao buscar histórico: ", error);
+              if (error.code === 'failed-precondition') {
+                   dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro por data precisa de um índice no Firestore. Acesse o console do seu navegador (F12) para encontrar um link que cria este índice automaticamente. Após criá-lo (pode levar alguns minutos), a funcionalidade será liberada.</p>`;
+                   console.log("Para criar o índice, acesse o link gerado pelo Firebase ou crie manualmente na coleção 'receipts' com o campo 'createdAt' (decrescente).");
+              } else {
+                  dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
+              }
           }
       },
       
@@ -590,11 +680,12 @@
           let tokens = selectedTokenKeys.map(key => ({
               key,
               preco: ITENS_CATALOGO[key].preco,
-              quantidade: parseInt(document.getElementById(`qtd-${key}`).value) || 0 // Pega a quantidade atual
+              quantidade: parseInt(document.getElementById(`qtd-${key}`).value) || 0
           }));
           
           this.runFairDistribution(tokens, this.currentLeftover);
           this.updateDistributionUI(tokens);
+          dom.leftoverDistributorSection.classList.add('hidden');
       },
       
       runFairDistribution(tokens, totalMush) {
@@ -691,69 +782,31 @@
         const calculo = this.calculateValues();
         if(!calculo) return;
         const t = TRANSLATIONS[currentLang];
-
         let temItens = Object.values(calculo.itens).some(item => item.quantidade > 0);
-        if (!temItens) {
-            alert(t.alertNoItems);
-            return;
-        }
-
+        if (!temItens) { alert(t.alertNoItems); return; }
         const nome = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
         const itemsToSave = {};
-        
-        // 1. Prepara os dados e salva no Firestore
         for(const key in calculo.itens) {
-            if(calculo.itens[key].quantidade > 0) {
-                itemsToSave[key] = calculo.itens[key].quantidade;
-            }
+            if(calculo.itens[key].quantidade > 0) itemsToSave[key] = calculo.itens[key].quantidade;
         }
-
         const receiptData = {
-            customerName: nome,
-            discountApplied: calculo.descontoPercentual,
-            grandTotal: calculo.totalFinal,
-            items: itemsToSave,
-            seller: auth.currentUser.email,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            customerName: nome, discountApplied: calculo.descontoPercentual, grandTotal: calculo.totalFinal,
+            items: itemsToSave, seller: auth.currentUser.email, createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-
         try {
             await db.collection("receipts").add(receiptData);
-            console.log("Recibo salvo no Firestore com sucesso!");
         } catch(e) {
             console.error("Erro ao salvar no Firestore: ", e);
             alert("Houve um erro ao salvar o recibo no banco de dados.");
         }
-
-        // 2. Gera o HTML visual para o recibo
-        let receiptHtml = `
-            <h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2>
-            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">${nome}</p>
-            <h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3>
-            <table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>`;
-        
+        let receiptHtml = `<h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2><p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">${nome}</p><h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3><table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>`;
         for(const key in calculo.itens) {
             const item = calculo.itens[key];
-            if(item.quantidade > 0) {
-                receiptHtml += `<tr>
-                    <td style="padding: 5px 0;">${ITENS_CATALOGO[key][`name_${currentLang}`]} x ${item.quantidade}</td>
-                    <td style="padding: 5px 0; text-align: right;">${item.subtotal.toFixed(2)}</td>
-                </tr>`;
-            }
+            if(item.quantidade > 0) receiptHtml += `<tr><td style="padding: 5px 0;">${ITENS_CATALOGO[key][`name_${currentLang}`]} x ${item.quantidade}</td><td style="padding: 5px 0; text-align: right;">${item.subtotal.toFixed(2)}</td></tr>`;
         }
-        
         const subtotalBruto = calculo.totalFinal / (1 - calculo.descontoPercentual / 100);
         const valorDesconto = subtotalBruto - calculo.totalFinal;
-
-        receiptHtml += `</tbody></table>
-            <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.9em;">
-                <p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${subtotalBruto.toFixed(2)}</span></p>
-                <p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${calculo.descontoPercentual}%):</span> <span>-${valorDesconto.toFixed(2)}</span></p>
-                <p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${calculo.totalFinal.toFixed(2)}</span></p>
-            </div>
-            <p style="text-align: center; margin-top: 20px; font-size: 0.9em;">${t.receiptThanks}</p>`;
-
-        // 3. Renderiza o HTML, captura com html2canvas e inicia o download
+        receiptHtml += `</tbody></table><div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.9em;"><p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${subtotalBruto.toFixed(2)}</span></p><p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${calculo.descontoPercentual}%):</span> <span>-${valorDesconto.toFixed(2)}</span></p><p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${calculo.totalFinal.toFixed(2)}</span></p></div><p style="text-align: center; margin-top: 20px; font-size: 0.9em;">${t.receiptThanks}</p>`;
         const resultadoDiv = document.getElementById('resultado');
         resultadoDiv.innerHTML = receiptHtml;
         resultadoDiv.style.display = 'block';
@@ -761,21 +814,14 @@
         resultadoDiv.style.top = '50%';
         resultadoDiv.style.left = '50%';
         resultadoDiv.style.transform = 'translate(-50%, -50%)';
-        resultadoDiv.style.zIndex = '1000'; // Garante que esteja visível para captura
-
-        // Pequeno atraso para garantir que o DOM foi atualizado com o HTML do recibo
+        resultadoDiv.style.zIndex = '1000';
         setTimeout(() => {
-            html2canvas(resultadoDiv, { 
-                backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'),
-                scale: 2 // Aumenta a resolução da imagem
-            }).then(canvas => {
+            html2canvas(resultadoDiv, { backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), scale: 2 }).then(canvas => {
               const link = document.createElement('a');
               const nomeSanitizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
               link.download = `${nomeSanitizado}_recibo.png`;
               link.href = canvas.toDataURL('image/png');
               link.click();
-              
-              // Limpa o div de resultado
               resultadoDiv.style.display = 'none';
               resultadoDiv.style.top = '-100%';
               resultadoDiv.style.zIndex = '-1';
