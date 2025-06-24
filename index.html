@@ -2,6 +2,7 @@
 <html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora de Tokens</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -142,14 +143,14 @@
   #auth-error, #admin-action-status { color: var(--text-error); font-size: 14px; text-align: center; min-height: 20px; }
   #admin-action-status.success { color: var(--accent-primary); }
 
-  .tab-navigation { display: flex; border-bottom: 1px solid var(--border-color); }
-  .tab-link { padding: 12px 20px; cursor: pointer; background: none; border: none; color: var(--text-secondary); font-weight: 600; font-size: 16px; border-bottom: 3px solid transparent; transition: all 0.3s ease; font-family: var(--font-body); }
+  .tab-navigation { display: flex; border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+  .tab-link { padding: 12px 20px; cursor: pointer; background: none; border: none; color: var(--text-secondary); font-weight: 600; font-size: 16px; border-bottom: 3px solid transparent; transition: all 0.3s ease; font-family: var(--font-body); white-space: nowrap; }
   .tab-link:hover { color: var(--text-primary); }
   .tab-link.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); }
   .tab-content { padding-top: 24px; display: flex; flex-direction: column; gap: 24px; }
   
-  .mode-selector { display: flex; gap: 20px; background-color: var(--bg-tertiary); padding: 6px; border-radius: 10px; width: fit-content; }
-  .mode-selector label { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; }
+  .mode-selector { display: flex; gap: 10px; background-color: var(--bg-tertiary); padding: 6px; border-radius: 10px; width: fit-content; flex-wrap: wrap; }
+  .mode-selector label { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; text-align: center; }
   .mode-selector input[type="radio"] { display: none; }
   .mode-selector input[type="radio"]:checked + label { background-color: var(--bg-secondary); color: var(--accent-primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
@@ -350,6 +351,86 @@
     margin-top: auto;
     border-top: 1px solid var(--border-color);
   }
+  
+  /* --- INÍCIO DAS MELHORIAS MOBILE --- */
+  @media (max-width: 768px) {
+    body {
+      padding: 20px 10px;
+    }
+    .container {
+      padding: 24px 16px;
+    }
+    h2 {
+      font-size: 24px;
+    }
+    
+    /* Transformação da Tabela em Cartões */
+    table thead {
+      display: none;
+    }
+    table tr {
+      display: block;
+      margin-bottom: 1em;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    table td {
+      display: block;
+      text-align: right;
+      padding-left: 50%;
+      position: relative;
+      border-bottom: 1px dotted var(--border-color);
+    }
+    table td:last-child {
+      border-bottom: none;
+    }
+    table td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 12px;
+      width: calc(50% - 24px);
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    table td[data-label] div {
+      width: 120px;
+      margin: 0 0 0 auto;
+    }
+    table tfoot td {
+      padding-left: 12px;
+      text-align: left;
+    }
+    table tfoot td::before {
+        display: none;
+    }
+
+    /* Ajuste de Controles e Botões */
+    .buttons {
+      flex-direction: column;
+      gap: 16px;
+    }
+    .buttons button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    #history-filter-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .settings-bar {
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-content {
+      width: 95%;
+      max-height: 85vh;
+    }
+  }
 </style>
 </head>
 <body>
@@ -517,6 +598,10 @@
                   <label for="history-date-end">Data Fim</label>
                   <input type="date" id="history-date-end">
               </div>
+              <div class="input-group hidden" id="history-seller-filter-container">
+                  <label for="history-seller-filter">Filtrar por Vendedor</label>
+                  <select id="history-seller-filter"></select>
+              </div>
               <div class="buttons" style="margin-top:0;">
                 <button id="history-apply-filter-btn">Aplicar Filtros</button>
                 <button id="export-txt-modal-btn"><svg class="icon"><use xlink:href="#icon-export"></use></svg>Exportar TXT</button>
@@ -622,10 +707,10 @@
     const RESELLER_DAILY_LIMIT = 750;
 
     const ITENS_CATALOGO = {
-      revive: { preco: 780, name_br: 'Revive Token', name_en: 'Revive Token' },
-      max: { preco: 540, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
-      partial: { preco: 180, name_br: 'Partial Growth Token', name_en: 'Partial Growth Token' },
-      change: { preco: 70, name_br: 'Appearance Change Token', name_en: 'Appearance Change Token' }
+      revive: { preco: 790, name_br: 'Revive Token', name_en: 'Revive Token' },
+      max: { preco: 570, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
+      partial: { preco: 195, name_br: 'Partial Growth Token', name_en: 'Partial Growth Token' },
+      change: { preco: 90, name_br: 'Appearance Change Token', name_en: 'Appearance Change Token' }
     };
     
     const PRECOS_MINIMOS = {
@@ -666,7 +751,7 @@
           resellerLimitExceededWarning: "Atenção: O limite diário do cliente para um ou mais itens foi excedido. Itens acima do limite serão cobrados com o preço base."
       },
       en: {
-          pageTitle: "Painel", mainHeader: "Token Calculator", themeLabel: "Light Theme",
+          pageTitle: "Panel", mainHeader: "Token Calculator", themeLabel: "Light Theme",
           idLabel: "Customer Identifier / Name", idPlaceholder: "Enter customer's name or ID", discountLabel: "Discount (%)",
           discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Unit Price", tableQty: "Quantity",
           tableTotal: "Total Value", tableGrandTotal: "GRAND TOTAL", btnCalculate: "Calculate", btnReset: "Reset",
@@ -751,6 +836,8 @@
       generateTxtFileBtn: document.getElementById('generate-txt-file-btn'),
       customerListForExport: document.getElementById('customer-list-for-export'),
       selectAllCustomersCheckbox: document.getElementById('select-all-customers-checkbox'),
+      historySellerFilterContainer: document.getElementById('history-seller-filter-container'),
+      historySellerFilter: document.getElementById('history-seller-filter'),
     };
 
     let currentLang = 'br';
@@ -926,7 +1013,7 @@
         try {
             const docRef = db.collection('userPreferences').doc(user.uid);
             const docSnap = await docRef.get();
-            if (docSnap.exists) {
+            if (docSnap.exists) { 
                 const prefs = docSnap.data();
                 if (prefs.theme) {
                     this.setTheme(prefs.theme, false);
@@ -1003,6 +1090,12 @@
 
           if (tabId === 'history-view') {
               this.loadHistory('first');
+              // Popular filtro de vendedor se for admin
+              if (this.isCurrentUserAdmin) {
+                this.populateHistorySellerFilter();
+              } else {
+                dom.historySellerFilterContainer.classList.add('hidden');
+              }
           } else if (tabId === 'dashboard-view') {
               this.loadDashboardData();
           } else if (tabId === 'admin-view' && this.isCurrentUserAdmin) {
@@ -1105,6 +1198,29 @@
         } catch (error) {
             console.error("Erro ao carregar lista de clientes revendedores:", error);
             dom.resellerCustomerSelect.innerHTML = `<option value="">Erro ao carregar</option>`;
+        }
+      },
+      
+      async populateHistorySellerFilter() {
+        if (!this.isCurrentUserAdmin) return;
+        dom.historySellerFilterContainer.classList.remove('hidden');
+        try {
+            const listAllUsers = functions.httpsCallable('listAllUsers');
+            const result = await listAllUsers();
+            const users = result.data;
+            
+            dom.historySellerFilter.innerHTML = '<option value="">Todos os Vendedores</option>'; 
+
+            users.forEach(user => {
+                const username = user.email.split('@')[0];
+                const option = document.createElement('option');
+                option.value = username;
+                option.textContent = username;
+                dom.historySellerFilter.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Erro ao carregar lista de vendedores para filtro:", error);
+            dom.historySellerFilter.innerHTML = `<option value="">Erro ao carregar</option>`;
         }
       },
 
@@ -1228,6 +1344,7 @@
           const lastDoc = this.historyPageCursors[pageToLoad];
           const viewMode = document.querySelector('input[name="history-view-mode"]:checked').value;
           const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
+          const selectedSeller = dom.historySellerFilter.value;
           
           let startDate = null;
           if (dom.historyDateStart.value) {
@@ -1243,11 +1360,18 @@
 
           try {
               if (viewMode === 'summary') {
-                  await this.renderSummaryView(searchTerm, startDate, endDate);
+                  await this.renderSummaryView(searchTerm, startDate, endDate, selectedSeller);
                   return;
               }
 
               let query = db.collection("receipts");
+
+              if (!this.isCurrentUserAdmin) {
+                  query = query.where('seller', '==', this.currentUsername);
+              } else if (selectedSeller) {
+                  query = query.where('seller', '==', selectedSeller);
+              }
+
               if (startDate) query = query.where('createdAt', '>=', startDate);
               if (endDate) query = query.where('createdAt', '<=', endDate);
               query = query.orderBy('createdAt', 'desc');
@@ -1285,7 +1409,7 @@
           } catch (error) {
               console.error("Erro ao buscar histórico: ", error);
               if (error.code === 'failed-precondition') {
-                  dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro por data precisa de um índice no Firestore. Acesse o console do seu navegador (F12 ou Ctrl+Shift+I), procure por esta mensagem de erro em vermelho e clique no link fornecido pelo Firebase para criar o índice automaticamente.</p>`;
+                  dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro que você está tentando usar precisa de um índice no banco de dados. Por favor, abra o console do seu navegador (F12), encontre a mensagem de erro em vermelho do Firebase e clique no link fornecido para criar o índice automaticamente. A criação pode levar alguns minutos.</p>`;
                   console.error("MENSAGEM DO FIREBASE (copie o link abaixo e cole no navegador para criar o índice): ", error.message);
               } else {
                   dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
@@ -1295,38 +1419,45 @@
 
       renderAllSalesView(docs) {
           const t = TRANSLATIONS[currentLang];
-          let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th><th>${t.historySeller}</th><th>${t.historyTotal}</th><th>${t.historyDate}</th>`;
-          
+          let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th>`;
           if (this.isCurrentUserAdmin) {
-              tableHTML += `<th>Ações</th>`;
+            tableHTML += `<th>${t.historySeller}</th>`;
           }
-          tableHTML += `</tr></thead><tbody>`;
+          tableHTML += `<th>${t.historyTotal}</th><th>${t.historyDate}</th><th>Ações</th></tr></thead><tbody>`;
 
           docs.forEach(doc => {
               const data = doc.data();
-              tableHTML += `<tr>
-                                  <td>${data.customerName || 'N/A'}</td>
-                                  <td>${(data.seller || 'N/A').split('@')[0]}</td>
+              tableHTML += `<tr><td>${data.customerName || 'N/A'}</td>`;
+              if (this.isCurrentUserAdmin) {
+                tableHTML += `<td>${(data.seller || 'N/A').split('@')[0]}</td>`;
+              }
+              tableHTML += `
                                   <td>${this.formatCurrency(data.grandTotal || 0)}</td>
-                                  <td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td>`;
+                                  <td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td>
+                                  <td style="display: flex; gap: 8px; justify-content: center;">
+                                      <button class="btn-view-receipt" data-id="${doc.id}" title="Ver Recibo">
+                                          <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-receipt"></use></svg>
+                                      </button>`;
               if (this.isCurrentUserAdmin) {
                   tableHTML += `
-                      <td style="display: flex; gap: 8px; justify-content: center;">
-                          <button class="btn-view-receipt" data-id="${doc.id}" title="Ver Recibo">
-                              <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-receipt"></use></svg>
-                          </button>
-                          <button class="delete-history-btn" data-id="${doc.id}" title="Excluir">
-                              <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-reset"></use></svg>
-                          </button>
-                      </td>`;
+                                      <button class="delete-history-btn" data-id="${doc.id}" title="Excluir">
+                                          <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-reset"></use></svg>
+                                      </button>`;
               }
-              tableHTML += `</tr>`;
+              tableHTML += `</td></tr>`;
           });
           dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
       },
 
-      async renderSummaryView(searchTerm, startDate, endDate) {
+      async renderSummaryView(searchTerm, startDate, endDate, selectedSeller) {
           let query = db.collection("receipts");
+
+          if (!this.isCurrentUserAdmin) {
+              query = query.where('seller', '==', this.currentUsername);
+          } else if (selectedSeller) {
+              query = query.where('seller', '==', selectedSeller);
+          }
+
           if (startDate) query = query.where('createdAt', '>=', startDate);
           if (endDate) query = query.where('createdAt', '<=', endDate);
           
@@ -1364,7 +1495,13 @@
 
       async loadDashboardData() {
         try {
-            const querySnapshot = await db.collection("receipts").get();
+            let query = db.collection("receipts");
+
+            if (!this.isCurrentUserAdmin) {
+                query = query.where('seller', '==', this.currentUsername);
+            }
+
+            const querySnapshot = await query.get();
             const receipts = querySnapshot.docs.map(doc => doc.data());
             const salesByDay = {};
             receipts.forEach(receipt => {
@@ -1423,7 +1560,7 @@
                       y: { 
                           ticks: { 
                             color: textColor,
-                            callback: (value) => this.formatCurrency(value) // FORMATAR NÚMERO
+                            callback: (value) => this.formatCurrency(value)
                           }, 
                           grid: { color: gridColor } 
                       },
@@ -1433,7 +1570,7 @@
                       legend: { labels: { color: textColor } },
                       tooltip: {
                           callbacks: {
-                            label: (context) => { // FORMATAR NÚMERO
+                            label: (context) => {
                               let label = context.dataset.label || '';
                               if (label) { label += ': '; }
                               if (context.parsed.y !== null) {
@@ -1663,23 +1800,24 @@
       
       loadTable() {
           dom.tabelaItensBody.innerHTML = '';
+          const t = TRANSLATIONS[currentLang]; 
           for (const key in ITENS_CATALOGO) {
               const item = ITENS_CATALOGO[key];
               const tr = document.createElement('tr');
               
               tr.innerHTML = `
-                  <td>${item[`name_${currentLang}`]}</td>
-                  <td>
+                  <td data-label="${t.tableItem}">${item[`name_${currentLang}`]}</td>
+                  <td data-label="${t.tablePrice}">
                       <div style="width: 100px; margin: 0 auto;">
                           <input type="number" class="price-input" id="price-${key}" value="${item.preco}" step="10" placeholder="Insira o valor aqui">
                       </div>
                   </td>
-                  <td style="text-align: center;">
+                  <td data-label="${t.tableQty}">
                       <div style="width: 80px; margin: 0 auto;">
                           <input type="number" id="qtd-${key}" value="0" min="0">
                       </div>
                   </td>
-                  <td style="text-align: center;">0,00</td>
+                  <td data-label="${t.tableTotal}">0,00</td>
               `;
               
               tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
@@ -1713,8 +1851,8 @@
           this.triggerSavePreferences();
       },
 
-      formatCurrency(number) { // FORMATAR NÚMERO
-          if (isNaN(number)) {
+      formatCurrency(number) {
+          if (isNaN(number) || number === null) {
             number = 0;
           }
           return number.toLocaleString('pt-BR', {
@@ -1782,11 +1920,11 @@
               const itemCalculado = calculo.itens[key];
               
               const totalCell = row.cells[3];
-              totalCell.innerHTML = `${this.formatCurrency(itemCalculado.subtotal)} `; // FORMATAR NÚMERO
+              totalCell.innerHTML = `${this.formatCurrency(itemCalculado.subtotal)} `;
               totalCell.appendChild(this.createCoinIcon());
           });
           
-          dom.totalGeralCell.innerHTML = `<b>${this.formatCurrency(calculo.totalFinal)}</b> `; // FORMATAR NÚMERO
+          dom.totalGeralCell.innerHTML = `<b>${this.formatCurrency(calculo.totalFinal)}</b> `;
           dom.totalGeralCell.appendChild(this.createCoinIcon());
       },
 
@@ -1868,7 +2006,7 @@
           const newCalculo = this.calculateValues();
           const totalMushInputted = parseFloat(dom.totalMushInput.value) || 0;
           this.currentLeftover = totalMushInputted - newCalculo.totalFinal;
-          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `; // FORMATAR NÚMERO
+          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `;
           dom.leftoverMushDiv.appendChild(this.createCoinIcon());
 
           this.updateUI();
@@ -1900,7 +2038,7 @@
           });
           const mushTotal = parseFloat(dom.totalMushInput.value) || 0;
           this.currentLeftover = mushTotal - mushGasto;
-          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `; // FORMATAR NÚMERO
+          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `;
           dom.leftoverMushDiv.appendChild(this.createCoinIcon());
           const cheapestPrice = Math.min(...Object.values(ITENS_CATALOGO).map(t => t.preco));
           if (this.currentLeftover >= cheapestPrice) {
@@ -1929,8 +2067,8 @@
               const item = receiptData.itemsData[key];
               const catalogoItem = ITENS_CATALOGO[key];
               if (item.qty > 0 && catalogoItem) {
-                  const subtotalItem = item.qty * item.price;
-                  itemsHtml += `<tr><td style="padding: 5px 0;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td style="padding: 5px 0; text-align: right;">${this.formatCurrency(subtotalItem)}</td></tr>`; // FORMATAR NÚMERO
+                  const subtotalItem = item.qty * item.price; 
+                  itemsHtml += `<tr><td style="padding: 5px 0;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td style="padding: 5px 0; text-align: right;">${this.formatCurrency(subtotalItem)}</td></tr>`;
                   subtotalBruto += item.qty * item.price;
               }
           }
@@ -1988,7 +2126,7 @@
             if(calculo.itens[key].quantidade > 0) {
                 itemsToSave[key] = {
                     qty: calculo.itens[key].quantidade,
-                    price: calculo.itens[key].precoAtual
+                    price: calculo.itens[key].precoComDesconto
                 };
             }
         }
