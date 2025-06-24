@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora de Tokens</title>
+<title>Painel de vendas by Riciv</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,8 +38,6 @@
     --bg-secondary: #ffffff;
     --bg-tertiary: #e4e4e7;
     --border-color: #d4d4d8;
-    --accent-primary: #10b981;
-    --accent-hover: #0f9a6c;
     --accent-danger: #ef4444;
     --accent-warning: #d97706;
     --text-primary: #18181b;
@@ -47,6 +45,17 @@
     --text-error: #b91c1c;
     --grid-color: rgba(0, 0, 0, 0.1);
   }
+  
+  /* Accent Color Themes */
+  html[data-accent-color='green'] { --accent-primary: #34d399; --accent-hover: #10b981; }
+  html[data-accent-color='blue'] { --accent-primary: #3b82f6; --accent-hover: #2563eb; }
+  html[data-accent-color='purple'] { --accent-primary: #8b5cf6; --accent-hover: #7c3aed; }
+  html[data-accent-color='yellow'] { --accent-primary: #f59e0b; --accent-hover: #d97706; }
+  html[data-theme='light'][data-accent-color='green'] { --accent-primary: #10b981; --accent-hover: #0f9a6c; }
+  html[data-theme='light'][data-accent-color='blue'] { --accent-primary: #2563eb; --accent-hover: #1d4ed8; }
+  html[data-theme='light'][data-accent-color='purple'] { --accent-primary: #7c3aed; --accent-hover: #6d28d9; }
+  html[data-theme='light'][data-accent-color='yellow'] { --accent-primary: #d97706; --accent-hover: #b45309; }
+
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -99,8 +108,10 @@
       align-items: center;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 16px;
   }
-  .settings-controls { display: flex; align-items: center; gap: 16px;}
+  .settings-controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
   #logged-in-user { font-size: 14px; color: var(--text-secondary); }
   #logged-in-user .username { font-weight: 700; color: var(--text-primary); }
   .language-switcher button { background: none; border: none; padding: 4px; cursor: pointer; transition: all 0.3s ease; }
@@ -114,6 +125,25 @@
   .toggle-thumb { width: 18px; height: 18px; background-color: white; border-radius: 50%; position: absolute; top: 3px; left: 4px; transition: transform 0.3s ease; }
   html[data-theme='light'] .toggle-track { background-color: var(--accent-primary); }
   html[data-theme='light'] .toggle-thumb { transform: translateX(19px); }
+
+  .accent-color-switcher { display: flex; align-items: center; gap: 8px; }
+  .accent-color-switcher .color-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+  }
+  .accent-color-switcher .color-box.active {
+    border-color: var(--accent-primary);
+    transform: scale(1.2);
+  }
+  #color-green { background-color: #34d399; }
+  #color-blue { background-color: #3b82f6; }
+  #color-purple { background-color: #8b5cf6; }
+  #color-yellow { background-color: #f59e0b; }
+
 
   h2 { font-family: var(--font-header); color: var(--accent-primary); font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px;}
   h3 { margin-bottom: 1rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
@@ -133,6 +163,10 @@
   input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, input[type="date"]:focus, select:focus {
     outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
   }
+  html[data-accent-color='blue'] input:focus { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
+  html[data-accent-color='purple'] input:focus { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3); }
+  html[data-accent-color='yellow'] input:focus { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3); }
+
 
   td input[type="number"] {
       padding: 8px;
@@ -225,6 +259,10 @@
   tbody tr:hover {
     background-color: rgba(52, 211, 153, 0.1);
   }
+  html[data-accent-color='blue'] tbody tr:hover { background-color: rgba(59, 130, 246, 0.1); }
+  html[data-accent-color='purple'] tbody tr:hover { background-color: rgba(139, 92, 246, 0.1); }
+  html[data-accent-color='yellow'] tbody tr:hover { background-color: rgba(245, 158, 11, 0.1); }
+
   .icon {
     width: 1.1em;
     height: 1.1em;
@@ -468,6 +506,12 @@
               <button id="lang-en">🇺🇸</button>
           </div>
           <div class="settings-controls">
+              <div class="accent-color-switcher" id="accent-color-switcher">
+                  <div class="color-box" id="color-green" data-color="green" title="Verde"></div>
+                  <div class="color-box" id="color-blue" data-color="blue" title="Azul"></div>
+                  <div class="color-box" id="color-purple" data-color="purple" title="Roxo"></div>
+                  <div class="color-box" id="color-yellow" data-color="yellow" title="Amarelo"></div>
+              </div>
               <div class="theme-switcher">
                   <span class="theme-switcher-label" data-translate-key="themeLabel"></span>
                   <div class="toggle-track" id="theme-toggle">
@@ -702,174 +746,175 @@
   const functions = firebase.app().functions('us-central1');
 
   // --- LÓGICA DA APLICAÇÃO ---
-    const MOEDA_BASE64 = "data:image/webp;base64,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";
-    const DUMMY_DOMAIN = '@painelriciv.com'; 
-    const RESELLER_DAILY_LIMIT = 750;
+  const MOEDA_BASE64 = "data:image/webp;base64,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";
+  const DUMMY_DOMAIN = '@painelriciv.com';
+  const RESELLER_DAILY_LIMIT = 750;
 
-    const ITENS_CATALOGO = {
-      revive: { preco: 790, name_br: 'Revive Token', name_en: 'Revive Token' },
-      max: { preco: 570, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
-      partial: { preco: 195, name_br: 'Partial Growth Token', name_en: 'Partial Growth Token' },
-      change: { preco: 90, name_br: 'Appearance Change Token', name_en: 'Appearance Change Token' }
-    };
-    
-    const PRECOS_MINIMOS = {
-      revive: 780,
-      max: 540,
-      partial: 180,
-      change: 70
-    };
+  const ITENS_CATALOGO = {
+    revive: { preco: 780, name_br: 'Revive Token', name_en: 'Revive Token' },
+    max: { preco: 540, name_br: 'Max Growth Token', name_en: 'Max Growth Token' },
+    partial: { preco: 180, name_br: 'Partial Growth Token', name_en: 'Partial Growth Token' },
+    change: { preco: 70, name_br: 'Appearance Change Token', name_en: 'Appearance Change Token' }
+  };
 
-    const PRECOS_RESELLER = {
-      revive: 770,
-      max: 530,
-      partial: 175,
-      change: 65
-    };
+  const PRECOS_MINIMOS = {
+    revive: 780,
+    max: 540,
+    partial: 180,
+    change: 70
+  };
 
-    const TRANSLATIONS = {
-      br: {
-          pageTitle: "Painel", mainHeader: "Calculadora de Tokens", themeLabel: "Tema Claro",
-          idLabel: "Identificador / Nome do Cliente", idPlaceholder: "Digite o nome ou ID do cliente", discountLabel: "Desconto (%)",
-          discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Preço Unitário", tableQty: "Quantidade",
-          tableTotal: "Valor Total", tableGrandTotal: "TOTAL GERAL", btnCalculate: "Calcular", btnReset: "Resetar",
-          btnExport: "Exportar para PNG", alertNoItems: "Nenhum item foi selecionado para gerar o recibo.",
-          receiptHeader: "Recibo", receiptItemsHeader: "Itens Comprados", receiptSubtotal: "Subtotal",
-          receiptDiscount: "Desconto", receiptFinalTotal: "Total Final", receiptThanks: "✨ Agradecemos a preferência! ✨",
-          calculationMode: "Modo de Cálculo", modeQty: "Por Quantidade", modeMush: "Por Mush",
-          distributeTokensLabel: "Tokens Desejáveis para Distribuição", totalMushLabel: "Total de Mush a Gastar",
-          btnDistribute: "Distribuir", leftoverMushText: "Sobrou:",
-          loginHeader: "Acessar Calculadora", usernameLabel: "Usuário", passwordLabel: "Senha",
-          loginButton: "Entrar", logoutButton: "Sair", errorInvalidCredentials: "Usuário ou senha inválidos.",
-          errorGeneric: "Ocorreu um erro. Tente novamente.",
-          tabCalculator: "Calculadora", tabHistory: "Histórico", historyHeader: "Histórico de Vendas",
-          historyCustomer: "Cliente", historyDate: "Data", historyTotal: "Total", historySeller: "Vendedor",
-          historyNoRecords: "Nenhum registro encontrado.", historyLoading: "Carregando histórico...",
-          loggedInAs: "Usuário:",
-          resellerCustomerLabel: "Cliente Revendedor", resellerCustomerManualPlaceholder: "Digite o nome do cliente revendedor",
-          resellerLimitStatus: (revive, max, total, time) => `Limite Cliente: <b>Revive</b> (${revive}/${total}) | <b>Max</b> (${max}/${total}). Reseta em <b>${time}</b>.`,
-          resellerLimitExceededWarning: "Atenção: O limite diário do cliente para um ou mais itens foi excedido. Itens acima do limite serão cobrados com o preço base."
-      },
-      en: {
-          pageTitle: "Panel", mainHeader: "Token Calculator", themeLabel: "Light Theme",
-          idLabel: "Customer Identifier / Name", idPlaceholder: "Enter customer's name or ID", discountLabel: "Discount (%)",
-          discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Unit Price", tableQty: "Quantity",
-          tableTotal: "Total Value", tableGrandTotal: "GRAND TOTAL", btnCalculate: "Calculate", btnReset: "Reset",
-          btnExport: "Export to PNG", alertNoItems: "No items were selected to generate the receipt.",
-          receiptHeader: "Receipt", receiptItemsHeader: "Purchased Items", receiptSubtotal: "Subtotal",
-          receiptDiscount: "Discount", receiptFinalTotal: "Final Total", receiptThanks: "✨ Thank you for your preference! ✨",
-          calculationMode: "Calculation Mode", modeQty: "By Quantity", modeMush: "By Mush",
-          distributeTokensLabel: "Desirable Tokens for Distribution", totalMushLabel: "Total Mush to Spend",
-          btnDistribute: "Distribute", leftoverMushText: "Leftover:",
-          loginHeader: "Calculator Login", usernameLabel: "Username", passwordLabel: "Password",
-          loginButton: "Login", logoutButton: "Logout", errorInvalidCredentials: "Invalid username or password.",
-          errorGeneric: "An error occurred. Please try again.",
-          tabCalculator: "Calculator", tabHistory: "History", historyHeader: "Sales History",
-          historyCustomer: "Customer", historyDate: "Date", historyTotal: "Total", historySeller: "Seller",
-          historyNoRecords: "No records found.", historyLoading: "Loading history...",
-          loggedInAs: "User:",
-          resellerCustomerLabel: "Reseller Customer", resellerCustomerManualPlaceholder: "Enter reseller customer's name",
-          resellerLimitStatus: (revive, max, total, time) => `Customer Limit: <b>Revive</b> (${revive}/${total}) | <b>Max</b> (${max}/${total}). Resets in <b>${time}</b>.`,
-          resellerLimitExceededWarning: "Warning: The customer's daily limit for one or more items has been exceeded. Items above the limit will be charged at the base price."
-      }
-    };
-    
-    const dom = {
-      authContainer: document.getElementById('auth-container'),
-      appContainer: document.getElementById('app-container'),
-      usernameInput: document.getElementById('username-input'),
-      passwordInput: document.getElementById('password-input'),
-      btnLogin: document.getElementById('btnLogin'),
-      btnLogout: document.getElementById('btnLogout'),
-      authError: document.getElementById('auth-error'),
-      html: document.documentElement,
-      nomeClienteInput: document.getElementById('nomeCliente'),
-      descontoInput: document.getElementById('desconto'),
-      tabelaItensBody: document.getElementById('tabela-itens'),
-      totalGeralCell: document.getElementById('totalGeral'),
-      themeToggle: document.getElementById('theme-toggle'),
-      langBr: document.getElementById('lang-br'),
-      langEn: document.getElementById('lang-en'),
-      modeQtyRadio: document.getElementById('mode-qty'),
-      modeMushRadio: document.getElementById('mode-mush'),
-      distributorSection: document.getElementById('distributor-section'),
-      tokenFiltersContainer: document.getElementById('token-filters-container'),
-      leftoverTokenFiltersContainer: document.getElementById('leftover-token-filters-container'),
-      totalMushInput: document.getElementById('total-mush'),
-      btnDistribute: document.getElementById('btnDistribute'),
-      btnDistributeLeftover: document.getElementById('btnDistributeLeftover'),
-      leftoverMushDiv: document.getElementById('leftover-mush'),
-      leftoverDistributorSection: document.getElementById('leftover-distributor-section'),
-      tabNavigation: document.querySelector('.tab-navigation'),
-      tabLinks: document.querySelectorAll('.tab-link'),
-      tabContents: document.querySelectorAll('.tab-content'),
-      historyTableContainer: document.getElementById('history-table-container'),
-      loggedInUserDiv: document.getElementById('logged-in-user'),
-      historySearchInput: document.getElementById('history-search-input'),
-      historyDateStart: document.getElementById('history-date-start'),
-      historyDateEnd: document.getElementById('history-date-end'),
-      historyApplyFilterBtn: document.getElementById('history-apply-filter-btn'),
-      historyPaginationControls: document.getElementById('history-pagination-controls'),
-      btnPrevPage: document.getElementById('btn-prev-page'),
-      btnNextPage: document.getElementById('btn-next-page'),
-      pageNumberDisplay: document.getElementById('page-number-display'),
-      salesOverTimeChart: document.getElementById('sales-over-time-chart'),
-      tokensSoldChart: document.getElementById('tokens-sold-chart'),
-      adminView: document.getElementById('admin-view'),
-      adminActionStatus: document.getElementById('admin-action-status'),
-      btnLoadUsers: document.getElementById('btn-load-users'),
-      userListContainer: document.getElementById('user-list-container'),
-      btnCreateSeller: document.getElementById('btn-create-seller'),
-      newSellerUsernameInput: document.getElementById('new-seller-username'),
-      newSellerPasswordInput: document.getElementById('new-seller-password'),
-      resellerModeContainer: document.getElementById('reseller-mode-container'),
-      resellerModeToggle: document.getElementById('reseller-mode-toggle'),
-      resellerLimitStatus: document.getElementById('reseller-limit-status'),
-      customerNameContainer: document.getElementById('customer-name-container'),
-      resellerCustomerSelectionContainer: document.getElementById('reseller-customer-selection-container'),
-      resellerCustomerSelect: document.getElementById('reseller-customer-select'),
-      resellerCustomerManualInput: document.getElementById('reseller-customer-manual-input'),
-      txtExportModal: document.getElementById('txt-export-modal'),
-      exportTxtModalBtn: document.getElementById('export-txt-modal-btn'),
-      closeTxtExportModalBtn: document.getElementById('close-txt-export-modal'),
-      cancelTxtExportBtn: document.getElementById('cancel-txt-export-btn'),
-      generateTxtFileBtn: document.getElementById('generate-txt-file-btn'),
-      customerListForExport: document.getElementById('customer-list-for-export'),
-      selectAllCustomersCheckbox: document.getElementById('select-all-customers-checkbox'),
-      historySellerFilterContainer: document.getElementById('history-seller-filter-container'),
-      historySellerFilter: document.getElementById('history-seller-filter'),
-    };
+  const PRECOS_RESELLER = {
+    revive: 770,
+    max: 530,
+    partial: 175,
+    change: 65
+  };
 
-    let currentLang = 'br';
+  const TRANSLATIONS = {
+    br: {
+        pageTitle: "Painel", mainHeader: "Calculadora de Tokens", themeLabel: "Tema Claro",
+        idLabel: "Identificador / Nome do Cliente", idPlaceholder: "Digite o nome ou ID do cliente", discountLabel: "Desconto (%)",
+        discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Preço Unitário", tableQty: "Quantidade",
+        tableTotal: "Valor Total", tableGrandTotal: "TOTAL GERAL", btnCalculate: "Calcular", btnReset: "Resetar",
+        btnExport: "Exportar para PNG", alertNoItems: "Nenhum item foi selecionado para gerar o recibo.",
+        receiptHeader: "Recibo", receiptItemsHeader: "Itens Comprados", receiptSubtotal: "Subtotal",
+        receiptDiscount: "Desconto", receiptFinalTotal: "Total Final", receiptThanks: "✨ Agradecemos a preferência! ✨",
+        calculationMode: "Modo de Cálculo", modeQty: "Por Quantidade", modeMush: "Por Mush",
+        distributeTokensLabel: "Tokens Desejáveis para Distribuição", totalMushLabel: "Total de Mush a Gastar",
+        btnDistribute: "Distribuir", leftoverMushText: "Sobrou:",
+        loginHeader: "Acessar painel", usernameLabel: "Usuário", passwordLabel: "Senha",
+        loginButton: "Entrar", logoutButton: "Sair", errorInvalidCredentials: "Usuário ou senha inválidos.",
+        errorGeneric: "Ocorreu um erro. Tente novamente.",
+        tabCalculator: "Calculadora", tabHistory: "Histórico", historyHeader: "Histórico de Vendas",
+        historyCustomer: "Cliente", historyDate: "Data", historyTotal: "Total", historySeller: "Vendedor",
+        historyNoRecords: "Nenhum registro encontrado.", historyLoading: "Carregando histórico...",
+        loggedInAs: "Usuário:",
+        resellerCustomerLabel: "Cliente Revendedor", resellerCustomerManualPlaceholder: "Digite o nome do cliente revendedor",
+        resellerLimitStatus: (revive, max, total, time) => `Limite Cliente: <b>Revive</b> (${revive}/${total}) | <b>Max</b> (${max}/${total}). Reseta em <b>${time}</b>.`,
+        resellerLimitExceededWarning: "Atenção: O limite diário do cliente para um ou mais itens foi excedido. Itens acima do limite serão cobrados com o preço base."
+    },
+    en: {
+        pageTitle: "Panel", mainHeader: "Token Calculator", themeLabel: "Light Theme",
+        idLabel: "Customer Identifier / Name", idPlaceholder: "Enter customer's name or ID", discountLabel: "Discount (%)",
+        discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Unit Price", tableQty: "Quantity",
+        tableTotal: "Total Value", tableGrandTotal: "GRAND TOTAL", btnCalculate: "Calculate", btnReset: "Reset",
+        btnExport: "Export to PNG", alertNoItems: "No items were selected to generate the receipt.",
+        receiptHeader: "Receipt", receiptItemsHeader: "Purchased Items", receiptSubtotal: "Subtotal",
+        receiptDiscount: "Discount", receiptFinalTotal: "Final Total", receiptThanks: "✨ Thank you for your preference! ✨",
+        calculationMode: "Calculation Mode", modeQty: "By Quantity", modeMush: "By Mush",
+        distributeTokensLabel: "Desirable Tokens for Distribution", totalMushLabel: "Total Mush to Spend",
+        btnDistribute: "Distribute", leftoverMushText: "Leftover:",
+        loginHeader: "Calculator Login", usernameLabel: "Username", passwordLabel: "Password",
+        loginButton: "Login", logoutButton: "Logout", errorInvalidCredentials: "Invalid username or password.",
+        errorGeneric: "An error occurred. Please try again.",
+        tabCalculator: "Calculator", tabHistory: "History", historyHeader: "Sales History",
+        historyCustomer: "Customer", historyDate: "Date", historyTotal: "Total", historySeller: "Seller",
+        historyNoRecords: "No records found.", historyLoading: "Loading history...",
+        loggedInAs: "User:",
+        resellerCustomerLabel: "Reseller Customer", resellerCustomerManualPlaceholder: "Enter reseller customer's name",
+        resellerLimitStatus: (revive, max, total, time) => `Customer Limit: <b>Revive</b> (${revive}/${total}) | <b>Max</b> (${max}/${total}). Resets in <b>${time}</b>.`,
+        resellerLimitExceededWarning: "Warning: The customer's daily limit for one or more items has been exceeded. Items above the limit will be charged at the base price."
+    }
+  };
 
-    const app = {
-      calculatorInitialized: false,
-      currentLeftover: 0,
-      historyPageSize: 15,
-      historyPageCursors: [null],
-      historyCurrentPage: 0,
-      historyHasNextPage: true,
-      salesChartInstance: null,
-      tokensChartInstance: null,
-      isCurrentUserAdmin: false,
-      currentUsername: null,
-      saveTimeout: null,
-      currentCustomerUsage: { revive: 0, max: 0 },
-      resellerLimitInterval: null, 
+  const dom = {
+    authContainer: document.getElementById('auth-container'),
+    appContainer: document.getElementById('app-container'),
+    usernameInput: document.getElementById('username-input'),
+    passwordInput: document.getElementById('password-input'),
+    btnLogin: document.getElementById('btnLogin'),
+    btnLogout: document.getElementById('btnLogout'),
+    authError: document.getElementById('auth-error'),
+    html: document.documentElement,
+    nomeClienteInput: document.getElementById('nomeCliente'),
+    descontoInput: document.getElementById('desconto'),
+    tabelaItensBody: document.getElementById('tabela-itens'),
+    totalGeralCell: document.getElementById('totalGeral'),
+    themeToggle: document.getElementById('theme-toggle'),
+    accentColorSwitcher: document.getElementById('accent-color-switcher'),
+    langBr: document.getElementById('lang-br'),
+    langEn: document.getElementById('lang-en'),
+    modeQtyRadio: document.getElementById('mode-qty'),
+    modeMushRadio: document.getElementById('mode-mush'),
+    distributorSection: document.getElementById('distributor-section'),
+    tokenFiltersContainer: document.getElementById('token-filters-container'),
+    leftoverTokenFiltersContainer: document.getElementById('leftover-token-filters-container'),
+    totalMushInput: document.getElementById('total-mush'),
+    btnDistribute: document.getElementById('btnDistribute'),
+    btnDistributeLeftover: document.getElementById('btnDistributeLeftover'),
+    leftoverMushDiv: document.getElementById('leftover-mush'),
+    leftoverDistributorSection: document.getElementById('leftover-distributor-section'),
+    tabNavigation: document.querySelector('.tab-navigation'),
+    tabLinks: document.querySelectorAll('.tab-link'),
+    tabContents: document.querySelectorAll('.tab-content'),
+    historyTableContainer: document.getElementById('history-table-container'),
+    loggedInUserDiv: document.getElementById('logged-in-user'),
+    historySearchInput: document.getElementById('history-search-input'),
+    historyDateStart: document.getElementById('history-date-start'),
+    historyDateEnd: document.getElementById('history-date-end'),
+    historyApplyFilterBtn: document.getElementById('history-apply-filter-btn'),
+    historyPaginationControls: document.getElementById('history-pagination-controls'),
+    btnPrevPage: document.getElementById('btn-prev-page'),
+    btnNextPage: document.getElementById('btn-next-page'),
+    pageNumberDisplay: document.getElementById('page-number-display'),
+    salesOverTimeChart: document.getElementById('sales-over-time-chart'),
+    tokensSoldChart: document.getElementById('tokens-sold-chart'),
+    adminView: document.getElementById('admin-view'),
+    adminActionStatus: document.getElementById('admin-action-status'),
+    btnLoadUsers: document.getElementById('btn-load-users'),
+    userListContainer: document.getElementById('user-list-container'),
+    btnCreateSeller: document.getElementById('btn-create-seller'),
+    newSellerUsernameInput: document.getElementById('new-seller-username'),
+    newSellerPasswordInput: document.getElementById('new-seller-password'),
+    resellerModeContainer: document.getElementById('reseller-mode-container'),
+    resellerModeToggle: document.getElementById('reseller-mode-toggle'),
+    resellerLimitStatus: document.getElementById('reseller-limit-status'),
+    customerNameContainer: document.getElementById('customer-name-container'),
+    resellerCustomerSelectionContainer: document.getElementById('reseller-customer-selection-container'),
+    resellerCustomerSelect: document.getElementById('reseller-customer-select'),
+    resellerCustomerManualInput: document.getElementById('reseller-customer-manual-input'),
+    txtExportModal: document.getElementById('txt-export-modal'),
+    exportTxtModalBtn: document.getElementById('export-txt-modal-btn'),
+    closeTxtExportModalBtn: document.getElementById('close-txt-export-modal'),
+    cancelTxtExportBtn: document.getElementById('cancel-txt-export-btn'),
+    generateTxtFileBtn: document.getElementById('generate-txt-file-btn'),
+    customerListForExport: document.getElementById('customer-list-for-export'),
+    selectAllCustomersCheckbox: document.getElementById('select-all-customers-checkbox'),
+    historySellerFilterContainer: document.getElementById('history-seller-filter-container'),
+    historySellerFilter: document.getElementById('history-seller-filter'),
+  };
 
-      init() {
+  let currentLang = 'br';
+
+  const app = {
+    calculatorInitialized: false,
+    currentLeftover: 0,
+    historyPageSize: 15,
+    historyPageCursors: [null],
+    historyCurrentPage: 0,
+    historyHasNextPage: true,
+    salesChartInstance: null,
+    tokensChartInstance: null,
+    isCurrentUserAdmin: false,
+    currentUsername: null,
+    saveTimeout: null,
+    currentCustomerUsage: { revive: 0, max: 0 },
+    resellerLimitInterval: null,
+
+    init() {
         this.loadDevicePreferences();
         this.setLanguage(currentLang, true);
         this.addAuthListeners();
-      },
-      
-      addAuthListeners() {
+    },
+
+    addAuthListeners() {
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 await user.getIdTokenResult(true).then(async (idTokenResult) => {
                     this.isCurrentUserAdmin = !!idTokenResult.claims.admin;
                     this.currentUsername = user.email.split('@')[0];
-                    
+
                     document.querySelector('[data-tab="admin-view"]').style.display = this.isCurrentUserAdmin ? 'inline-block' : 'none';
                     if (this.isCurrentUserAdmin) {
                         dom.resellerModeContainer.classList.remove('hidden');
@@ -879,12 +924,12 @@
 
                     dom.authContainer.classList.add('hidden');
                     dom.appContainer.classList.remove('hidden');
-                    
+
                     if (!this.calculatorInitialized) {
                         this.addAppEventListeners();
-                        this.setLanguage(currentLang); 
+                        this.setLanguage(currentLang);
                         await this.loadUserPreferences(user);
-                        this.setDefaultTab(); 
+                        this.setDefaultTab();
                         const initialMode = dom.modeQtyRadio.checked ? 'quantity' : 'mush';
                         this.toggleMode(initialMode);
                         this.calculatorInitialized = true;
@@ -897,679 +942,716 @@
                 dom.authContainer.classList.remove('hidden');
                 dom.appContainer.classList.add('hidden');
                 dom.resellerModeContainer.classList.add('hidden');
-                this.calculatorInitialized = false; 
+                this.calculatorInitialized = false;
             }
         });
         dom.btnLogin.addEventListener('click', this.handleLogin.bind(this));
         dom.btnLogout.addEventListener('click', this.handleLogout.bind(this));
-      },
+    },
 
-      addAppEventListeners() {
-          dom.descontoInput.addEventListener('input', this.updateUI.bind(this));
-          document.getElementById('btnCalcular').addEventListener('click', this.updateUI.bind(this));
-          document.getElementById('btnResetar').addEventListener('click', this.reset.bind(this));
-          document.getElementById('btnGerarImagem').addEventListener('click', this.generateImage.bind(this));
-          dom.themeToggle.addEventListener('click', () => {
-              const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-              this.setTheme(newTheme);
-              if(document.getElementById('dashboard-view').classList.contains('active')) {
-                  this.loadDashboardData();
-              }
-          });
-          dom.langBr.addEventListener('click', () => this.setLanguage('br'));
-          dom.langEn.addEventListener('click', () => this.setLanguage('en'));
-          dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
-          dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
-          dom.resellerModeToggle.addEventListener('change', this.toggleResellerMode.bind(this));
-          
-          dom.nomeClienteInput.addEventListener('keyup', () => {});
-
-          dom.resellerCustomerSelect.addEventListener('change', () => {
-              if (dom.resellerCustomerSelect.value === 'manual') {
-                  dom.resellerCustomerManualInput.classList.remove('hidden');
-                  dom.resellerCustomerManualInput.focus();
-              } else {
-                  dom.resellerCustomerManualInput.classList.add('hidden');
-              }
-              this.checkResellerLimit();
-          });
-
-          dom.resellerCustomerManualInput.addEventListener('keyup', this.checkResellerLimit.bind(this));
-          
-          dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
-          dom.btnDistributeLeftover.addEventListener('click', this.distributeLeftoverMush.bind(this));
-          dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
-          dom.tokenFiltersContainer.addEventListener('change', () => {
-              const selectedCount = dom.tokenFiltersContainer.querySelectorAll('input:checked').length;
-              document.getElementById('two-token-options').classList.toggle('hidden', selectedCount !== 2);
-          });
-          document.querySelectorAll('input[name="history-view-mode"]').forEach(radio => {
-              radio.addEventListener('change', () => this.loadHistory('first'));
-          });
-          dom.historyApplyFilterBtn.addEventListener('click', () => this.loadHistory('first'));
-          dom.btnPrevPage.addEventListener('click', () => this.loadHistory('prev'));
-          dom.btnNextPage.addEventListener('click', () => this.loadHistory('next'));
-          dom.historyTableContainer.addEventListener('click', (event) => {
-              const target = event.target.closest('button');
-              if (!target) return;
-
-              if (target.classList.contains('delete-history-btn')) {
-                  this.handleHistoryDelete(target.dataset.id);
-              }
-              if (target.classList.contains('btn-view-receipt')) {
-                  this.regenerateReceipt(target.dataset.id);
-              }
-          });
-          
-          dom.btnLoadUsers.addEventListener('click', this.loadUsers.bind(this));
-          dom.userListContainer.addEventListener('click', this.handleUserAction.bind(this));
-          dom.btnCreateSeller.addEventListener('click', this.handleCreateSeller.bind(this));
-
-          dom.exportTxtModalBtn.addEventListener('click', this.openTxtExportModal.bind(this));
-          dom.closeTxtExportModalBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
-          dom.cancelTxtExportBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
-          dom.selectAllCustomersCheckbox.addEventListener('change', this.handleSelectAllCustomers.bind(this));
-          dom.generateTxtFileBtn.addEventListener('click', this.generateTxtFile.bind(this));
-          dom.txtExportModal.addEventListener('click', (e) => {
-            if (e.target === dom.txtExportModal) {
-              dom.txtExportModal.classList.add('hidden');
+    addAppEventListeners() {
+        dom.descontoInput.addEventListener('input', () => {
+            this.updateUI();
+            this.triggerSavePreferences();
+        });
+        document.getElementById('btnCalcular').addEventListener('click', this.updateUI.bind(this));
+        document.getElementById('btnResetar').addEventListener('click', this.reset.bind(this));
+        document.getElementById('btnGerarImagem').addEventListener('click', this.generateImage.bind(this));
+        dom.themeToggle.addEventListener('click', () => {
+            const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            this.setTheme(newTheme);
+        });
+        dom.accentColorSwitcher.addEventListener('click', (event) => {
+            const color = event.target.dataset.color;
+            if (color) {
+                this.setAccentColor(color);
             }
-          });
-      },
-      
-      async handleLogin() {
-        const username = dom.usernameInput.value.trim();
-        const password = dom.passwordInput.value;
-        const t = TRANSLATIONS[currentLang];
-        if (!username || !password) {
-            dom.authError.textContent = t.errorInvalidCredentials;
+        });
+        dom.langBr.addEventListener('click', () => this.setLanguage('br'));
+        dom.langEn.addEventListener('click', () => this.setLanguage('en'));
+        dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
+        dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
+        dom.resellerModeToggle.addEventListener('change', this.toggleResellerMode.bind(this));
+
+        dom.nomeClienteInput.addEventListener('keyup', () => {});
+
+        dom.resellerCustomerSelect.addEventListener('change', () => {
+            if (dom.resellerCustomerSelect.value === 'manual') {
+                dom.resellerCustomerManualInput.classList.remove('hidden');
+                dom.resellerCustomerManualInput.focus();
+            } else {
+                dom.resellerCustomerManualInput.classList.add('hidden');
+            }
+            this.checkResellerLimit();
+        });
+
+        dom.resellerCustomerManualInput.addEventListener('keyup', this.checkResellerLimit.bind(this));
+
+        dom.totalMushInput.addEventListener('input', () => this.triggerSavePreferences());
+        dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
+        dom.btnDistributeLeftover.addEventListener('click', this.distributeLeftoverMush.bind(this));
+        dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
+        dom.tokenFiltersContainer.addEventListener('change', () => {
+            const selectedCount = dom.tokenFiltersContainer.querySelectorAll('input:checked').length;
+            document.getElementById('two-token-options').classList.toggle('hidden', selectedCount !== 2);
+        });
+        document.querySelectorAll('input[name="history-view-mode"]').forEach(radio => {
+            radio.addEventListener('change', () => this.loadHistory('first'));
+        });
+        dom.historyApplyFilterBtn.addEventListener('click', () => this.loadHistory('first'));
+        dom.btnPrevPage.addEventListener('click', () => this.loadHistory('prev'));
+        dom.btnNextPage.addEventListener('click', () => this.loadHistory('next'));
+        dom.historyTableContainer.addEventListener('click', (event) => {
+            const target = event.target.closest('button');
+            if (!target) return;
+
+            if (target.classList.contains('delete-history-btn')) {
+                this.handleHistoryDelete(target.dataset.id);
+            }
+            if (target.classList.contains('btn-view-receipt')) {
+                this.regenerateReceipt(target.dataset.id);
+            }
+        });
+
+        dom.btnLoadUsers.addEventListener('click', this.loadUsers.bind(this));
+        dom.userListContainer.addEventListener('click', this.handleUserAction.bind(this));
+        dom.btnCreateSeller.addEventListener('click', this.handleCreateSeller.bind(this));
+
+        dom.exportTxtModalBtn.addEventListener('click', this.openTxtExportModal.bind(this));
+        dom.closeTxtExportModalBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
+        dom.cancelTxtExportBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
+        dom.selectAllCustomersCheckbox.addEventListener('change', this.handleSelectAllCustomers.bind(this));
+        dom.generateTxtFileBtn.addEventListener('click', this.generateTxtFile.bind(this));
+        dom.txtExportModal.addEventListener('click', (e) => {
+            if (e.target === dom.txtExportModal) {
+                dom.txtExportModal.classList.add('hidden');
+            }
+        });
+    },
+
+    async handleLogin() {
+      const username = dom.usernameInput.value.trim();
+      const password = dom.passwordInput.value;
+      const t = TRANSLATIONS[currentLang];
+      if (!username || !password) {
+          dom.authError.textContent = t.errorInvalidCredentials;
+          return;
+      }
+      const email = username + DUMMY_DOMAIN;
+      try {
+          dom.authError.textContent = '';
+          await auth.signInWithEmailAndPassword(email, password);
+      } catch (error) {
+          if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+              dom.authError.textContent = t.errorInvalidCredentials;
+          } else {
+              dom.authError.textContent = t.errorGeneric;
+          }
+      }
+    },
+
+    handleLogout() {
+      auth.signOut();
+    },
+
+    loadDevicePreferences() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      const accentColor = localStorage.getItem('accentColor') || 'green';
+      this.setTheme(theme, false);
+      this.setAccentColor(accentColor, false);
+      currentLang = localStorage.getItem('language') || 'br';
+    },
+
+    async loadUserPreferences(user) {
+      if (!user) return;
+      try {
+          const docRef = db.collection('userPreferences').doc(user.uid);
+          const docSnap = await docRef.get();
+          if (docSnap.exists) {
+              const prefs = docSnap.data();
+              if (prefs.theme) this.setTheme(prefs.theme, false);
+              if (prefs.accentColor) this.setAccentColor(prefs.accentColor, false);
+              if (prefs.language) this.setLanguage(prefs.language, false, true);
+
+              if (prefs.calculator) {
+                  dom.descontoInput.value = prefs.calculator.discount || '';
+                  dom.totalMushInput.value = prefs.calculator.totalMush || '';
+                  if (prefs.calculator.quantities) {
+                      for (const key in prefs.calculator.quantities) {
+                          const qtyInput = document.getElementById(`qtd-${key}`);
+                          if (qtyInput) {
+                              qtyInput.value = prefs.calculator.quantities[key];
+                          }
+                      }
+                  }
+              }
+
+              if (prefs.prices) {
+                  for (const key in prefs.prices) {
+                      const priceInput = document.getElementById(`price-${key}`);
+                      if (priceInput && prefs.prices[key]) {
+                          priceInput.value = prefs.prices[key];
+                      }
+                  }
+              }
+              this.updateUI(); 
+          }
+      } catch (error) {
+          console.error("Erro ao carregar preferências do usuário:", error);
+      }
+    },
+
+    triggerSavePreferences() {
+        clearTimeout(this.saveTimeout);
+        this.saveTimeout = setTimeout(() => this.savePreferences(), 1500);
+    },
+
+    async savePreferences() {
+        if (!auth.currentUser || dom.resellerModeToggle.checked) return;
+
+        const pricesToSave = {};
+        for (const key in ITENS_CATALOGO) {
+            const priceInput = document.getElementById(`price-${key}`);
+            if (priceInput) pricesToSave[key] = parseFloat(priceInput.value) || 0;
+        }
+
+        const quantitiesToSave = {};
+        for (const key in ITENS_CATALOGO) {
+            const qtyInput = document.getElementById(`qtd-${key}`);
+            if (qtyInput) quantitiesToSave[key] = parseInt(qtyInput.value) || 0;
+        }
+
+        const prefs = {
+            theme: dom.html.getAttribute('data-theme'),
+            accentColor: dom.html.getAttribute('data-accent-color'),
+            language: currentLang,
+            prices: pricesToSave,
+            calculator: {
+                discount: parseFloat(dom.descontoInput.value) || 0,
+                totalMush: parseFloat(dom.totalMushInput.value) || 0,
+                quantities: quantitiesToSave
+            }
+        };
+
+        try {
+            await db.collection('userPreferences').doc(auth.currentUser.uid).set(prefs, { merge: true });
+        } catch (error) {
+            console.error("Erro ao salvar preferências:", error);
+        }
+    },
+
+    setDefaultTab() {
+      dom.tabLinks.forEach(link => link.classList.remove('active'));
+      dom.tabContents.forEach(content => content.classList.add('hidden'));
+
+      const firstTab = document.querySelector('.tab-link');
+      const firstContentId = firstTab.dataset.tab;
+
+      firstTab.classList.add('active');
+      document.getElementById(firstContentId).classList.remove('hidden');
+    },
+
+    handleTabClick(event) {
+        const clickedTab = event.target.closest('.tab-link');
+        if (!clickedTab || clickedTab.classList.contains('active')) {
             return;
         }
-        const email = username + DUMMY_DOMAIN;
-        try {
-            dom.authError.textContent = '';
-            await auth.signInWithEmailAndPassword(email, password);
-        } catch (error) {
-            if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
-                dom.authError.textContent = t.errorInvalidCredentials;
-            } else {
-                dom.authError.textContent = t.errorGeneric;
-            }
-        }
-      },
-      
-      handleLogout() {
-        auth.signOut();
-      },
-
-      loadDevicePreferences() {
-          const theme = localStorage.getItem('theme') || 'dark';
-          this.setTheme(theme, false);
-          currentLang = localStorage.getItem('language') || 'br';
-      },
-      
-      async loadUserPreferences(user) {
-        if (!user) return;
-        try {
-            const docRef = db.collection('userPreferences').doc(user.uid);
-            const docSnap = await docRef.get();
-            if (docSnap.exists) { 
-                const prefs = docSnap.data();
-                if (prefs.theme) {
-                    this.setTheme(prefs.theme, false);
-                }
-                if (prefs.language) {
-                    this.setLanguage(prefs.language, false, true);
-                }
-                if (prefs.prices) {
-                    for (const key in prefs.prices) {
-                        const priceInput = document.getElementById(`price-${key}`);
-                        if (priceInput && prefs.prices[key]) {
-                            priceInput.value = prefs.prices[key];
-                        }
-                    }
-                    this.updateUI();
-                }
-            }
-        } catch (error) {
-            console.error("Erro ao carregar preferências do usuário:", error);
-        }
-      },
-
-      triggerSavePreferences() {
-          clearTimeout(this.saveTimeout);
-          this.saveTimeout = setTimeout(() => this.savePreferences(), 2000);
-      },
-
-      async savePreferences() {
-          if (!auth.currentUser || dom.resellerModeToggle.checked) return;
-
-          const pricesToSave = {};
-          for (const key in ITENS_CATALOGO) {
-              const priceInput = document.getElementById(`price-${key}`);
-              if (priceInput) {
-                  pricesToSave[key] = parseFloat(priceInput.value);
-              }
-          }
-
-          const prefs = {
-              theme: dom.html.getAttribute('data-theme'),
-              language: currentLang,
-              prices: pricesToSave
-          };
-          
-          try {
-              await db.collection('userPreferences').doc(auth.currentUser.uid).set(prefs, { merge: true });
-          } catch (error) {
-              console.error("Erro ao salvar preferências:", error);
-          }
-      },
-      
-      setDefaultTab() {
         dom.tabLinks.forEach(link => link.classList.remove('active'));
         dom.tabContents.forEach(content => content.classList.add('hidden'));
-        
-        const firstTab = document.querySelector('.tab-link');
-        const firstContentId = firstTab.dataset.tab;
-        
-        firstTab.classList.add('active');
-        document.getElementById(firstContentId).classList.remove('hidden');
-      },
 
-      handleTabClick(event) {
-          const clickedTab = event.target.closest('.tab-link');
-          if (!clickedTab || clickedTab.classList.contains('active')) {
-              return;
-          }
-          dom.tabLinks.forEach(link => link.classList.remove('active'));
-          dom.tabContents.forEach(content => content.classList.add('hidden'));
-          
-          clickedTab.classList.add('active');
-          const tabId = clickedTab.dataset.tab;
-          document.getElementById(tabId).classList.remove('hidden');
-
-          if (tabId === 'history-view') {
-              this.loadHistory('first');
-              // Popular filtro de vendedor se for admin
-              if (this.isCurrentUserAdmin) {
-                this.populateHistorySellerFilter();
-              } else {
-                dom.historySellerFilterContainer.classList.add('hidden');
-              }
-          } else if (tabId === 'dashboard-view') {
-              this.loadDashboardData();
-          } else if (tabId === 'admin-view' && this.isCurrentUserAdmin) {
-              this.loadUsers();
-          }
-      },
-      
-      async handleHistoryDelete(docId) {
-        if (!docId) return;
+        clickedTab.classList.add('active');
+        const tabId = clickedTab.dataset.tab;
+        document.getElementById(tabId).classList.remove('hidden');
         
-        const confirmDelete = confirm("Tem certeza que deseja excluir este registro de venda? Esta ação não pode ser desfeita.");
-        
-        if (confirmDelete) {
-            try {
-                await db.collection('receipts').doc(docId).delete();
-                alert('Registro excluído com sucesso!');
-                this.loadHistory('first');
-            } catch (error) {
-                console.error("Erro ao excluir registro:", error);
-                alert("Ocorreu um erro ao excluir o registro. Verifique suas permissões.");
+      if (tabId === 'dashboard-view') {
+          this.loadDashboardData();
+      } else if (tabId === 'history-view') {
+            this.loadHistory('first');
+            if (this.isCurrentUserAdmin) {
+              this.populateHistorySellerFilter();
+            } else {
+              dom.historySellerFilterContainer.classList.add('hidden');
             }
+        } else if (tabId === 'admin-view' && this.isCurrentUserAdmin) {
+            this.loadUsers();
         }
-      },
-      
-      displayAdminStatus(message, isSuccess = false) {
-          dom.adminActionStatus.textContent = message;
-          dom.adminActionStatus.className = isSuccess ? 'success' : '';
-          setTimeout(() => dom.adminActionStatus.textContent = '', 5000);
-      },
+    },
 
-      async handleCreateSeller() {
-          const username = dom.newSellerUsernameInput.value.trim();
-          const password = dom.newSellerPasswordInput.value;
+    async handleHistoryDelete(docId) {
+      if (!docId) return;
 
-          if (!username || !password) {
-              this.displayAdminStatus('Por favor, preencha o usuário e a senha.');
-              return;
-          }
-          if (password.length < 6) {
-              this.displayAdminStatus('A senha deve ter no mínimo 6 caracteres.');
-              return;
-          }
+      const confirmDelete = confirm("Tem certeza que deseja excluir este registro de venda? Esta ação não pode ser desfeita.");
 
-          dom.btnCreateSeller.disabled = true;
-          this.displayAdminStatus('Criando vendedor...', true);
-
+      if (confirmDelete) {
           try {
-              const createUser = functions.httpsCallable('createUser');
-              const result = await createUser({
-                  email: username + DUMMY_DOMAIN,
-                  password: password
-              });
-              this.displayAdminStatus(result.data.message, true);
-              dom.newSellerUsernameInput.value = '';
-              dom.newSellerPasswordInput.value = '';
-              this.loadUsers();
+              await db.collection('receipts').doc(docId).delete();
+              alert('Registro excluído com sucesso!');
+              this.loadHistory('first');
           } catch (error) {
-              console.error("Erro ao criar vendedor:", error);
-              this.displayAdminStatus(`Erro: ${error.message}`);
-          } finally {
-              dom.btnCreateSeller.disabled = false;
+              console.error("Erro ao excluir registro:", error);
+              alert("Ocorreu um erro ao excluir o registro. Verifique suas permissões.");
           }
-      },
-      
-      async loadUsers() {
-          dom.userListContainer.innerHTML = '<p>Carregando usuários...</p>';
-          try {
-              const listAllUsers = functions.httpsCallable('listAllUsers');
-              const result = await listAllUsers();
-              this.renderUserList(result.data);
-          } catch (error) {
-              console.error("Erro ao carregar usuários:", error);
-              dom.userListContainer.innerHTML = `<p style="color: var(--text-error);">Erro ao carregar usuários: ${error.message}</p>`;
-          }
-      },
-      
-      async populateResellerCustomerDropdown() {
+      }
+    },
+
+    displayAdminStatus(message, isSuccess = false) {
+        dom.adminActionStatus.textContent = message;
+        dom.adminActionStatus.className = isSuccess ? 'success' : '';
+        setTimeout(() => dom.adminActionStatus.textContent = '', 5000);
+    },
+
+    async handleCreateSeller() {
+        const username = dom.newSellerUsernameInput.value.trim();
+        const password = dom.newSellerPasswordInput.value;
+
+        if (!username || !password) {
+            this.displayAdminStatus('Por favor, preencha o usuário e a senha.');
+            return;
+        }
+        if (password.length < 6) {
+            this.displayAdminStatus('A senha deve ter no mínimo 6 caracteres.');
+            return;
+        }
+
+        dom.btnCreateSeller.disabled = true;
+        this.displayAdminStatus('Criando vendedor...', true);
+
+        try {
+            const createUser = functions.httpsCallable('createUser');
+            const result = await createUser({
+                email: username + DUMMY_DOMAIN,
+                password: password
+            });
+            this.displayAdminStatus(result.data.message, true);
+            dom.newSellerUsernameInput.value = '';
+            dom.newSellerPasswordInput.value = '';
+            this.loadUsers();
+        } catch (error) {
+            console.error("Erro ao criar vendedor:", error);
+            this.displayAdminStatus(`Erro: ${error.message}`);
+        } finally {
+            dom.btnCreateSeller.disabled = false;
+        }
+    },
+
+    async loadUsers() {
+        dom.userListContainer.innerHTML = '<p>Carregando usuários...</p>';
         try {
             const listAllUsers = functions.httpsCallable('listAllUsers');
             const result = await listAllUsers();
-            const users = result.data;
-            
-            dom.resellerCustomerSelect.innerHTML = '<option value="">Selecione um cliente...</option>'; 
-
-            users.forEach(user => {
-                if (user.email === auth.currentUser.email) return;
-
-                const username = user.email.split('@')[0];
-                const option = document.createElement('option');
-                option.value = username;
-                option.textContent = username;
-                dom.resellerCustomerSelect.appendChild(option);
-            });
-            
-            const manualOption = document.createElement('option');
-            manualOption.value = 'manual';
-            manualOption.textContent = 'Digitar nome manualmente...';
-            dom.resellerCustomerSelect.appendChild(manualOption);
-
+            this.renderUserList(result.data);
         } catch (error) {
-            console.error("Erro ao carregar lista de clientes revendedores:", error);
-            dom.resellerCustomerSelect.innerHTML = `<option value="">Erro ao carregar</option>`;
+            console.error("Erro ao carregar usuários:", error);
+            dom.userListContainer.innerHTML = `<p style="color: var(--text-error);">Erro ao carregar usuários: ${error.message}</p>`;
         }
-      },
-      
-      async populateHistorySellerFilter() {
-        if (!this.isCurrentUserAdmin) return;
-        dom.historySellerFilterContainer.classList.remove('hidden');
-        try {
-            const listAllUsers = functions.httpsCallable('listAllUsers');
-            const result = await listAllUsers();
-            const users = result.data;
-            
-            dom.historySellerFilter.innerHTML = '<option value="">Todos os Vendedores</option>'; 
+    },
 
-            users.forEach(user => {
-                const username = user.email.split('@')[0];
-                const option = document.createElement('option');
-                option.value = username;
-                option.textContent = username;
-                dom.historySellerFilter.appendChild(option);
-            });
-        } catch (error) {
-            console.error("Erro ao carregar lista de vendedores para filtro:", error);
-            dom.historySellerFilter.innerHTML = `<option value="">Erro ao carregar</option>`;
-        }
-      },
+    async populateResellerCustomerDropdown() {
+      try {
+          const listAllUsers = functions.httpsCallable('listAllUsers');
+          const result = await listAllUsers();
+          const users = result.data;
 
-      renderUserList(users) {
-          if (!users || users.length === 0) {
-              dom.userListContainer.innerHTML = '<p>Nenhum usuário encontrado.</p>';
-              return;
-          }
+          dom.resellerCustomerSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
 
-          const isSuperAdmin = this.currentUsername === 'risk29';
+          users.forEach(user => {
+              if (user.email === auth.currentUser.email) return;
 
-          let tableHTML = `
-              <table style="width: 100%;">
-                  <thead>
-                      <tr>
-                          <th>Usuário</th>
-                          <th>Status</th>
-                          <th style="text-align: center;">Ações</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-          `;
+              const username = user.email.split('@')[0];
+              const option = document.createElement('option');
+              option.value = username;
+              option.textContent = username;
+              dom.resellerCustomerSelect.appendChild(option);
+          });
+
+          const manualOption = document.createElement('option');
+          manualOption.value = 'manual';
+          manualOption.textContent = 'Digitar nome manualmente...';
+          dom.resellerCustomerSelect.appendChild(manualOption);
+
+      } catch (error) {
+          console.error("Erro ao carregar lista de clientes revendedores:", error);
+          dom.resellerCustomerSelect.innerHTML = `<option value="">Erro ao carregar</option>`;
+      }
+    },
+
+    async populateHistorySellerFilter() {
+      if (!this.isCurrentUserAdmin) return;
+      dom.historySellerFilterContainer.classList.remove('hidden');
+      try {
+          const listAllUsers = functions.httpsCallable('listAllUsers');
+          const result = await listAllUsers();
+          const users = result.data;
+
+          dom.historySellerFilter.innerHTML = '<option value="">Todos os Vendedores</option>';
 
           users.forEach(user => {
               const username = user.email.split('@')[0];
-              const isCurrentUser = auth.currentUser.uid === user.uid;
-              
-              const canManageThisUser = !isCurrentUser && (isSuperAdmin || !user.isAdmin);
-
-              tableHTML += `
-                  <tr>
-                      <td>${username}</td>
-                      <td>${user.isAdmin ? '<b>Admin</b>' : 'Vendedor'}</td>
-                      <td style="display: flex; justify-content: center; gap: 8px;">
-              `;
-
-              if (!user.isAdmin) {
-                  tableHTML += `<button class="btn-promote-admin" data-uid="${user.uid}" data-email="${user.email}" ${!canManageThisUser ? 'disabled' : ''} title="Promover a admin">Promover</button>`;
-              }
-              
-              if (user.isAdmin && isSuperAdmin && !isCurrentUser) {
-                   tableHTML += `<button class="btn-demote-admin" data-uid="${user.uid}" data-email="${user.email}" title="Rebaixar para Vendedor">Demover</button>`;
-              }
-
-              tableHTML += `
-                          <button class="btn-delete-user" data-uid="${user.uid}" ${!canManageThisUser ? 'disabled' : ''} title="${isCurrentUser ? 'Não pode se auto-excluir' : 'Excluir usuário'}">Excluir</button>
-                      </td>
-                  </tr>
-              `;
+              const option = document.createElement('option');
+              option.value = username;
+              option.textContent = username;
+              dom.historySellerFilter.appendChild(option);
           });
+      } catch (error) {
+          console.error("Erro ao carregar lista de vendedores para filtro:", error);
+          dom.historySellerFilter.innerHTML = `<option value="">Erro ao carregar</option>`;
+      }
+    },
 
-          tableHTML += `</tbody></table>`;
-          dom.userListContainer.innerHTML = tableHTML;
-      },
-
-      async handleUserAction(event) {
-          const target = event.target;
-          if (!target.matches('button')) return;
-
-          const uid = target.dataset.uid;
-          const email = target.dataset.email;
-          const username = email ? email.split('@')[0] : target.closest('tr').cells[0].textContent;
-
-          target.disabled = true;
-
-          if (target.classList.contains('btn-promote-admin')) {
-              if (confirm(`Tem certeza que deseja promover o usuário ${username} a administrador?`)) {
-                  this.callAdminFunction('setAdminClaim', { email }, `Usuário ${username} promovido.`, `Erro ao promover ${username}.`, target);
-              } else {
-                  target.disabled = false;
-              }
-          }
-          
-          if (target.classList.contains('btn-demote-admin')) {
-              if (confirm(`Tem certeza que deseja REBAIXAR o admin ${username} para vendedor? Ele perderá as permissões de admin.`)) {
-                  this.callAdminFunction('removeAdminClaim', { email }, `Admin ${username} rebaixado para vendedor.`, `Erro ao rebaixar ${username}.`, target);
-              } else {
-                  target.disabled = false;
-              }
-          }
-
-          if (target.classList.contains('btn-delete-user')) {
-              if (confirm(`ATENÇÃO: Esta ação é irreversível!\nTem certeza que deseja excluir o usuário ${username}?`)) {
-                  this.callAdminFunction('deleteUserByUid', { uid }, `Usuário ${username} excluído.`, `Erro ao excluir ${username}.`, target);
-              } else {
-                  target.disabled = false;
-              }
-          }
-      },
-
-      async callAdminFunction(functionName, params, successMsg, errorMsg, buttonElement) {
-        try {
-            const func = functions.httpsCallable(functionName);
-            const result = await func(params);
-            this.displayAdminStatus(result.data.message || successMsg, true);
-            this.loadUsers();
-        } catch (error) {
-            console.error(`${errorMsg}:`, error);
-            this.displayAdminStatus(`${errorMsg}: ${error.message}`);
-            if (buttonElement) buttonElement.disabled = false;
+    renderUserList(users) {
+        if (!users || users.length === 0) {
+            dom.userListContainer.innerHTML = '<p>Nenhum usuário encontrado.</p>';
+            return;
         }
-      },
 
-      async loadHistory(direction = 'first') {
-          const t = TRANSLATIONS[currentLang];
-          dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
-          dom.historyPaginationControls.classList.add('hidden');
+        const isSuperAdmin = this.currentUsername === 'risk29';
 
-          if (direction === 'first') {
-              this.historyPageCursors = [null];
-              this.historyCurrentPage = 0;
-          }
+        let tableHTML = `
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Status</th>
+                        <th style="text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
 
-          let pageToLoad = this.historyCurrentPage;
-          if (direction === 'next') {
-              pageToLoad++;
-          } else if (direction === 'prev' && pageToLoad > 0) {
-              pageToLoad--;
-          }
-          
-          const lastDoc = this.historyPageCursors[pageToLoad];
-          const viewMode = document.querySelector('input[name="history-view-mode"]:checked').value;
-          const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
-          const selectedSeller = dom.historySellerFilter.value;
-          
-          let startDate = null;
-          if (dom.historyDateStart.value) {
-              const parts = dom.historyDateStart.value.split('-');
-              startDate = new Date(parts[0], parts[1] - 1, parts[2]);
-          }
-          let endDate = null;
-          if (dom.historyDateEnd.value) {
-              const parts = dom.historyDateEnd.value.split('-');
-              endDate = new Date(parts[0], parts[1] - 1, parts[2]);
-              endDate.setHours(23, 59, 59, 999);
-          }
+        users.forEach(user => {
+            const username = user.email.split('@')[0];
+            const isCurrentUser = auth.currentUser.uid === user.uid;
 
-          try {
-              if (viewMode === 'summary') {
-                  await this.renderSummaryView(searchTerm, startDate, endDate, selectedSeller);
-                  return;
-              }
+            const canManageThisUser = !isCurrentUser && (isSuperAdmin || !user.isAdmin);
 
-              let query = db.collection("receipts");
+            tableHTML += `
+                <tr>
+                    <td>${username}</td>
+                    <td>${user.isAdmin ? '<b>Admin</b>' : 'Vendedor'}</td>
+                    <td style="display: flex; justify-content: center; gap: 8px;">
+            `;
 
-              if (!this.isCurrentUserAdmin) {
-                  query = query.where('seller', '==', this.currentUsername);
-              } else if (selectedSeller) {
-                  query = query.where('seller', '==', selectedSeller);
-              }
+            if (!user.isAdmin) {
+                tableHTML += `<button class="btn-promote-admin" data-uid="${user.uid}" data-email="${user.email}" ${!canManageThisUser ? 'disabled' : ''} title="Promover a admin">Promover</button>`;
+            }
 
-              if (startDate) query = query.where('createdAt', '>=', startDate);
-              if (endDate) query = query.where('createdAt', '<=', endDate);
-              query = query.orderBy('createdAt', 'desc');
-              if (lastDoc) query = query.startAfter(lastDoc);
-              query = query.limit(this.historyPageSize + 1);
+            if (user.isAdmin && isSuperAdmin && !isCurrentUser) {
+                tableHTML += `<button class="btn-demote-admin" data-uid="${user.uid}" data-email="${user.email}" title="Rebaixar para Vendedor">Demover</button>`;
+            }
 
-              let querySnapshot = await query.get();
-              let docs = querySnapshot.docs;
-              
-              this.historyHasNextPage = docs.length > this.historyPageSize;
-              if (this.historyHasNextPage) docs.pop();
-              
-              const lastVisibleDoc = docs[docs.length - 1];
-              if (direction === 'next' && lastVisibleDoc) {
-                  this.historyPageCursors[pageToLoad] = lastVisibleDoc;
-              }
-              this.historyCurrentPage = pageToLoad;
+            tableHTML += `
+                        <button class="btn-delete-user" data-uid="${user.uid}" ${!canManageThisUser ? 'disabled' : ''} title="${isCurrentUser ? 'Não pode se auto-excluir' : 'Excluir usuário'}">Excluir</button>
+                    </td>
+                </tr>
+            `;
+        });
 
-              if (searchTerm) {
-                  docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
-              }
+        tableHTML += `</tbody></table>`;
+        dom.userListContainer.innerHTML = tableHTML;
+    },
 
-              if (docs.length === 0 && this.historyCurrentPage === 0) {
-                  dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
-                  return;
-              }
-              
-              this.renderAllSalesView(docs);
-              
-              dom.historyPaginationControls.classList.remove('hidden');
-              dom.pageNumberDisplay.textContent = `Página ${this.historyCurrentPage + 1}`;
-              dom.btnPrevPage.disabled = this.historyCurrentPage === 0;
-              dom.btnNextPage.disabled = !this.historyHasNextPage;
+    async handleUserAction(event) {
+        const target = event.target;
+        if (!target.matches('button')) return;
 
-          } catch (error) {
-              console.error("Erro ao buscar histórico: ", error);
-              if (error.code === 'failed-precondition') {
-                  dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro que você está tentando usar precisa de um índice no banco de dados. Por favor, abra o console do seu navegador (F12), encontre a mensagem de erro em vermelho do Firebase e clique no link fornecido para criar o índice automaticamente. A criação pode levar alguns minutos.</p>`;
-                  console.error("MENSAGEM DO FIREBASE (copie o link abaixo e cole no navegador para criar o índice): ", error.message);
-              } else {
-                  dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
-              }
-          }
-      },
+        const uid = target.dataset.uid;
+        const email = target.dataset.email;
+        const username = email ? email.split('@')[0] : target.closest('tr').cells[0].textContent;
 
-      renderAllSalesView(docs) {
-          const t = TRANSLATIONS[currentLang];
-          let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th>`;
-          if (this.isCurrentUserAdmin) {
-            tableHTML += `<th>${t.historySeller}</th>`;
-          }
-          tableHTML += `<th>${t.historyTotal}</th><th>${t.historyDate}</th><th>Ações</th></tr></thead><tbody>`;
+        target.disabled = true;
 
-          docs.forEach(doc => {
-              const data = doc.data();
-              tableHTML += `<tr><td>${data.customerName || 'N/A'}</td>`;
-              if (this.isCurrentUserAdmin) {
-                tableHTML += `<td>${(data.seller || 'N/A').split('@')[0]}</td>`;
-              }
-              tableHTML += `
-                                  <td>${this.formatCurrency(data.grandTotal || 0)}</td>
-                                  <td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td>
-                                  <td style="display: flex; gap: 8px; justify-content: center;">
-                                      <button class="btn-view-receipt" data-id="${doc.id}" title="Ver Recibo">
-                                          <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-receipt"></use></svg>
-                                      </button>`;
-              if (this.isCurrentUserAdmin) {
-                  tableHTML += `
-                                      <button class="delete-history-btn" data-id="${doc.id}" title="Excluir">
-                                          <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-reset"></use></svg>
-                                      </button>`;
-              }
-              tableHTML += `</td></tr>`;
-          });
-          dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
-      },
+        if (target.classList.contains('btn-promote-admin')) {
+            if (confirm(`Tem certeza que deseja promover o usuário ${username} a administrador?`)) {
+                this.callAdminFunction('setAdminClaim', { email }, `Usuário ${username} promovido.`, `Erro ao promover ${username}.`, target);
+            } else {
+                target.disabled = false;
+            }
+        }
 
-      async renderSummaryView(searchTerm, startDate, endDate, selectedSeller) {
-          let query = db.collection("receipts");
+        if (target.classList.contains('btn-demote-admin')) {
+            if (confirm(`Tem certeza que deseja REBAIXAR o admin ${username} para vendedor? Ele perderá as permissões de admin.`)) {
+                this.callAdminFunction('removeAdminClaim', { email }, `Admin ${username} rebaixado para vendedor.`, `Erro ao rebaixar ${username}.`, target);
+            } else {
+                target.disabled = false;
+            }
+        }
 
-          if (!this.isCurrentUserAdmin) {
-              query = query.where('seller', '==', this.currentUsername);
-          } else if (selectedSeller) {
-              query = query.where('seller', '==', selectedSeller);
-          }
+        if (target.classList.contains('btn-delete-user')) {
+            if (confirm(`ATENÇÃO: Esta ação é irreversível!\nTem certeza que deseja excluir o usuário ${username}?`)) {
+                this.callAdminFunction('deleteUserByUid', { uid }, `Usuário ${username} excluído.`, `Erro ao excluir ${username}.`, target);
+            } else {
+                target.disabled = false;
+            }
+        }
+    },
 
-          if (startDate) query = query.where('createdAt', '>=', startDate);
-          if (endDate) query = query.where('createdAt', '<=', endDate);
-          
-          const allDocsSnapshot = await query.get();
-          let docs = allDocsSnapshot.docs;
-          
-          if (searchTerm) {
-              docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
-          }
-          if (docs.length === 0) {
-              dom.historyTableContainer.innerHTML = `<p>${TRANSLATIONS[currentLang].historyNoRecords}</p>`;
-              return;
-          }
-          const customerSummary = {};
-          docs.forEach(doc => {
-              const data = doc.data();
-              const customerName = data.customerName || 'Cliente Não Identificado';
-              if (!customerSummary[customerName]) {
-                  customerSummary[customerName] = { totalSpent: 0, salesCount: 0, lastSaleDate: null };
-              }
-              customerSummary[customerName].totalSpent += data.grandTotal || 0;
-              customerSummary[customerName].salesCount++;
-              const saleDate = data.createdAt?.toDate;
-              if (saleDate && (!customerSummary[customerName].lastSaleDate || saleDate > customerSummary[customerName].lastSaleDate)) {
-                  customerSummary[customerName].lastSaleDate = saleDate;
-              }
-          });
-          const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
-          let tableHTML = `<table><thead><tr><th>Cliente</th><th>Total Gasto</th><th>Nº de Compras</th><th>Última Compra</th></tr></thead><tbody>`;
-          summaryArray.forEach(summary => {
-              tableHTML += `<tr><td>${summary.name}</td><td>${this.formatCurrency(summary.totalSpent)}</td><td>${summary.salesCount}</td><td>${summary.lastSaleDate ? summary.lastSaleDate.toLocaleDateString(currentLang) : 'N/A'}</td></tr>`;
-          });
-          dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
-      },
+    async callAdminFunction(functionName, params, successMsg, errorMsg, buttonElement) {
+      try {
+          const func = functions.httpsCallable(functionName);
+          const result = await func(params);
+          this.displayAdminStatus(result.data.message || successMsg, true);
+          this.loadUsers();
+      } catch (error) {
+          console.error(`${errorMsg}:`, error);
+          this.displayAdminStatus(`${errorMsg}: ${error.message}`);
+          if (buttonElement) buttonElement.disabled = false;
+      }
+    },
 
-      async loadDashboardData() {
+    async loadHistory(direction = 'first') {
+        const t = TRANSLATIONS[currentLang];
+        dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
+        dom.historyPaginationControls.classList.add('hidden');
+
+        if (direction === 'first') {
+            this.historyPageCursors = [null];
+            this.historyCurrentPage = 0;
+        }
+
+        let pageToLoad = this.historyCurrentPage;
+        if (direction === 'next') {
+            pageToLoad++;
+        } else if (direction === 'prev' && pageToLoad > 0) {
+            pageToLoad--;
+        }
+
+        const lastDoc = this.historyPageCursors[pageToLoad];
+        const viewMode = document.querySelector('input[name="history-view-mode"]:checked').value;
+        const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
+        const selectedSeller = dom.historySellerFilter.value;
+
+        let startDate = null;
+        if (dom.historyDateStart.value) {
+            const parts = dom.historyDateStart.value.split('-');
+            startDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        let endDate = null;
+        if (dom.historyDateEnd.value) {
+            const parts = dom.historyDateEnd.value.split('-');
+            endDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            endDate.setHours(23, 59, 59, 999);
+        }
+
         try {
+            if (viewMode === 'summary') {
+                await this.renderSummaryView(searchTerm, startDate, endDate, selectedSeller);
+                return;
+            }
+
             let query = db.collection("receipts");
 
             if (!this.isCurrentUserAdmin) {
                 query = query.where('seller', '==', this.currentUsername);
+            } else if (selectedSeller) {
+                query = query.where('seller', '==', selectedSeller);
             }
 
-            const querySnapshot = await query.get();
-            const receipts = querySnapshot.docs.map(doc => doc.data());
-            const salesByDay = {};
-            receipts.forEach(receipt => {
-                if (receipt.createdAt) {
-                    const date = receipt.createdAt.toDate();
-                    const dateString = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toLocaleDateString(currentLang, { year: '2-digit', month: '2-digit', day: '2-digit' });
-                    salesByDay[dateString] = (salesByDay[dateString] || 0) + (receipt.grandTotal || 0);
-                }
-            });
-            const sortedSales = Object.entries(salesByDay).sort((a, b) => {
-                const dateA = new Date(a[0].split('/').reverse().join('-'));
-                const dateB = new Date(b[0].split('/').reverse().join('-'));
-                return dateA - dateB;
-            });
-            const salesLabels = sortedSales.map(entry => entry[0]);
-            const salesData = sortedSales.map(entry => entry[1]);
-            this.renderSalesChart(salesLabels, salesData);
-            const tokenCounts = {};
-            receipts.forEach(receipt => {
-                if (receipt.itemsData && typeof receipt.itemsData === 'object') {
-                    for (const tokenKey in receipt.itemsData) {
-                        tokenCounts[tokenKey] = (tokenCounts[tokenKey] || 0) + receipt.itemsData[tokenKey].qty;
-                    }
-                }
-            });
-            const tokenLabels = Object.keys(tokenCounts).map(key => ITENS_CATALOGO[key]?.[`name_${currentLang}`] || key);
-            const tokenData = Object.values(tokenCounts);
-            this.renderTokensChart(tokenLabels, tokenData);
-        } catch (error) {
-            console.error("Erro ao carregar dados do dashboard:", error);
-        }
-      },
+            if (startDate) query = query.where('createdAt', '>=', startDate);
+            if (endDate) query = query.where('createdAt', '<=', endDate);
+            query = query.orderBy('createdAt', 'desc');
+            if (lastDoc) query = query.startAfter(lastDoc);
+            query = query.limit(this.historyPageSize + 1);
 
-      renderSalesChart(labels, data) {
-          if (this.salesChartInstance) {
-              this.salesChartInstance.destroy();
+            let querySnapshot = await query.get();
+            let docs = querySnapshot.docs;
+
+            this.historyHasNextPage = docs.length > this.historyPageSize;
+            if (this.historyHasNextPage) docs.pop();
+
+            const lastVisibleDoc = docs[docs.length - 1];
+            if (direction === 'next' && lastVisibleDoc) {
+                this.historyPageCursors[pageToLoad] = lastVisibleDoc;
+            }
+            this.historyCurrentPage = pageToLoad;
+
+            if (searchTerm) {
+                docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
+            }
+
+            if (docs.length === 0 && this.historyCurrentPage === 0) {
+                dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
+                return;
+            }
+
+            this.renderAllSalesView(docs);
+
+            dom.historyPaginationControls.classList.remove('hidden');
+            dom.pageNumberDisplay.textContent = `Página ${this.historyCurrentPage + 1}`;
+            dom.btnPrevPage.disabled = this.historyCurrentPage === 0;
+            dom.btnNextPage.disabled = !this.historyHasNextPage;
+
+        } catch (error) {
+            console.error("Erro ao buscar histórico: ", error);
+            if (error.code === 'failed-precondition') {
+                dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro que você está tentando usar precisa de um índice no banco de dados. Por favor, abra o console do seu navegador (F12), encontre a mensagem de erro em vermelho do Firebase e clique no link fornecido para criar o índice automaticamente. A criação pode levar alguns minutos.</p>`;
+                console.error("MENSAGEM DO FIREBASE (copie o link abaixo e cole no navegador para criar o índice): ", error.message);
+            } else {
+                dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
+            }
+        }
+    },
+
+    renderAllSalesView(docs) {
+        const t = TRANSLATIONS[currentLang];
+        let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th>`;
+        if (this.isCurrentUserAdmin) {
+          tableHTML += `<th>${t.historySeller}</th>`;
+        }
+        tableHTML += `<th>${t.historyTotal}</th><th>${t.historyDate}</th><th>Ações</th></tr></thead><tbody>`;
+
+        docs.forEach(doc => {
+            const data = doc.data();
+            tableHTML += `<tr><td>${data.customerName || 'N/A'}</td>`;
+            if (this.isCurrentUserAdmin) {
+              tableHTML += `<td>${(data.seller || 'N/A').split('@')[0]}</td>`;
+            }
+            tableHTML += `
+                                <td>${this.formatCurrency(data.grandTotal || 0)}</td>
+                                <td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td>
+                                <td style="display: flex; gap: 8px; justify-content: center;">
+                                    <button class="btn-view-receipt" data-id="${doc.id}" title="Ver Recibo">
+                                        <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-receipt"></use></svg>
+                                    </button>`;
+            if (this.isCurrentUserAdmin) {
+                tableHTML += `
+                                    <button class="delete-history-btn" data-id="${doc.id}" title="Excluir">
+                                        <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-reset"></use></svg>
+                                    </button>`;
+            }
+            tableHTML += `</td></tr>`;
+        });
+        dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
+    },
+
+    async renderSummaryView(searchTerm, startDate, endDate, selectedSeller) {
+        let query = db.collection("receipts");
+
+        if (!this.isCurrentUserAdmin) {
+            query = query.where('seller', '==', this.currentUsername);
+        } else if (selectedSeller) {
+            query = query.where('seller', '==', selectedSeller);
+        }
+
+        if (startDate) query = query.where('createdAt', '>=', startDate);
+        if (endDate) query = query.where('createdAt', '<=', endDate);
+
+        const allDocsSnapshot = await query.get();
+        let docs = allDocsSnapshot.docs;
+
+        if (searchTerm) {
+            docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
+        }
+        if (docs.length === 0) {
+            dom.historyTableContainer.innerHTML = `<p>${TRANSLATIONS[currentLang].historyNoRecords}</p>`;
+            return;
+        }
+        const customerSummary = {};
+        docs.forEach(doc => {
+            const data = doc.data();
+            const customerName = data.customerName || 'Cliente Não Identificado';
+            if (!customerSummary[customerName]) {
+                customerSummary[customerName] = { totalSpent: 0, salesCount: 0, lastSaleDate: null };
+            }
+            customerSummary[customerName].totalSpent += data.grandTotal || 0;
+            customerSummary[customerName].salesCount++;
+            const saleDate = data.createdAt?.toDate;
+            if (saleDate && (!customerSummary[customerName].lastSaleDate || saleDate > customerSummary[customerName].lastSaleDate)) {
+                customerSummary[customerName].lastSaleDate = saleDate;
+            }
+        });
+        const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
+        let tableHTML = `<table><thead><tr><th>Cliente</th><th>Total Gasto</th><th>Nº de Compras</th><th>Última Compra</th></tr></thead><tbody>`;
+        summaryArray.forEach(summary => {
+            tableHTML += `<tr><td>${summary.name}</td><td>${this.formatCurrency(summary.totalSpent)}</td><td>${summary.salesCount}</td><td>${summary.lastSaleDate ? summary.lastSaleDate.toLocaleDateString(currentLang) : 'N/A'}</td></tr>`;
+        });
+        dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
+    },
+
+    async loadDashboardData() {
+      if (this.salesChartInstance) this.salesChartInstance.destroy();
+      if (this.tokensChartInstance) this.tokensChartInstance.destroy();
+      try {
+          let query = db.collection("receipts");
+
+          if (!this.isCurrentUserAdmin) {
+              query = query.where('seller', '==', this.currentUsername);
           }
-          const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
-          const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
-          this.salesChartInstance = new Chart(dom.salesOverTimeChart, {
-              type: 'line',
-              data: {
-                  labels: labels,
-                  datasets: [{
-                      label: 'Total de Vendas (Mush)',
-                      data: data,
-                      borderColor: 'rgba(52, 211, 153, 1)',
-                      backgroundColor: 'rgba(52, 211, 153, 0.2)',
-                      fill: true,
-                      tension: 0.1
-                  }]
-              },
-              options: {
-                  responsive: true,
-                  scales: {
-                      y: { 
-                          ticks: { 
-                            color: textColor,
-                            callback: (value) => this.formatCurrency(value)
-                          }, 
-                          grid: { color: gridColor } 
-                      },
-                      x: { ticks: { color: textColor }, grid: { color: gridColor } }
-                  },
-                  plugins: {
-                      legend: { labels: { color: textColor } },
-                      tooltip: {
-                          callbacks: {
+
+          const querySnapshot = await query.get();
+          const receipts = querySnapshot.docs.map(doc => doc.data());
+          const salesByDay = {};
+          receipts.forEach(receipt => {
+              if (receipt.createdAt) {
+                  const date = receipt.createdAt.toDate();
+                  const dateString = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toLocaleDateString(currentLang, { year: '2-digit', month: '2-digit', day: '2-digit' });
+                  salesByDay[dateString] = (salesByDay[dateString] || 0) + (receipt.grandTotal || 0);
+              }
+          });
+          const sortedSales = Object.entries(salesByDay).sort((a, b) => {
+              const dateA = new Date(a[0].split('/').reverse().join('-'));
+              const dateB = new Date(b[0].split('/').reverse().join('-'));
+              return dateA - dateB;
+          });
+          const salesLabels = sortedSales.map(entry => entry[0]);
+          const salesData = sortedSales.map(entry => entry[1]);
+          this.renderSalesChart(salesLabels, salesData);
+          const tokenCounts = {};
+          receipts.forEach(receipt => {
+              if (receipt.itemsData && typeof receipt.itemsData === 'object') {
+                  for (const tokenKey in receipt.itemsData) {
+                      tokenCounts[tokenKey] = (tokenCounts[tokenKey] || 0) + receipt.itemsData[tokenKey].qty;
+                  }
+              }
+          });
+          const tokenLabels = Object.keys(tokenCounts).map(key => ITENS_CATALOGO[key]?.[`name_${currentLang}`] || key);
+          const tokenData = Object.values(tokenCounts);
+          this.renderTokensChart(tokenLabels, tokenData);
+      } catch (error) {
+          console.error("Erro ao carregar dados do dashboard:", error);
+      }
+    },
+
+  hexToRgb(hex, asString = false) {
+      let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      if (!result) return asString ? '0,0,0' : 'rgb(0,0,0)';
+      const rgb = {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+      };
+      return asString ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  },
+
+    renderSalesChart(labels, data) {
+        if (this.salesChartInstance) this.salesChartInstance.destroy();
+
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim();
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
+        const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
+
+        this.salesChartInstance = new Chart(dom.salesOverTimeChart, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total de Vendas (Mush)',
+                    data: data,
+                    borderColor: accentColor,
+                    backgroundColor: `rgba(${this.hexToRgb(accentColor, true)}, 0.2)`,
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { ticks: { color: textColor, callback: (value) => this.formatCurrency(value) }, grid: { color: gridColor } },
+                    x: { ticks: { color: textColor }, grid: { color: gridColor } }
+                },
+                plugins: {
+                    legend: { labels: { color: textColor } },
+                    tooltip: {
+                        callbacks: {
                             label: (context) => {
                               let label = context.dataset.label || '';
                               if (label) { label += ': '; }
@@ -1578,196 +1660,216 @@
                               }
                               return label;
                             }
-                          }
-                      }
-                  }
-              }
-          });
-      },
-
-      renderTokensChart(labels, data) {
-          if (this.tokensChartInstance) {
-              this.tokensChartInstance.destroy();
-          }
-          const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
-          this.tokensChartInstance = new Chart(dom.tokensSoldChart, {
-              type: 'doughnut',
-              data: {
-                  labels: labels,
-                  datasets: [{
-                      label: 'Quantidade Vendida',
-                      data: data,
-                      backgroundColor: [
-                          'rgba(52, 211, 153, 0.7)', 'rgba(59, 130, 246, 0.7)',
-                          'rgba(239, 68, 68, 0.7)', 'rgba(245, 158, 11, 0.7)'
-                      ],
-                      borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary'),
-                      borderWidth: 2
-                  }]
-              },
-              options: {
-                  responsive: true,
-                  plugins: {
-                      legend: { position: 'top', labels: { color: textColor } }
-                  }
-              }
-          });
-      },
-      
-      setLanguage(lang, shouldSave = true, skipReload = false) {
-          currentLang = lang;
-          localStorage.setItem('language', lang);
-          document.querySelectorAll('[data-translate-key]').forEach(el => {
-              const key = el.dataset.translateKey;
-              const translation = TRANSLATIONS[lang][key];
-              if (translation && typeof translation !== 'function') {
-                  el.innerText = translation;
-              }
-          });
-          document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
-              const key = el.dataset.translateKeyPlaceholder;
-              if (TRANSLATIONS[lang][key]) {
-                  el.placeholder = TRANSLATIONS[lang][key];
-              }
-          });
-          document.title = TRANSLATIONS[lang].pageTitle;
-          dom.langBr.classList.toggle('active', lang === 'br');
-          dom.langEn.classList.toggle('active', lang === 'en');
-          
-          if (!skipReload) {
-              this.loadTable();
-              this.buildTokenFilters(dom.tokenFiltersContainer);
-              this.updateUI();
-          }
-
-          if (shouldSave) {
-              this.triggerSavePreferences();
-          }
-      },
-      
-      toggleMode(mode) {
-        dom.distributorSection.style.display = mode === 'mush' ? 'flex' : 'none';
-        const isMushMode = mode === 'mush';
-        dom.tabelaItensBody.querySelectorAll('input').forEach(input => {
-            if (input.id.startsWith('qtd-')) {
-                input.disabled = isMushMode;
+                        }
+                    }
+                }
             }
         });
-        document.getElementById('btnCalcular').style.display = isMushMode ? 'none' : 'inline-block';
-        if (isMushMode) this.buildTokenFilters(dom.tokenFiltersContainer);
-      },
+    },
 
-      async toggleResellerMode(event) {
-          const isResellerMode = event.target.checked;
-          
-          if (isResellerMode) {
-              dom.customerNameContainer.classList.add('hidden');
-              dom.resellerCustomerSelectionContainer.classList.remove('hidden');
-              await this.populateResellerCustomerDropdown();
-              this.checkResellerLimit();
-          } else {
-              dom.customerNameContainer.classList.remove('hidden');
-              dom.resellerCustomerSelectionContainer.classList.add('hidden');
-              dom.resellerLimitStatus.classList.add('hidden');
-              clearInterval(this.resellerLimitInterval);
-          }
+    renderTokensChart(labels, data) {
+        if (this.tokensChartInstance) this.tokensChartInstance.destroy();
 
-          if (isResellerMode) {
-              for (const key in PRECOS_RESELLER) {
-                  const priceInput = document.getElementById(`price-${key}`);
-                  if (priceInput) {
-                      priceInput.value = PRECOS_RESELLER[key];
-                      priceInput.disabled = true;
-                  }
-              }
-          } else {
-              for (const key in ITENS_CATALOGO) {
-                  const priceInput = document.getElementById(`price-${key}`);
-                  if (priceInput) {
-                      priceInput.disabled = false;
-                  }
-              }
-              await this.loadUserPreferences(auth.currentUser);
-          }
-          this.updateUI();
-      },
-      
-      setTheme(theme, shouldSave = true) {
-          dom.html.setAttribute('data-theme', theme);
-          localStorage.setItem('theme', theme);
-          if (shouldSave) {
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
+        const colorSet = {
+            green: ['#34d399', '#10b981', '#059669', '#047857'],
+            blue: ['#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8'],
+            purple: ['#a78bfa', '#8b5cf6', '#7c3aed', '#6d28d9'],
+            yellow: ['#facc15', '#f59e0b', '#d97706', '#b45309']
+        };
+        const currentAccent = dom.html.dataset.accentColor || 'green';
+
+        this.tokensChartInstance = new Chart(dom.tokensSoldChart, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Quantidade Vendida',
+                    data: data,
+                    backgroundColor: colorSet[currentAccent],
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary'),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top', labels: { color: textColor } }
+                }
+            }
+        });
+    },
+    
+    setLanguage(lang, shouldSave = true, skipReload = false) {
+        currentLang = lang;
+        localStorage.setItem('language', lang);
+        document.querySelectorAll('[data-translate-key]').forEach(el => {
+            const key = el.dataset.translateKey;
+            const translation = TRANSLATIONS[lang][key];
+            if (translation && typeof translation !== 'function') {
+                el.innerText = translation;
+            }
+        });
+        document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
+            const key = el.dataset.translateKeyPlaceholder;
+            if (TRANSLATIONS[lang][key]) {
+                el.placeholder = TRANSLATIONS[lang][key];
+            }
+        });
+        document.title = TRANSLATIONS[lang].pageTitle;
+        dom.langBr.classList.toggle('active', lang === 'br');
+        dom.langEn.classList.toggle('active', lang === 'en');
+
+        if (!skipReload) {
+            this.loadTable();
+            this.buildTokenFilters(dom.tokenFiltersContainer);
+            this.updateUI();
+        }
+
+        if (shouldSave) {
             this.triggerSavePreferences();
+        }
+    },
+
+    toggleMode(mode) {
+      dom.distributorSection.style.display = mode === 'mush' ? 'flex' : 'none';
+      const isMushMode = mode === 'mush';
+      dom.tabelaItensBody.querySelectorAll('input').forEach(input => {
+          if (input.id.startsWith('qtd-')) {
+              input.disabled = isMushMode;
           }
-      },
+      });
+      document.getElementById('btnCalcular').style.display = isMushMode ? 'none' : 'inline-block';
+      if (isMushMode) this.buildTokenFilters(dom.tokenFiltersContainer);
+    },
 
-      buildTokenFilters(container) {
-          container.innerHTML = '';
-          for (const key in ITENS_CATALOGO) {
-              const item = ITENS_CATALOGO[key];
-              const label = document.createElement('label');
-              label.innerHTML = `<input type="checkbox" value="${key}" checked><span>${item[`name_${currentLang}`]}</span>`;
-              container.appendChild(label);
-          }
-          if (container.id === 'token-filters-container') {
-              container.dispatchEvent(new Event('change'));
-          }
-      },
+    async toggleResellerMode(event) {
+        const isResellerMode = event.target.checked;
 
-      getFormattedDate() {
-          const today = new Date();
-          const year = today.getFullYear();
-          const month = String(today.getMonth() + 1).padStart(2, '0');
-          const day = String(today.getDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-      },
+        if (isResellerMode) {
+            dom.customerNameContainer.classList.add('hidden');
+            dom.resellerCustomerSelectionContainer.classList.remove('hidden');
+            await this.populateResellerCustomerDropdown();
+            this.checkResellerLimit();
+        } else {
+            dom.customerNameContainer.classList.remove('hidden');
+            dom.resellerCustomerSelectionContainer.classList.add('hidden');
+            dom.resellerLimitStatus.classList.add('hidden');
+            clearInterval(this.resellerLimitInterval);
+        }
 
-      async checkResellerLimit() {
-          if (!dom.resellerModeToggle.checked) {
-              dom.resellerLimitStatus.classList.add('hidden');
-              clearInterval(this.resellerLimitInterval);
-              return;
-          }
+        if (isResellerMode) {
+            for (const key in PRECOS_RESELLER) {
+                const priceInput = document.getElementById(`price-${key}`);
+                if (priceInput) {
+                    priceInput.value = PRECOS_RESELLER[key];
+                    priceInput.disabled = true;
+                }
+            }
+        } else {
+            for (const key in ITENS_CATALOGO) {
+                const priceInput = document.getElementById(`price-${key}`);
+                if (priceInput) {
+                    priceInput.disabled = false;
+                }
+            }
+            await this.loadUserPreferences(auth.currentUser);
+        }
+        this.updateUI();
+    },
 
-          let customerName;
-          if (dom.resellerCustomerSelect.value === 'manual') {
-              customerName = dom.resellerCustomerManualInput.value.trim().toLowerCase();
-          } else {
-              customerName = dom.resellerCustomerSelect.value.trim().toLowerCase();
-          }
+    setTheme(theme, shouldSave = true) {
+        dom.html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+      if(!document.getElementById('dashboard-view').classList.contains('hidden')) {
+            this.loadDashboardData();
+      }
+        if (shouldSave) this.triggerSavePreferences();
+    },
 
-          if (!customerName) {
-              dom.resellerLimitStatus.classList.add('hidden');
-              clearInterval(this.resellerLimitInterval);
-              this.currentCustomerUsage = { revive: 0, max: 0 };
-              return;
-          }
+    setAccentColor(color, shouldSave = true) {
+        dom.html.setAttribute('data-accent-color', color);
+        localStorage.setItem('accentColor', color);
 
-          const dateStr = this.getFormattedDate();
-          const docId = `${customerName}_${dateStr}`;
-          
-          try {
-              const docRef = db.collection('resellerLimits').doc(docId);
-              const docSnap = await docRef.get();
+        document.querySelectorAll('.color-box').forEach(box => {
+            box.classList.toggle('active', box.dataset.color === color);
+        });
 
-              if (docSnap.exists) {
-                  const data = docSnap.data();
-                  this.currentCustomerUsage.revive = data.reviveCount || 0;
-                  this.currentCustomerUsage.max = data.maxCount || 0;
-              } else {
-                  this.currentCustomerUsage = { revive: 0, max: 0 };
-              }
-              
-              this.updateResellerLimitStatusUI();
-              dom.resellerLimitStatus.classList.remove('hidden');
+        if (!document.getElementById('dashboard-view').classList.contains('hidden')) {
+            this.loadDashboardData();
+        }
 
-          } catch (error) {
-              console.error("Erro ao verificar limite do revendedor:", error);
-              this.currentCustomerUsage = { revive: 0, max: 0 };
-              dom.resellerLimitStatus.classList.add('hidden');
-          }
-      },
-      
-      updateResellerLimitStatusUI() {
+        if (shouldSave) this.triggerSavePreferences();
+    },
+
+    buildTokenFilters(container) {
+        container.innerHTML = '';
+        for (const key in ITENS_CATALOGO) {
+            const item = ITENS_CATALOGO[key];
+            const label = document.createElement('label');
+            label.innerHTML = `<input type="checkbox" value="${key}" checked><span>${item[`name_${currentLang}`]}</span>`;
+            container.appendChild(label);
+        }
+        if (container.id === 'token-filters-container') {
+            container.dispatchEvent(new Event('change'));
+        }
+    },
+
+    getFormattedDate() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    },
+
+    async checkResellerLimit() {
+        if (!dom.resellerModeToggle.checked) {
+            dom.resellerLimitStatus.classList.add('hidden');
+            clearInterval(this.resellerLimitInterval);
+            return;
+        }
+
+        let customerName;
+        if (dom.resellerCustomerSelect.value === 'manual') {
+            customerName = dom.resellerCustomerManualInput.value.trim().toLowerCase();
+        } else {
+            customerName = dom.resellerCustomerSelect.value.trim().toLowerCase();
+        }
+
+        if (!customerName) {
+            dom.resellerLimitStatus.classList.add('hidden');
+            clearInterval(this.resellerLimitInterval);
+            this.currentCustomerUsage = { revive: 0, max: 0 };
+            return;
+        }
+
+        const dateStr = this.getFormattedDate();
+        const docId = `${customerName}_${dateStr}`;
+
+        try {
+            const docRef = db.collection('resellerLimits').doc(docId);
+            const docSnap = await docRef.get();
+
+            if (docSnap.exists) {
+                const data = docSnap.data();
+                this.currentCustomerUsage.revive = data.reviveCount || 0;
+                this.currentCustomerUsage.max = data.maxCount || 0;
+            } else {
+                this.currentCustomerUsage = { revive: 0, max: 0 };
+            }
+
+            this.updateResellerLimitStatusUI();
+            dom.resellerLimitStatus.classList.remove('hidden');
+
+        } catch (error) {
+            console.error("Erro ao verificar limite do revendedor:", error);
+            this.currentCustomerUsage = { revive: 0, max: 0 };
+            dom.resellerLimitStatus.classList.add('hidden');
+        }
+    },
+
+    updateResellerLimitStatusUI() {
             clearInterval(this.resellerLimitInterval);
 
             const updateTimer = () => {
@@ -1784,7 +1886,7 @@
                 const minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
                 const seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
                 const timeString = `${hours}:${minutes}:${seconds}`;
-                
+
                 const t = TRANSLATIONS[currentLang];
                 dom.resellerLimitStatus.innerHTML = t.resellerLimitStatus(
                     this.currentCustomerUsage.revive,
@@ -1796,389 +1898,429 @@
 
             updateTimer();
             this.resellerLimitInterval = setInterval(updateTimer, 1000);
-      },
-      
-      loadTable() {
-          dom.tabelaItensBody.innerHTML = '';
-          const t = TRANSLATIONS[currentLang]; 
-          for (const key in ITENS_CATALOGO) {
-              const item = ITENS_CATALOGO[key];
-              const tr = document.createElement('tr');
-              
-              tr.innerHTML = `
-                  <td data-label="${t.tableItem}">${item[`name_${currentLang}`]}</td>
-                  <td data-label="${t.tablePrice}">
-                      <div style="width: 100px; margin: 0 auto;">
-                          <input type="number" class="price-input" id="price-${key}" value="${item.preco}" step="10" placeholder="Insira o valor aqui">
-                      </div>
-                  </td>
-                  <td data-label="${t.tableQty}">
-                      <div style="width: 80px; margin: 0 auto;">
-                          <input type="number" id="qtd-${key}" value="0" min="0">
-                      </div>
-                  </td>
-                  <td data-label="${t.tableTotal}">0,00</td>
-              `;
-              
-              tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
-              dom.tabelaItensBody.appendChild(tr);
+    },
 
-              tr.querySelector(`#qtd-${key}`).addEventListener('input', this.updateUI.bind(this));
-              tr.querySelector(`#price-${key}`).addEventListener('change', (event) => this.handlePriceChange(event, key));
-          }
-          this.updateUI();
-      },
-
-      handlePriceChange(event, key) {
-          const input = event.target;
-          let novoPreco = parseFloat(input.value);
-          const precoMinimo = PRECOS_MINIMOS[key];
-
-          if (!this.isCurrentUserAdmin) {
-              if (novoPreco < precoMinimo) {
-                  alert(`O valor mínimo para este item é ${precoMinimo}.`);
-                  novoPreco = precoMinimo;
-                  input.value = novoPreco;
-              }
-          }
-          
-          if (novoPreco < 0) {
-               novoPreco = 0;
-               input.value = novoPreco;
-          }
-
-          this.updateUI();
-          this.triggerSavePreferences();
-      },
-
-      formatCurrency(number) {
-          if (isNaN(number) || number === null) {
-            number = 0;
-          }
-          return number.toLocaleString('pt-BR', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          });
-      },
-
-      calculateValues() {
-          const descontoPercentual = parseFloat(dom.descontoInput.value) || 0;
-          const fatorDesconto = 1 - (descontoPercentual / 100);
-          let totalFinal = 0;
-          const itensCalculados = {};
-          
-          const isResellerMode = dom.resellerModeToggle.checked;
-          
-          let reviveLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive;
-          let maxLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max;
-          
-          for (const key in ITENS_CATALOGO) {
-              const precoBase = ITENS_CATALOGO[key].preco;
-              const precoRevendedor = PRECOS_RESELLER[key];
-              
-              const quantidadeInput = document.getElementById(`qtd-${key}`);
-              const quantidade = quantidadeInput ? parseInt(quantidadeInput.value) || 0 : 0;
-              let subtotal = 0;
-              let precoAplicado = precoBase;
-
-              if (isResellerMode && (key === 'revive' || key === 'max')) {
-                  const limitRemaining = (key === 'revive') ? reviveLimitRemaining : maxLimitRemaining;
-                  
-                  const tokensDentroDoLimite = Math.max(0, Math.min(quantidade, limitRemaining));
-                  const tokensForaDoLimite = Math.max(0, quantidade - tokensDentroDoLimite);
-                  
-                  subtotal += tokensDentroDoLimite * precoRevendedor;
-                  subtotal += tokensForaDoLimite * precoBase;
-                  
-                  precoAplicado = precoRevendedor;
-
-              } else {
-                  const precoInput = document.getElementById(`price-${key}`);
-                  precoAplicado = isResellerMode ? PRECOS_RESELLER[key] : (precoInput ? parseFloat(precoInput.value) : precoBase);
-                  subtotal = quantidade * (precoAplicado * fatorDesconto);
-              }
-
-              totalFinal += subtotal;
-              
-              itensCalculados[key] = {
-                  quantidade,
-                  precoAtual: precoAplicado,
-                  precoComDesconto: subtotal / quantidade || 0,
-                  subtotal
-              };
-          }
-
-          return { totalFinal, descontoPercentual, itens: itensCalculados };
-      },
-      
-      updateUI() {
-          const calculo = this.calculateValues();
-          if (!calculo) return;
-          
-          Array.from(dom.tabelaItensBody.rows).forEach((row, index) => {
-              const key = Object.keys(ITENS_CATALOGO)[index];
-              const itemCalculado = calculo.itens[key];
-              
-              const totalCell = row.cells[3];
-              totalCell.innerHTML = `${this.formatCurrency(itemCalculado.subtotal)} `;
-              totalCell.appendChild(this.createCoinIcon());
-          });
-          
-          dom.totalGeralCell.innerHTML = `<b>${this.formatCurrency(calculo.totalFinal)}</b> `;
-          dom.totalGeralCell.appendChild(this.createCoinIcon());
-      },
-
-      reset(clearDistributor = true) {
-          dom.nomeClienteInput.value = '';
-          dom.descontoInput.value = '';
-          dom.resellerCustomerSelect.value = '';
-          dom.resellerCustomerManualInput.value = '';
-          dom.resellerCustomerManualInput.classList.add('hidden');
-          
-          if (clearDistributor) {
-              dom.totalMushInput.value = '';
-              dom.leftoverMushDiv.innerHTML = '';
-              dom.leftoverDistributorSection.classList.add('hidden');
-          }
-          Object.keys(ITENS_CATALOGO).forEach(key => {
-              const qtdInput = document.getElementById(`qtd-${key}`);
-              if (qtdInput) qtdInput.value = 0;
-
-              if (!dom.resellerModeToggle.checked) {
-                const priceInput = document.getElementById(`price-${key}`);
-                if (priceInput) priceInput.value = ITENS_CATALOGO[key].preco;
-              }
-          });
-
-          this.checkResellerLimit();
-          this.updateUI();
-          if(!dom.resellerModeToggle.checked) {
-            this.triggerSavePreferences();
-          }
-      },
-      
-      distributeMush() {
-          this.reset(false);
-          const totalMush = parseFloat(dom.totalMushInput.value) || 0;
-          if (totalMush <= 0) { this.updateUI(); return; }
-          const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
-          if (selectedTokenKeys.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
-          
-          let tokens = selectedTokenKeys.map(key => ({ 
-              key, 
-              preco: parseFloat(document.getElementById(`price-${key}`).value) || ITENS_CATALOGO[key].preco, 
-              quantidade: 0 
-          }));
-          
-          if (tokens.length === 2 && document.querySelector('input[name="two-token-strategy"]:checked').value === 'split') {
-              const mushPerToken = totalMush / 2;
-              tokens.forEach(token => {
-                  if(token.preco > 0) {
-                     token.quantidade = Math.floor(mushPerToken / token.preco);
-                  }
-              });
-          } else {
-              this.runFairDistribution(tokens, totalMush);
-          }
-          this.updateDistributionUI(tokens);
-      },
-
-      distributeLeftoverMush() {
-          const selectedTokenKeysForLeftover = Array.from(dom.leftoverTokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
-          if (selectedTokenKeysForLeftover.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
-
-          let tokensForDistribution = selectedTokenKeysForLeftover.map(key => ({
-              key,
-              preco: parseFloat(document.getElementById(`price-${key}`).value) || ITENS_CATALOGO[key].preco,
-              quantidade: 0
-          }));
-
-          this.runFairDistribution(tokensForDistribution, this.currentLeftover);
-
-          tokensForDistribution.forEach(token => {
-              const qtyInput = document.getElementById(`qtd-${token.key}`);
-              const currentQty = parseInt(qtyInput.value) || 0;
-              qtyInput.value = currentQty + token.quantidade;
-          });
-
-          dom.leftoverDistributorSection.classList.add('hidden');
-          
-          const newCalculo = this.calculateValues();
-          const totalMushInputted = parseFloat(dom.totalMushInput.value) || 0;
-          this.currentLeftover = totalMushInputted - newCalculo.totalFinal;
-          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `;
-          dom.leftoverMushDiv.appendChild(this.createCoinIcon());
-
-          this.updateUI();
-      },
-      
-      runFairDistribution(tokens, totalMush) {
-          tokens.sort(() => Math.random() - 0.5);
-          let mushRestante = totalMush;
-          let possivelComprar = true;
-          while (possivelComprar) {
-              let comprouNestaRodada = false;
-              for (const token of tokens) {
-                  if (mushRestante >= token.preco && token.preco > 0) {
-                      token.quantidade++;
-                      mushRestante -= token.preco;
-                      comprouNestaRodada = true;
-                  }
-              }
-              if (!comprouNestaRodada) possivelComprar = false;
-          }
-          return tokens;
-      },
-
-      updateDistributionUI(tokens) {
-          let mushGasto = 0;
-          tokens.forEach(token => {
-              document.getElementById(`qtd-${token.key}`).value = token.quantidade;
-              mushGasto += token.quantidade * token.preco;
-          });
-          const mushTotal = parseFloat(dom.totalMushInput.value) || 0;
-          this.currentLeftover = mushTotal - mushGasto;
-          dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `;
-          dom.leftoverMushDiv.appendChild(this.createCoinIcon());
-          const cheapestPrice = Math.min(...Object.values(ITENS_CATALOGO).map(t => t.preco));
-          if (this.currentLeftover >= cheapestPrice) {
-              dom.leftoverDistributorSection.classList.remove('hidden');
-              this.buildTokenFilters(dom.leftoverTokenFiltersContainer);
-          } else {
-              dom.leftoverDistributorSection.classList.add('hidden');
-          }
-          this.updateUI();
-      },
-
-      createCoinIcon() {
-          const img = document.createElement('img');
-          img.src = MOEDA_BASE64;
-          img.style.cssText = 'width: 16px; height: 16px; vertical-align: middle; margin-left: 4px;';
-          img.alt = 'mush';
-          return img;
-      },
-
-      buildReceiptHtml(receiptData) {
-          const t = TRANSLATIONS[currentLang];
-          let subtotalBruto = 0;
-          let itemsHtml = '';
-
-          for (const key in receiptData.itemsData) {
-              const item = receiptData.itemsData[key];
-              const catalogoItem = ITENS_CATALOGO[key];
-              if (item.qty > 0 && catalogoItem) {
-                  const subtotalItem = item.qty * item.price; 
-                  itemsHtml += `<tr><td style="padding: 5px 0;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td style="padding: 5px 0; text-align: right;">${this.formatCurrency(subtotalItem)}</td></tr>`;
-                  subtotalBruto += item.qty * item.price;
-              }
-          }
-          
-          const valorDesconto = subtotalBruto - receiptData.grandTotal;
-          const dataVenda = receiptData.createdAt?.toDate ? receiptData.createdAt.toDate().toLocaleString(currentLang) : new Date().toLocaleString(currentLang);
-
-          let receiptHtml = `
-              <h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2>
-              <p style="text-align: center; color: var(--text-secondary); margin-bottom: 10px;">${receiptData.customerName}</p>
-              <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px; font-size: 0.8em;">${dataVenda}</p>
-              <h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3>
-              <table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>${itemsHtml}</tbody></table>
-              <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.9em;">
-                  <p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${this.formatCurrency(subtotalBruto)}</span></p>
-                  <p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${this.formatCurrency(valorDesconto)}</span></p>
-                  <p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${this.formatCurrency(receiptData.grandTotal)}</span></p>
-              </div>
-              <p style="text-align: center; margin-top: 20px; font-size: 0.9em;">${t.receiptThanks}</p>`;
-          return receiptHtml;
-      },
-
-      async generateImage() {
-        const isResellerMode = dom.resellerModeToggle.checked;
-        if (isResellerMode) {
-            const reviveQty = parseInt(document.getElementById('qtd-revive').value) || 0;
-            const maxQty = parseInt(document.getElementById('qtd-max').value) || 0;
-            const reviveLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive;
-            const maxLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max;
-
-            if (reviveQty > reviveLimitRemaining || maxQty > maxLimitRemaining) {
-                 alert(TRANSLATIONS[currentLang].resellerLimitExceededWarning);
-            }
-        }
-
-        const calculo = this.calculateValues();
-        if(!calculo) return;
+    loadTable() {
+        dom.tabelaItensBody.innerHTML = '';
         const t = TRANSLATIONS[currentLang];
-        let temItens = Object.values(calculo.itens).some(item => item.quantidade > 0);
-        if (!temItens) { alert(t.alertNoItems); return; }
-        
-        let customerName;
-        if (isResellerMode) {
-            if (dom.resellerCustomerSelect.value === 'manual') {
-                customerName = dom.resellerCustomerManualInput.value.trim() || 'Revendedor_Nao_Identificado';
+        for (const key in ITENS_CATALOGO) {
+            const item = ITENS_CATALOGO[key];
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td data-label="${t.tableItem}">${item[`name_${currentLang}`]}</td>
+                <td data-label="${t.tablePrice}">
+                    <div style="width: 100px; margin: 0 auto;">
+                        <input type="number" class="price-input" id="price-${key}" value="${item.preco}" step="10" placeholder="Insira o valor aqui">
+                    </div>
+                </td>
+                <td data-label="${t.tableQty}">
+                    <div style="width: 80px; margin: 0 auto;">
+                        <input type="number" id="qtd-${key}" value="0" min="0">
+                    </div>
+                </td>
+                <td data-label="${t.tableTotal}">0,00</td>
+            `;
+
+            tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
+            dom.tabelaItensBody.appendChild(tr);
+
+            tr.querySelector(`#qtd-${key}`).addEventListener('input', () => {
+                this.updateUI();
+                this.triggerSavePreferences();
+            });
+            tr.querySelector(`#price-${key}`).addEventListener('change', (event) => this.handlePriceChange(event, key));
+        }
+        this.updateUI();
+    },
+
+    handlePriceChange(event, key) {
+        const input = event.target;
+        let novoPreco = parseFloat(input.value);
+        const precoMinimo = PRECOS_MINIMOS[key];
+
+        if (!this.isCurrentUserAdmin) {
+            if (novoPreco < precoMinimo) {
+                alert(`O valor mínimo para este item é ${precoMinimo}.`);
+                novoPreco = precoMinimo;
+                input.value = novoPreco;
+            }
+        }
+
+        if (novoPreco < 0) {
+            novoPreco = 0;
+            input.value = novoPreco;
+        }
+
+        this.updateUI();
+        this.triggerSavePreferences();
+    },
+
+    formatCurrency(number) {
+        if (isNaN(number) || number === null) {
+          number = 0;
+        }
+        return number.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+    },
+
+    calculateValues() {
+        const descontoPercentual = parseFloat(dom.descontoInput.value) || 0;
+        const fatorDesconto = 1 - (descontoPercentual / 100);
+        let totalFinal = 0;
+        const itensCalculados = {};
+
+        const isResellerMode = dom.resellerModeToggle.checked;
+
+        let reviveLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive;
+        let maxLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max;
+
+        for (const key in ITENS_CATALOGO) {
+            const precoBase = ITENS_CATALOGO[key].preco;
+            const precoRevendedor = PRECOS_RESELLER[key];
+
+            const quantidadeInput = document.getElementById(`qtd-${key}`);
+            const quantidade = quantidadeInput ? parseInt(quantidadeInput.value) || 0 : 0;
+            let subtotal = 0;
+            let precoAplicado = precoBase;
+
+            if (isResellerMode && (key === 'revive' || key === 'max')) {
+                const limitRemaining = (key === 'revive') ? reviveLimitRemaining : maxLimitRemaining;
+
+                const tokensDentroDoLimite = Math.max(0, Math.min(quantidade, limitRemaining));
+                const tokensForaDoLimite = Math.max(0, quantidade - tokensDentroDoLimite);
+
+                subtotal += tokensDentroDoLimite * precoRevendedor;
+                subtotal += tokensForaDoLimite * precoBase;
+
+                precoAplicado = precoRevendedor;
+
             } else {
-                customerName = dom.resellerCustomerSelect.value || 'Revendedor_Nao_Identificado';
+                const precoInput = document.getElementById(`price-${key}`);
+                precoAplicado = isResellerMode ? PRECOS_RESELLER[key] : (precoInput ? parseFloat(precoInput.value) || precoBase : precoBase);
+                subtotal = quantidade * (precoAplicado * fatorDesconto);
             }
+
+            totalFinal += subtotal;
+
+            itensCalculados[key] = {
+                quantidade,
+                precoAtual: precoAplicado,
+                precoComDesconto: subtotal / quantidade || 0,
+                subtotal
+            };
+        }
+
+        return { totalFinal, descontoPercentual, itens: itensCalculados };
+    },
+
+    updateUI() {
+        const calculo = this.calculateValues();
+        if (!calculo) return;
+
+        Array.from(dom.tabelaItensBody.rows).forEach((row, index) => {
+            const key = Object.keys(ITENS_CATALOGO)[index];
+            const itemCalculado = calculo.itens[key];
+
+            const totalCell = row.cells[3];
+            totalCell.innerHTML = `${this.formatCurrency(itemCalculado.subtotal)} `;
+            totalCell.appendChild(this.createCoinIcon());
+        });
+
+        dom.totalGeralCell.innerHTML = `<b>${this.formatCurrency(calculo.totalFinal)}</b> `;
+        dom.totalGeralCell.appendChild(this.createCoinIcon());
+    },
+
+    reset(clearDistributor = true) {
+        dom.nomeClienteInput.value = '';
+        dom.descontoInput.value = '';
+        dom.resellerCustomerSelect.value = '';
+        dom.resellerCustomerManualInput.value = '';
+        dom.resellerCustomerManualInput.classList.add('hidden');
+
+        if (clearDistributor) {
+            dom.totalMushInput.value = '';
+            dom.leftoverMushDiv.innerHTML = '';
+            dom.leftoverDistributorSection.classList.add('hidden');
+        }
+        Object.keys(ITENS_CATALOGO).forEach(key => {
+            const qtdInput = document.getElementById(`qtd-${key}`);
+            if (qtdInput) qtdInput.value = 0;
+
+            if (!dom.resellerModeToggle.checked) {
+              const priceInput = document.getElementById(`price-${key}`);
+              if (priceInput) priceInput.value = ITENS_CATALOGO[key].preco;
+            }
+        });
+
+        this.checkResellerLimit();
+        this.updateUI();
+        this.triggerSavePreferences();
+    },
+
+    distributeMush() {
+        this.reset(false);
+        const totalMush = parseFloat(dom.totalMushInput.value) || 0;
+        if (totalMush <= 0) { this.updateUI(); return; }
+        const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+        if (selectedTokenKeys.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
+
+        let tokens = selectedTokenKeys.map(key => ({
+            key,
+            preco: parseFloat(document.getElementById(`price-${key}`).value) || ITENS_CATALOGO[key].preco,
+            quantidade: 0
+        }));
+
+        if (tokens.length === 2 && document.querySelector('input[name="two-token-strategy"]:checked').value === 'split') {
+            const mushPerToken = totalMush / 2;
+            tokens.forEach(token => {
+                if (token.preco > 0) {
+                    token.quantidade = Math.floor(mushPerToken / token.preco);
+                }
+            });
         } else {
-            customerName = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+            this.runFairDistribution(tokens, totalMush);
         }
-        
-        const itemsToSave = {};
-        for(const key in calculo.itens) {
-            if(calculo.itens[key].quantidade > 0) {
-                itemsToSave[key] = {
-                    qty: calculo.itens[key].quantidade,
-                    price: calculo.itens[key].precoComDesconto
-                };
-            }
-        }
-        const receiptData = {
-            customerName: customerName, 
-            discountApplied: calculo.descontoPercentual, 
-            grandTotal: calculo.totalFinal,
-            itemsData: itemsToSave, 
-            seller: this.currentUsername, 
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
+        this.updateDistributionUI(tokens);
+        this.triggerSavePreferences();
+    },
 
-        try {
-            await db.collection("receipts").add(receiptData);
+    distributeLeftoverMush() {
+        const selectedTokenKeysForLeftover = Array.from(dom.leftoverTokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+        if (selectedTokenKeysForLeftover.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
 
-            if (isResellerMode && customerName !== 'Revendedor_Nao_Identificado') {
-                const reviveComprados = calculo.itens.revive?.quantidade || 0;
-                const maxComprados = calculo.itens.max?.quantidade || 0;
+        let tokensForDistribution = selectedTokenKeysForLeftover.map(key => ({
+            key,
+            preco: parseFloat(document.getElementById(`price-${key}`).value) || ITENS_CATALOGO[key].preco,
+            quantidade: 0
+        }));
 
-                if (reviveComprados > 0 || maxComprados > 0) {
-                    const customerNameForDb = customerName.toLowerCase();
-                    const dateStr = this.getFormattedDate();
-                    const docId = `${customerNameForDb}_${dateStr}`;
-                    const docRef = db.collection('resellerLimits').doc(docId);
-                    
-                    const updateData = {
-                        customerName: customerNameForDb,
-                        date: dateStr,
-                        lastUpdatedBy: auth.currentUser.email
-                    };
-                    if (reviveComprados > 0) {
-                        updateData.reviveCount = firebase.firestore.FieldValue.increment(reviveComprados);
-                    }
-                    if (maxComprados > 0) {
-                        updateData.maxCount = firebase.firestore.FieldValue.increment(maxComprados);
-                    }
-                    
-                    await docRef.set(updateData, { merge: true });
-                    
-                    this.currentCustomerUsage.revive += reviveComprados;
-                    this.currentCustomerUsage.max += maxComprados;
-                    this.updateResellerLimitStatusUI();
+        this.runFairDistribution(tokensForDistribution, this.currentLeftover);
+
+        tokensForDistribution.forEach(token => {
+            const qtyInput = document.getElementById(`qtd-${token.key}`);
+            const currentQty = parseInt(qtyInput.value) || 0;
+            qtyInput.value = currentQty + token.quantidade;
+        });
+
+        dom.leftoverDistributorSection.classList.add('hidden');
+
+        const newCalculo = this.calculateValues();
+        const totalMushInputted = parseFloat(dom.totalMushInput.value) || 0;
+        this.currentLeftover = totalMushInputted - newCalculo.totalFinal;
+        dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `;
+        dom.leftoverMushDiv.appendChild(this.createCoinIcon());
+
+        this.updateUI();
+        this.triggerSavePreferences();
+    },
+
+    runFairDistribution(tokens, totalMush) {
+        tokens.sort(() => Math.random() - 0.5);
+        let mushRestante = totalMush;
+        let possivelComprar = true;
+        while (possivelComprar) {
+            let comprouNestaRodada = false;
+            for (const token of tokens) {
+                if (mushRestante >= token.preco && token.preco > 0) {
+                    token.quantidade++;
+                    mushRestante -= token.preco;
+                    comprouNestaRodada = true;
                 }
             }
-        } catch(e) {
-            console.error("Erro ao salvar no Firestore: ", e);
-            alert("Houve um erro ao salvar o recibo ou atualizar o limite no banco de dados.");
-            return;
+            if (!comprouNestaRodada) possivelComprar = false;
+        }
+        return tokens;
+    },
+
+    updateDistributionUI(tokens) {
+        let mushGasto = 0;
+        tokens.forEach(token => {
+            document.getElementById(`qtd-${token.key}`).value = token.quantidade;
+            mushGasto += token.quantidade * token.preco;
+        });
+        const mushTotal = parseFloat(dom.totalMushInput.value) || 0;
+        this.currentLeftover = mushTotal - mushGasto;
+        dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `;
+        dom.leftoverMushDiv.appendChild(this.createCoinIcon());
+        const cheapestPrice = Math.min(...Object.values(ITENS_CATALOGO).map(t => t.preco));
+        if (this.currentLeftover >= cheapestPrice) {
+            dom.leftoverDistributorSection.classList.remove('hidden');
+            this.buildTokenFilters(dom.leftoverTokenFiltersContainer);
+        } else {
+            dom.leftoverDistributorSection.classList.add('hidden');
+        }
+        this.updateUI();
+    },
+
+    createCoinIcon() {
+        const img = document.createElement('img');
+        img.src = MOEDA_BASE64;
+        img.style.cssText = 'width: 16px; height: 16px; vertical-align: middle; margin-left: 4px;';
+        img.alt = 'mush';
+        return img;
+    },
+
+    buildReceiptHtml(receiptData) {
+        const t = TRANSLATIONS[currentLang];
+        let subtotalBruto = 0;
+        let itemsHtml = '';
+
+        for (const key in receiptData.itemsData) {
+            const item = receiptData.itemsData[key];
+            const catalogoItem = ITENS_CATALOGO[key];
+            if (item.qty > 0 && catalogoItem) {
+                const subtotalItem = item.qty * item.price;
+                itemsHtml += `<tr><td style="padding: 5px 0;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td style="padding: 5px 0; text-align: right;">${this.formatCurrency(subtotalItem)}</td></tr>`;
+                subtotalBruto += subtotalItem;
+            }
         }
 
-        const receiptHtml = this.buildReceiptHtml(receiptData);
+        const valorDesconto = subtotalBruto - receiptData.grandTotal;
+        const dataVenda = receiptData.createdAt?.toDate ? receiptData.createdAt.toDate().toLocaleString(currentLang) : new Date().toLocaleString(currentLang);
 
+        let receiptHtml = `
+            <h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 10px;">${receiptData.customerName}</p>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px; font-size: 0.8em;">${dataVenda}</p>
+            <h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3>
+            <table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>${itemsHtml}</tbody></table>
+            <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.9em;">
+                <p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${this.formatCurrency(subtotalBruto)}</span></p>
+                <p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${this.formatCurrency(valorDesconto)}</span></p>
+                <p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${this.formatCurrency(receiptData.grandTotal)}</span></p>
+            </div>
+            <p style="text-align: center; margin-top: 20px; font-size: 0.9em;">${t.receiptThanks}</p>`;
+        return receiptHtml;
+    },
+
+    async generateImage() {
+      const isResellerMode = dom.resellerModeToggle.checked;
+      if (isResellerMode) {
+          const reviveQty = parseInt(document.getElementById('qtd-revive').value) || 0;
+          const maxQty = parseInt(document.getElementById('qtd-max').value) || 0;
+          const reviveLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive;
+          const maxLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max;
+
+          if (reviveQty > reviveLimitRemaining || maxQty > maxLimitRemaining) {
+              alert(TRANSLATIONS[currentLang].resellerLimitExceededWarning);
+          }
+      }
+
+      const calculo = this.calculateValues();
+      if (!calculo) return;
+      const t = TRANSLATIONS[currentLang];
+      let temItens = Object.values(calculo.itens).some(item => item.quantidade > 0);
+      if (!temItens) { alert(t.alertNoItems); return; }
+
+      let customerName;
+      if (isResellerMode) {
+          if (dom.resellerCustomerSelect.value === 'manual') {
+              customerName = dom.resellerCustomerManualInput.value.trim() || 'Revendedor_Nao_Identificado';
+          } else {
+              customerName = dom.resellerCustomerSelect.value || 'Revendedor_Nao_Identificado';
+          }
+      } else {
+          customerName = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+      }
+
+      const itemsToSave = {};
+      for (const key in calculo.itens) {
+          if (calculo.itens[key].quantidade > 0) {
+              itemsToSave[key] = {
+                  qty: calculo.itens[key].quantidade,
+                  price: calculo.itens[key].precoAtual
+              };
+          }
+      }
+      const receiptData = {
+          customerName: customerName,
+          discountApplied: calculo.descontoPercentual,
+          grandTotal: calculo.totalFinal,
+          itemsData: itemsToSave,
+          seller: this.currentUsername,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+          await db.collection("receipts").add(receiptData);
+
+          if (isResellerMode && customerName !== 'Revendedor_Nao_Identificado') {
+              const reviveComprados = calculo.itens.revive?.quantidade || 0;
+              const maxComprados = calculo.itens.max?.quantidade || 0;
+
+              if (reviveComprados > 0 || maxComprados > 0) {
+                  const customerNameForDb = customerName.toLowerCase();
+                  const dateStr = this.getFormattedDate();
+                  const docId = `${customerNameForDb}_${dateStr}`;
+                  const docRef = db.collection('resellerLimits').doc(docId);
+
+                  const updateData = {
+                      customerName: customerNameForDb,
+                      date: dateStr,
+                      lastUpdatedBy: auth.currentUser.email
+                  };
+                  if (reviveComprados > 0) {
+                      updateData.reviveCount = firebase.firestore.FieldValue.increment(reviveComprados);
+                  }
+                  if (maxComprados > 0) {
+                      updateData.maxCount = firebase.firestore.FieldValue.increment(maxComprados);
+                  }
+
+                  await docRef.set(updateData, { merge: true });
+
+                  this.currentCustomerUsage.revive += reviveComprados;
+                  this.currentCustomerUsage.max += maxComprados;
+                  this.updateResellerLimitStatusUI();
+              }
+          }
+      } catch(e) {
+          console.error("Erro ao salvar no Firestore: ", e);
+          alert("Houve um erro ao salvar o recibo ou atualizar o limite no banco de dados.");
+          return;
+      }
+
+      const receiptHtml = this.buildReceiptHtml(receiptData);
+
+      const resultadoDiv = document.getElementById('resultado');
+      resultadoDiv.innerHTML = receiptHtml;
+      resultadoDiv.style.display = 'block';
+      resultadoDiv.style.position = 'fixed';
+      resultadoDiv.style.top = '50%';
+      resultadoDiv.style.left = '50%';
+      resultadoDiv.style.transform = 'translate(-50%, -50%)';
+      resultadoDiv.style.zIndex = '1000';
+      setTimeout(() => {
+          html2canvas(resultadoDiv, { backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), scale: 2 }).then(canvas => {
+              const link = document.createElement('a');
+              const nomeSanitizado = customerName.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+              link.download = `${nomeSanitizado}_recibo.png`;
+              link.href = canvas.toDataURL('image/png');
+              link.click();
+              resultadoDiv.style.display = 'none';
+              resultadoDiv.style.top = '-100%';
+              resultadoDiv.style.zIndex = '-1';
+          });
+      }, 300);
+    },
+
+    async regenerateReceipt(docId) {
+      if (!docId) return;
+
+      try {
+        const docRef = db.collection('receipts').doc(docId);
+        const docSnap = await docRef.get();
+
+        if (!docSnap.exists) {
+          alert("Erro: Recibo não encontrado no banco de dados.");
+          return;
+        }
+
+        const receiptData = docSnap.data();
+        const receiptHtml = this.buildReceiptHtml(receiptData);
+        
         const resultadoDiv = document.getElementById('resultado');
         resultadoDiv.innerHTML = receiptHtml;
         resultadoDiv.style.display = 'block';
@@ -2187,11 +2329,14 @@
         resultadoDiv.style.left = '50%';
         resultadoDiv.style.transform = 'translate(-50%, -50%)';
         resultadoDiv.style.zIndex = '1000';
+
         setTimeout(() => {
             html2canvas(resultadoDiv, { backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
+                const customerName = receiptData.customerName || 'recibo';
+                const date = receiptData.createdAt.toDate().toISOString().split('T')[0];
                 const nomeSanitizado = customerName.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
-                link.download = `${nomeSanitizado}_recibo.png`;
+                link.download = `${nomeSanitizado}_recibo_${date}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
                 resultadoDiv.style.display = 'none';
@@ -2199,161 +2344,121 @@
                 resultadoDiv.style.zIndex = '-1';
             });
         }, 300);
-      },
+
+      } catch (error) {
+        console.error("Erro ao regenerar recibo:", error);
+        alert("Ocorreu um erro ao buscar os dados do recibo.");
+      }
+    },
+
+    async openTxtExportModal() {
+      dom.customerListForExport.innerHTML = `<p>${TRANSLATIONS[currentLang].historyLoading}</p>`;
+      dom.txtExportModal.classList.remove('hidden');
+
+      const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
+      let startDate = null;
+      if (dom.historyDateStart.value) {
+          const parts = dom.historyDateStart.value.split('-');
+          startDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+      let endDate = null;
+      if (dom.historyDateEnd.value) {
+          const parts = dom.historyDateEnd.value.split('-');
+          endDate = new Date(parts[0], parts[1] - 1, parts[2]);
+          endDate.setHours(23, 59, 59, 999);
+      }
       
-      async regenerateReceipt(docId) {
-        if (!docId) return;
-
-        try {
-          const docRef = db.collection('receipts').doc(docId);
-          const docSnap = await docRef.get();
-
-          if (!docSnap.exists) {
-            alert("Erro: Recibo não encontrado no banco de dados.");
+      let query = db.collection("receipts");
+      if (startDate) query = query.where('createdAt', '>=', startDate);
+      if (endDate) query = query.where('createdAt', '<=', endDate);
+      
+      try {
+        const allDocsSnapshot = await query.get();
+        let docs = allDocsSnapshot.docs;
+        
+        if (searchTerm) {
+            docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
+        }
+        if (docs.length === 0) {
+            dom.customerListForExport.innerHTML = `<p>${TRANSLATIONS[currentLang].historyNoRecords}</p>`;
             return;
-          }
-
-          const receiptData = docSnap.data();
-          const receiptHtml = this.buildReceiptHtml(receiptData);
-          
-          const resultadoDiv = document.getElementById('resultado');
-          resultadoDiv.innerHTML = receiptHtml;
-          resultadoDiv.style.display = 'block';
-          resultadoDiv.style.position = 'fixed';
-          resultadoDiv.style.top = '50%';
-          resultadoDiv.style.left = '50%';
-          resultadoDiv.style.transform = 'translate(-50%, -50%)';
-          resultadoDiv.style.zIndex = '1000';
-
-          setTimeout(() => {
-              html2canvas(resultadoDiv, { backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), scale: 2 }).then(canvas => {
-                  const link = document.createElement('a');
-                  const customerName = receiptData.customerName || 'recibo';
-                  const date = receiptData.createdAt.toDate().toISOString().split('T')[0];
-                  const nomeSanitizado = customerName.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
-                  link.download = `${nomeSanitizado}_recibo_${date}.png`;
-                  link.href = canvas.toDataURL('image/png');
-                  link.click();
-                  resultadoDiv.style.display = 'none';
-                  resultadoDiv.style.top = '-100%';
-                  resultadoDiv.style.zIndex = '-1';
-              });
-          }, 300);
-
-        } catch (error) {
-          console.error("Erro ao regenerar recibo:", error);
-          alert("Ocorreu um erro ao buscar os dados do recibo.");
         }
-      },
-
-      async openTxtExportModal() {
-        dom.customerListForExport.innerHTML = `<p>${TRANSLATIONS[currentLang].historyLoading}</p>`;
-        dom.txtExportModal.classList.remove('hidden');
-
-        const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
-        let startDate = null;
-        if (dom.historyDateStart.value) {
-            const parts = dom.historyDateStart.value.split('-');
-            startDate = new Date(parts[0], parts[1] - 1, parts[2]);
-        }
-        let endDate = null;
-        if (dom.historyDateEnd.value) {
-            const parts = dom.historyDateEnd.value.split('-');
-            endDate = new Date(parts[0], parts[1] - 1, parts[2]);
-            endDate.setHours(23, 59, 59, 999);
-        }
-        
-        let query = db.collection("receipts");
-        if (startDate) query = query.where('createdAt', '>=', startDate);
-        if (endDate) query = query.where('createdAt', '<=', endDate);
-        
-        try {
-          const allDocsSnapshot = await query.get();
-          let docs = allDocsSnapshot.docs;
-          
-          if (searchTerm) {
-              docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
-          }
-          if (docs.length === 0) {
-              dom.customerListForExport.innerHTML = `<p>${TRANSLATIONS[currentLang].historyNoRecords}</p>`;
-              return;
-          }
-          const customerSummary = {};
-          docs.forEach(doc => {
-              const data = doc.data();
-              const customerName = data.customerName || 'Cliente Não Identificado';
-              if (!customerSummary[customerName]) {
-                  customerSummary[customerName] = { totalSpent: 0 };
-              }
-              customerSummary[customerName].totalSpent += data.grandTotal || 0;
-          });
-
-          const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
-          
-          dom.customerListForExport.innerHTML = '';
-          dom.selectAllCustomersCheckbox.checked = false;
-          summaryArray.forEach(summary => {
-            const label = document.createElement('label');
-            label.innerHTML = `
-              <input type="checkbox" value="${summary.name}" data-total="${summary.totalSpent}">
-              <div class="customer-info">
-                <span>${summary.name}</span>
-                <span class="customer-total">R$ ${this.formatCurrency(summary.totalSpent)}</span>
-              </div>
-            `;
-            dom.customerListForExport.appendChild(label);
-          });
-
-        } catch (error) {
-          console.error("Erro ao gerar resumo para exportação:", error);
-          dom.customerListForExport.innerHTML = `<p style="color: var(--text-error);">${TRANSLATIONS[currentLang].errorGeneric}</p>`;
-        }
-      },
-
-      handleSelectAllCustomers(event) {
-        const checkboxes = dom.customerListForExport.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-          checkbox.checked = event.target.checked;
-        });
-      },
-
-      generateTxtFile() {
-        const linesToExport = [];
-        const checkedCustomers = dom.customerListForExport.querySelectorAll('input[type="checkbox"]:checked');
-
-        if (checkedCustomers.length === 0) {
-          alert("Nenhum cliente selecionado para exportar.");
-          return;
-        }
-
-        checkedCustomers.forEach(checkbox => {
-          const customerName = checkbox.value;
-          const totalSpent = parseFloat(checkbox.dataset.total);
-          linesToExport.push(`${customerName}: R$ ${this.formatCurrency(totalSpent)}`);
+        const customerSummary = {};
+        docs.forEach(doc => {
+            const data = doc.data();
+            const customerName = data.customerName || 'Cliente Não Identificado';
+            if (!customerSummary[customerName]) {
+                customerSummary[customerName] = { totalSpent: 0 };
+            }
+            customerSummary[customerName].totalSpent += data.grandTotal || 0;
         });
 
-        const fileContent = linesToExport.join('\r\n');
-        const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
-        const dateStr = new Date().toISOString().slice(0, 10);
-        const fileName = `Relatorio_Clientes_${dateStr}.txt`;
+        const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
         
-        const link = document.createElement("a");
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", fileName);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+        dom.customerListForExport.innerHTML = '';
+        dom.selectAllCustomersCheckbox.checked = false;
+        summaryArray.forEach(summary => {
+          const label = document.createElement('label');
+          label.innerHTML = `
+            <input type="checkbox" value="${summary.name}" data-total="${summary.totalSpent}">
+            <div class="customer-info">
+              <span>${summary.name}</span>
+              <span class="customer-total">R$ ${this.formatCurrency(summary.totalSpent)}</span>
+            </div>
+          `;
+          dom.customerListForExport.appendChild(label);
+        });
 
-        dom.txtExportModal.classList.add('hidden');
+      } catch (error) {
+        console.error("Erro ao gerar resumo para exportação:", error);
+        dom.customerListForExport.innerHTML = `<p style="color: var(--text-error);">${TRANSLATIONS[currentLang].errorGeneric}</p>`;
+      }
+    },
+
+    handleSelectAllCustomers(event) {
+      const checkboxes = dom.customerListForExport.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = event.target.checked;
+      });
+    },
+
+    generateTxtFile() {
+      const linesToExport = [];
+      const checkedCustomers = dom.customerListForExport.querySelectorAll('input[type="checkbox"]:checked');
+
+      if (checkedCustomers.length === 0) {
+        alert("Nenhum cliente selecionado para exportar.");
+        return;
       }
 
-    };
-    
-    app.init();
+      checkedCustomers.forEach(checkbox => {
+        const customerName = checkbox.value;
+        const totalSpent = parseFloat(checkbox.dataset.total);
+        linesToExport.push(`${customerName}: R$ ${this.formatCurrency(totalSpent)}`);
+      });
+
+      const fileContent = linesToExport.join('\r\n');
+      const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const fileName = `Relatorio_Clientes_${dateStr}.txt`;
+      
+      const link = document.createElement("a");
+      if (link.download !== undefined) {
+          const url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", fileName);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      }
+
+      dom.txtExportModal.classList.add('hidden');
+    }
+
+  };
+  
+  app.init();
 </script>
 </body>
 </html>
