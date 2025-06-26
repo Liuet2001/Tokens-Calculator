@@ -26,7 +26,9 @@
     --accent-primary: #34d399;
     --accent-hover: #10b981;
     --accent-danger: #f43f5e;
+    --accent-danger-hover: #be123c;
     --accent-warning: #f59e0b;
+    --accent-warning-hover: #b45309;
     --text-primary: #f8fafc;
     --text-secondary: #a1a1aa;
     --text-error: #fca5a5;
@@ -39,7 +41,9 @@
     --bg-tertiary: #e4e4e7;
     --border-color: #d4d4d8;
     --accent-danger: #ef4444;
-    --accent-warning: #d97706;
+    --accent-danger-hover: #dc2626;
+    --accent-warning: #f59e0b;
+    --accent-warning-hover: #d97706;
     --text-primary: #18181b;
     --text-secondary: #71717a;
     --text-error: #b91c1c;
@@ -212,10 +216,12 @@
   button { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; border: none; display: inline-flex; align-items: center; justify-content: center; }
   button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
   button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;}
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, .btn-promote-official, #generate-txt-file-btn, #btn-create-sub-reseller { background: var(--accent-primary); color: #fff; }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #btn-load-users:hover, .btn-promote-official:hover, #generate-txt-file-btn:hover, #btn-create-sub-reseller:hover { background: var(--accent-hover); }
-  #btnResetar, .delete-history-btn, .btn-delete-user, .btn-demote-seller { background: var(--accent-danger); color: var(--text-primary); }
-  .btn-promote-owner, .btn-demote-admin { background: var(--accent-warning); color: var(--text-primary); }
+  
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #btn-create-sub-reseller { background: var(--accent-primary); color: #fff; }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #btn-load-users:hover, #btn-create-sub-reseller:hover { background: var(--accent-hover); }
+
+  #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
+
   #btnGerarImagem, #btnLogout, #btnDistributeLeftover, #btn-prev-page, #btn-next-page, #export-txt-modal-btn, #cancel-txt-export-btn, .btn-view-receipt, #btn-load-my-resellers { background: var(--bg-tertiary); color: var(--text-primary); }
 
   .admin-section {
@@ -232,13 +238,13 @@
   .container {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
   }
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, .btn-promote-official, #generate-txt-file-btn, #btn-create-sub-reseller {
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #generate-txt-file-btn, #btn-create-sub-reseller {
     background-image: linear-gradient(to right, var(--accent-primary) 0%, var(--accent-hover) 100%);
     background-size: 200% auto;
     transition: all 0.4s ease-in-out;
     border: none;
   }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, .btn-promote-official:hover, #generate-txt-file-btn:hover, #btn-create-sub-reseller:hover {
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #generate-txt-file-btn:hover, #btn-create-sub-reseller:hover {
     background-position: right center;
     background-color: var(--accent-hover);
   }
@@ -298,6 +304,33 @@
     padding: 8px;
     border-radius: 8px;
   }
+  
+  /* --- ESTILOS DOS BOTÕES DE AÇÃO - CORREÇÃO --- */
+  .btn-action {
+    color: var(--text-primary) !important;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .btn-action.promote {
+    background-color: var(--accent-primary);
+  }
+  .btn-action.promote:hover {
+    background-color: var(--accent-hover);
+  }
+  .btn-action.attention {
+    background-color: var(--accent-warning);
+  }
+  .btn-action.attention:hover {
+    background-color: var(--accent-warning-hover);
+  }
+  .btn-action.demote, .btn-action.delete {
+    background-color: var(--accent-danger);
+  }
+  .btn-action.demote:hover, .btn-action.delete:hover {
+    background-color: var(--accent-danger-hover);
+  }
+  /* --- FIM DA CORREÇÃO --- */
+
 
   /* --- ESTILOS PARA O MODAL DE EXPORTAÇÃO --- */
   .modal {
@@ -632,32 +665,23 @@
     }
 
     /* Botão Secundário (ações menos comuns) */
-    #btnResetar, #btnGerarImagem, .btn-delete-user, #btnLogout, .btn-demote-seller {
+    #btnResetar, #btnGerarImagem, #btnLogout {
         background: transparent;
         border: 2px solid var(--bg-tertiary);
         color: var(--text-secondary);
         background-image: none; /* Remove o gradiente */
     }
 
-    #btnResetar, .btn-demote-seller, .btn-delete-user {
+    #btnResetar {
         border-color: var(--accent-danger);
         color: var(--accent-danger);
     }
-    
-    .btn-demote-admin {
-        border-color: var(--accent-warning);
-        color: var(--accent-warning);
-    }
 
-    #btnResetar:hover, .btn-demote-seller:hover, .btn-delete-user:hover, .btn-demote-admin:hover {
+    #btnResetar:hover {
         background-color: var(--accent-danger);
         color: white;
         transform: translateY(-2px) scale(1.02);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-    
-    .btn-demote-admin:hover {
-        background-color: var(--accent-warning);
     }
 
     #btnGerarImagem:hover, #btnLogout:hover {
@@ -735,7 +759,7 @@
           <button class="tab-link" data-tab="history-view" data-translate-key="tabHistory">Histórico</button>
           <button class="tab-link" data-tab="dashboard-view">Dashboard</button>
           <button class="tab-link" data-tab="reseller-panel-view" style="display: none;">Meus Vendedores</button>
-          <button class="tab-link" data-tab="admin-view" style="display: none;">Painel do Dono</button>
+          <button class="tab-link" data-tab="admin-view" style="display: none;">Administração</button>
       </div>
 
       <div id="calculator-view" class="tab-content">
@@ -920,7 +944,7 @@
       </div>
       
       <div id="admin-view" class="tab-content hidden">
-        <h2>Gerenciamento do Dono</h2>
+        <h2>Administração e Gestão</h2>
         <div id="admin-action-status"></div>
 
         <div class="admin-section">
@@ -1543,28 +1567,30 @@
     },
     
     async handleSubResellerAction(event) {
-        const target = event.target.closest('.btn-delete-user');
-        if (!target) return;
+        const target = event.target.closest('button');
+        if (!target || !target.classList.contains('btn-action')) return;
 
         const uid = target.dataset.uid;
         const username = target.closest('tr').cells[0].textContent;
 
         if (!uid || !username) return;
 
-        if (confirm(`Tem certeza que deseja EXCLUIR o vendedor "${username}"? Esta ação não pode ser desfeita.`)) {
-            target.disabled = true;
-            this.displaySubResellerStatus('Excluindo vendedor...', true);
+        if (target.classList.contains('delete')) {
+          if (confirm(`Tem certeza que deseja EXCLUIR o vendedor "${username}"? Esta ação não pode ser desfeita.`)) {
+              target.disabled = true;
+              this.displaySubResellerStatus('Excluindo vendedor...', true);
 
-            try {
-                const deleteUserFunc = functions.httpsCallable('deleteUserByUid');
-                const result = await deleteUserFunc({ uid: uid });
-                this.displaySubResellerStatus(result.data.message, true);
-                this.loadResellerPanelData();
-            } catch (error) {
-                console.error("Erro ao excluir sub-revendedor:", error);
-                this.displaySubResellerStatus(`Erro: ${error.message}`);
-                target.disabled = false;
-            }
+              try {
+                  const deleteUserFunc = functions.httpsCallable('deleteUserByUid');
+                  const result = await deleteUserFunc({ uid: uid });
+                  this.displaySubResellerStatus(result.data.message, true);
+                  this.loadResellerPanelData();
+              } catch (error) {
+                  console.error("Erro ao excluir sub-revendedor:", error);
+                  this.displaySubResellerStatus(`Erro: ${error.message}`);
+                  target.disabled = false;
+              }
+          }
         }
     },
 
@@ -1592,7 +1618,7 @@
                     <td data-label="Usuário">${user.username}</td>
                     <td data-label="Email">${user.email}</td>
                     <td data-label="Ações" style="text-align: center;">
-                        <button class="btn-delete-user" data-uid="${user.uid}" title="Excluir sub-revendedor">Excluir</button>
+                        <button class="btn-action delete" data-uid="${user.uid}" title="Excluir sub-revendedor">Excluir</button>
                     </td>
                 </tr>
             `;
@@ -1650,30 +1676,30 @@
             // Ações que o DONO pode tomar
             if (this.isCurrentUserOwner && !isCurrentUser) {
                 if (userRole !== 'owner') {
-                  actionsHtml += `<button class="btn-promote-owner" data-uid="${user.uid}" title="Promover a Dono">Tornar Dono</button>`;
+                  actionsHtml += `<button class="btn-action attention" data-action="promote-owner" data-uid="${user.uid}" title="Promover a Dono">Tornar Dono</button>`;
                 }
                 if (userRole !== 'admin') {
-                  actionsHtml += `<button class="btn-promote-admin" data-uid="${user.uid}" title="Promover a Admin">Tornar Admin</button>`;
+                  actionsHtml += `<button class="btn-action attention" data-action="promote-admin" data-uid="${user.uid}" title="Promover a Admin">Tornar Admin</button>`;
                 } else { // Se o usuário JÁ é admin
-                  actionsHtml += `<button class="btn-demote-admin" data-uid="${user.uid}" title="Rebaixar para Vendedor">Rebaixar Admin</button>`;
+                  actionsHtml += `<button class="btn-action demote" data-action="demote-admin" data-uid="${user.uid}" title="Rebaixar para Vendedor">Rebaixar Admin</button>`;
                 }
                 if (userRole === 'seller') {
-                    actionsHtml += `<button class="btn-promote-official" data-uid="${user.uid}" title="Promover a Revendedor Oficial">Tornar Oficial</button>`;
+                    actionsHtml += `<button class="btn-action promote" data-action="promote-official" data-uid="${user.uid}" title="Promover a Revendedor Oficial">Tornar Oficial</button>`;
                 }
                 if (userRole === 'official_reseller') {
-                    actionsHtml += `<button class="btn-demote-seller" data-uid="${user.uid}" title="Rebaixar para Vendedor">Rebaixar</button>`;
+                    actionsHtml += `<button class="btn-action demote" data-action="demote-seller" data-uid="${user.uid}" title="Rebaixar para Vendedor">Rebaixar</button>`;
                 }
-                actionsHtml += `<button class="btn-delete-user" data-uid="${user.uid}" title="Excluir usuário">Excluir</button>`;
+                actionsHtml += `<button class="btn-action delete" data-action="delete-user" data-uid="${user.uid}" title="Excluir usuário">Excluir</button>`;
             } 
             // Ações que um ADMIN pode tomar
             else if (this.isCurrentUserAdmin && !isCurrentUser && userRole !== 'owner' && userRole !== 'admin') {
                 if (userRole === 'seller') {
-                    actionsHtml += `<button class="btn-promote-official" data-uid="${user.uid}" title="Promover a Revendedor Oficial">Tornar Oficial</button>`;
+                    actionsHtml += `<button class="btn-action promote" data-action="promote-official" data-uid="${user.uid}" title="Promover a Revendedor Oficial">Tornar Oficial</button>`;
                 }
                 if (userRole === 'official_reseller') {
-                    actionsHtml += `<button class="btn-demote-seller" data-uid="${user.uid}" title="Rebaixar para Vendedor">Rebaixar</button>`;
+                    actionsHtml += `<button class="btn-action demote" data-action="demote-seller" data-uid="${user.uid}" title="Rebaixar para Vendedor">Rebaixar</button>`;
                 }
-                actionsHtml += `<button class="btn-delete-user" data-uid="${user.uid}" title="Excluir usuário">Excluir</button>`;
+                actionsHtml += `<button class="btn-action delete" data-action="delete-user" data-uid="${user.uid}" title="Excluir usuário">Excluir</button>`;
             }
 
 
@@ -1692,52 +1718,60 @@
 
     async handleUserAction(event) {
         const target = event.target;
-        if (!target.matches('button')) return;
+        if (!target.matches('button.btn-action')) return;
 
         const uid = target.dataset.uid;
+        const action = target.dataset.action;
         const username = target.closest('tr').cells[0].textContent;
         const fullEmail = username + DUMMY_DOMAIN;
 
         target.disabled = true;
 
-        if (target.classList.contains('btn-promote-owner')) {
-            if (confirm(`ATENÇÃO: Esta ação dará privilégios TOTAIS e IRREVOGÁVEIS ao usuário ${username}.\nTem certeza que deseja promover ${username} a Dono?`)) {
-                this.callAdminFunction('setOwnerClaim', { email: fullEmail }, `Usuário ${username} promovido a Dono.`, `Erro ao promover ${username}.`, target);
-            } else {
+        switch (action) {
+            case 'promote-owner':
+                if (confirm(`ATENÇÃO: Esta ação dará privilégios TOTAIS e IRREVOGÁVEIS ao usuário ${username}.\nTem certeza que deseja promover ${username} a Dono?`)) {
+                    this.callAdminFunction('setOwnerClaim', { email: fullEmail }, `Usuário ${username} promovido a Dono.`, `Erro ao promover ${username}.`, target);
+                } else {
+                    target.disabled = false;
+                }
+                break;
+            case 'promote-admin':
+                if (confirm(`Tem certeza que deseja promover o usuário ${username} a Admin?`)) {
+                    this.callAdminFunction('setAdminClaim', { uid }, `Usuário ${username} promovido a Admin.`, `Erro ao promover ${username}.`, target);
+                } else {
+                    target.disabled = false;
+                }
+                break;
+            case 'demote-admin':
+                 if (confirm(`Tem certeza que deseja rebaixar o Admin ${username} para Vendedor?`)) {
+                    this.callAdminFunction('demoteAdminToSeller', { uid }, `Usuário ${username} rebaixado para Vendedor.`, `Erro ao rebaixar ${username}.`, target);
+                } else {
+                    target.disabled = false;
+                }
+                break;
+            case 'promote-official':
+                if (confirm(`Tem certeza que deseja promover o usuário ${username} a Revendedor Oficial?`)) {
+                    this.callAdminFunction('setOfficialReseller', { uid }, `Usuário ${username} promovido.`, `Erro ao promover ${username}.`, target);
+                } else {
+                    target.disabled = false;
+                }
+                break;
+            case 'demote-seller':
+                if (confirm(`Tem certeza que deseja rebaixar o usuário ${username} para Vendedor? Ele perderá as permissões especiais.`)) {
+                    this.callAdminFunction('demoteToSeller', { uid }, `Usuário ${username} rebaixado para Vendedor.`, `Erro ao rebaixar ${username}.`, target);
+                } else {
+                    target.disabled = false;
+                }
+                break;
+            case 'delete-user':
+                if (confirm(`ATENÇÃO: Esta ação é irreversível!\nTem certeza que deseja excluir o usuário ${username}?`)) {
+                    this.callAdminFunction('deleteUserByUid', { uid }, `Usuário ${username} excluído.`, `Erro ao excluir ${username}.`, target);
+                } else {
+                    target.disabled = false;
+                }
+                break;
+            default:
                 target.disabled = false;
-            }
-        } else if (target.classList.contains('btn-promote-admin')) {
-            if (confirm(`Tem certeza que deseja promover o usuário ${username} a Admin?`)) {
-                this.callAdminFunction('setAdminClaim', { uid }, `Usuário ${username} promovido a Admin.`, `Erro ao promover ${username}.`, target);
-            } else {
-                target.disabled = false;
-            }
-        } else if (target.classList.contains('btn-demote-admin')) {
-            if (confirm(`Tem certeza que deseja rebaixar o Admin ${username} para Vendedor?`)) {
-                this.callAdminFunction('demoteAdminToSeller', { uid }, `Usuário ${username} rebaixado para Vendedor.`, `Erro ao rebaixar ${username}.`, target);
-            } else {
-                target.disabled = false;
-            }
-        } else if (target.classList.contains('btn-promote-official')) {
-            if (confirm(`Tem certeza que deseja promover o usuário ${username} a Revendedor Oficial?`)) {
-                this.callAdminFunction('setOfficialReseller', { uid }, `Usuário ${username} promovido.`, `Erro ao promover ${username}.`, target);
-            } else {
-                target.disabled = false;
-            }
-        } else if (target.classList.contains('btn-demote-seller')) {
-            if (confirm(`Tem certeza que deseja rebaixar o usuário ${username} para Vendedor? Ele perderá as permissões especiais.`)) {
-                this.callAdminFunction('demoteToSeller', { uid }, `Usuário ${username} rebaixado para Vendedor.`, `Erro ao rebaixar ${username}.`, target);
-            } else {
-                target.disabled = false;
-            }
-        } else if (target.classList.contains('btn-delete-user')) {
-            if (confirm(`ATENÇÃO: Esta ação é irreversível!\nTem certeza que deseja excluir o usuário ${username}?`)) {
-                this.callAdminFunction('deleteUserByUid', { uid }, `Usuário ${username} excluído.`, `Erro ao excluir ${username}.`, target);
-            } else {
-                target.disabled = false;
-            }
-        } else {
-            target.disabled = false;
         }
     },
 
