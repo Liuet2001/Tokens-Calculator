@@ -46,7 +46,6 @@
     --grid-color: rgba(0, 0, 0, 0.1);
   }
   
-  /* Accent Color Themes */
   html[data-accent-color='green'] { --accent-primary: #34d399; --accent-hover: #10b981; }
   html[data-accent-color='blue'] { --accent-primary: #3b82f6; --accent-hover: #2563eb; }
   html[data-accent-color='purple'] { --accent-primary: #8b5cf6; --accent-hover: #7c3aed; }
@@ -174,16 +173,21 @@
       font-size: 15px;
   }
 
-  #auth-error, #admin-action-status { color: var(--text-error); font-size: 14px; text-align: center; min-height: 20px; }
-  #admin-action-status.success { color: var(--accent-primary); }
+  #auth-error, #admin-action-status, #sub-reseller-action-status { color: var(--text-error); font-size: 14px; text-align: center; min-height: 20px; }
+  #admin-action-status.success, #sub-reseller-action-status.success { color: var(--accent-primary); }
 
-  .tab-navigation { display: flex; border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+  .tab-navigation { 
+    display: flex; 
+    justify-content: center;
+    flex-wrap: wrap; 
+    border-bottom: 1px solid var(--border-color);
+  }
   .tab-link { padding: 12px 20px; cursor: pointer; background: none; border: none; color: var(--text-secondary); font-weight: 600; font-size: 16px; border-bottom: 3px solid transparent; transition: all 0.3s ease; font-family: var(--font-body); white-space: nowrap; }
   .tab-link:hover { color: var(--text-primary); }
   .tab-link.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); }
   .tab-content { padding-top: 24px; display: flex; flex-direction: column; gap: 24px; }
   
-  .mode-selector { display: flex; gap: 10px; background-color: var(--bg-tertiary); padding: 6px; border-radius: 10px; width: fit-content; flex-wrap: wrap; }
+  .mode-selector { display: flex; gap: 10px; background-color: var(--bg-tertiary); padding: 6px; border-radius: 10px; width: fit-content; flex-wrap: wrap; align-items: center; }
   .mode-selector label { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; text-align: center; }
   .mode-selector input[type="radio"] { display: none; }
   .mode-selector input[type="radio"]:checked + label { background-color: var(--bg-secondary); color: var(--accent-primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -208,11 +212,11 @@
   button { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s; border: none; display: inline-flex; align-items: center; justify-content: center; }
   button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
   button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;}
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, .btn-promote-admin, #generate-txt-file-btn { background: var(--accent-primary); color: #fff; }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #btn-load-users:hover, .btn-promote-admin:hover, #generate-txt-file-btn:hover { background: var(--accent-hover); }
-  #btnResetar, .delete-history-btn, .btn-delete-user { background: var(--accent-danger); color: var(--text-primary); }
-  .btn-demote-admin { background: var(--accent-warning); color: var(--text-primary); }
-  #btnGerarImagem, #btnLogout, #btnDistributeLeftover, #btn-prev-page, #btn-next-page, #export-txt-modal-btn, #cancel-txt-export-btn, .btn-view-receipt { background: var(--bg-tertiary); color: var(--text-primary); }
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, .btn-promote-official, #generate-txt-file-btn, #btn-create-sub-reseller { background: var(--accent-primary); color: #fff; }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #btn-load-users:hover, .btn-promote-official:hover, #generate-txt-file-btn:hover, #btn-create-sub-reseller:hover { background: var(--accent-hover); }
+  #btnResetar, .delete-history-btn, .btn-delete-user, .btn-demote-seller { background: var(--accent-danger); color: var(--text-primary); }
+  .btn-promote-owner, .btn-demote-admin { background: var(--accent-warning); color: var(--text-primary); }
+  #btnGerarImagem, #btnLogout, #btnDistributeLeftover, #btn-prev-page, #btn-next-page, #export-txt-modal-btn, #cancel-txt-export-btn, .btn-view-receipt, #btn-load-my-resellers { background: var(--bg-tertiary); color: var(--text-primary); }
 
   .admin-section {
     padding: 20px;
@@ -228,13 +232,13 @@
   .container {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
   }
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, .btn-promote-admin, #generate-txt-file-btn {
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, .btn-promote-official, #generate-txt-file-btn, #btn-create-sub-reseller {
     background-image: linear-gradient(to right, var(--accent-primary) 0%, var(--accent-hover) 100%);
     background-size: 200% auto;
     transition: all 0.4s ease-in-out;
     border: none;
   }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, .btn-promote-admin:hover, #generate-txt-file-btn:hover {
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, .btn-promote-official:hover, #generate-txt-file-btn:hover, #btn-create-sub-reseller:hover {
     background-position: right center;
     background-color: var(--accent-hover);
   }
@@ -291,6 +295,8 @@
     text-align: center;
     border: 1px solid var(--border-color);
     font-size: 14px;
+    padding: 8px;
+    border-radius: 8px;
   }
 
   /* --- ESTILOS PARA O MODAL DE EXPORTAÇÃO --- */
@@ -504,16 +510,18 @@
     }
 
     /* Aplica a animação com um pequeno atraso para um efeito suave */
-    #calculator-view > *, #history-view > *, #dashboard-view > *, #admin-view > * {
+    #calculator-view > *, #history-view > *, #dashboard-view > *, #admin-view > *, #reseller-panel-view > * {
       animation: fadeInUp 0.5s ease-out both;
     }
 
     #calculator-view > *:nth-child(2),
     #history-view > *:nth-child(2),
-    #dashboard-view > *:nth-child(2) { animation-delay: 0.1s; }
+    #dashboard-view > *:nth-child(2),
+    #reseller-panel-view > *:nth-child(2) { animation-delay: 0.1s; }
 
     #calculator-view > *:nth-child(3),
-    #history-view > *:nth-child(3) { animation-delay: 0.2s; }
+    #history-view > *:nth-child(3),
+    #reseller-panel-view > *:nth-child(3) { animation-delay: 0.2s; }
 
     #calculator-view > *:nth-child(4) { animation-delay: 0.3s; }
     
@@ -545,13 +553,24 @@
         align-items: flex-end;
     }
 
-    /* Deixa as seções de admin mais destacadas */
-    .admin-section, .distributor-container {
+    /* Deixa as seções de admin mais destacadas e centralizadas */
+    .admin-section {
         background-color: var(--bg-primary);
         border: 1px solid var(--border-color);
         padding: 24px;
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        max-width: 90%; /* Evita que fiquem muito largas */
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .distributor-container {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     
 
@@ -609,33 +628,49 @@
     
     /* Botão Primário (o mais importante) */
     #btnCalcular, #btnDistribute, #btnLogin, #btn-create-seller, #generate-txt-file-btn, #history-apply-filter-btn {
-       /* Já está bom com o gradiente */
+        /* Já está bom com o gradiente */
     }
 
     /* Botão Secundário (ações menos comuns) */
-    #btnResetar, #btnGerarImagem, .btn-delete-user, #btnLogout {
+    #btnResetar, #btnGerarImagem, .btn-delete-user, #btnLogout, .btn-demote-seller {
         background: transparent;
         border: 2px solid var(--bg-tertiary);
         color: var(--text-secondary);
         background-image: none; /* Remove o gradiente */
     }
 
-    #btnResetar {
+    #btnResetar, .btn-demote-seller, .btn-delete-user {
         border-color: var(--accent-danger);
         color: var(--accent-danger);
     }
+    
+    .btn-demote-admin {
+        border-color: var(--accent-warning);
+        color: var(--accent-warning);
+    }
 
-    #btnResetar:hover {
+    #btnResetar:hover, .btn-demote-seller:hover, .btn-delete-user:hover, .btn-demote-admin:hover {
         background-color: var(--accent-danger);
         color: white;
         transform: translateY(-2px) scale(1.02);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-demote-admin:hover {
+        background-color: var(--accent-warning);
     }
 
     #btnGerarImagem:hover, #btnLogout:hover {
         border-color: var(--accent-primary);
         color: var(--accent-primary);
         background-color: transparent;
+    }
+
+    /* UX FIX: Centralizar controles de paginação */
+    #history-pagination-controls {
+        width: 100%;
+        justify-content: center;
+        margin-top: 24px;
     }
   }
   /* === FIM DAS MELHORIAS DE UX PARA DESKTOP === */
@@ -646,6 +681,7 @@
 
 <svg width="0" height="0" style="position:absolute">
   <symbol id="icon-user" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></symbol>
+  <symbol id="icon-team" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 15v-3a2 2 0 00-2-2H6a2 2 0 00-2 2v3h12z" /></symbol>
   <symbol id="icon-discount" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a1 1 0 011-1h5a1 1 0 01.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></symbol>
   <symbol id="icon-reset" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></symbol>
   <symbol id="icon-image" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></symbol>
@@ -698,7 +734,8 @@
           <button class="tab-link" data-tab="calculator-view" data-translate-key="tabCalculator">Calculadora</button>
           <button class="tab-link" data-tab="history-view" data-translate-key="tabHistory">Histórico</button>
           <button class="tab-link" data-tab="dashboard-view">Dashboard</button>
-          <button class="tab-link" data-tab="admin-view" style="display: none;">Admin</button>
+          <button class="tab-link" data-tab="reseller-panel-view" style="display: none;">Meus Vendedores</button>
+          <button class="tab-link" data-tab="admin-view" style="display: none;">Painel do Dono</button>
       </div>
 
       <div id="calculator-view" class="tab-content">
@@ -730,7 +767,9 @@
                 <label for="mode-mush" data-translate-key="modeMush">Por Mush</label>
               </div>
             </div>
-          </div> <div class="input-group hidden" id="reseller-mode-container">
+          </div> 
+
+          <div class="input-group hidden" id="reseller-mode-container">
             <label class="reseller-label">
               <input type="checkbox" id="reseller-mode-toggle">
               Modo Revendedor
@@ -796,11 +835,15 @@
           <h2 data-translate-key="historyHeader">Histórico de Vendas</h2>
           <div class="input-group" style="align-items: center; margin-bottom: 20px;">
               <label>Visualizar:</label>
-              <div class="mode-selector">
+              <div class="mode-selector" style="margin: 0 auto;">
                   <input type="radio" id="history-view-all" name="history-view-mode" value="all" checked>
                   <label for="history-view-all">Todas as Vendas</label>
                   <input type="radio" id="history-view-summary" name="history-view-mode" value="summary">
                   <label for="history-view-summary">Resumo por Cliente</label>
+                  <div id="history-view-team-container">
+                    <input type="radio" id="history-view-team" name="history-view-mode" value="team">
+                    <label for="history-view-team">Minha Equipe</label>
+                  </div>
               </div>
           </div>
           <div id="history-filter-bar" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 20px; padding: 15px; border: 1px solid var(--border-color); border-radius: 12px;">
@@ -846,9 +889,38 @@
               </div>
           </div>
       </div>
+
+      <div id="reseller-panel-view" class="tab-content hidden">
+        <h2>Gerenciar Meus Vendedores</h2>
+        <div id="sub-reseller-action-status"></div>
+
+        <div class="admin-section" id="add-sub-reseller-section">
+            <h3>Adicionar Novo Sub-revendedor</h3>
+            <div class="input-group">
+                <label for="new-sub-reseller-username">Usuário do Sub-revendedor</label>
+                <input type="text" id="new-sub-reseller-username" placeholder="Ex: novo.sub.revendedor">
+            </div>
+            <div class="input-group">
+                <label for="new-sub-reseller-password">Senha Provisória</label>
+                <input type="password" id="new-sub-reseller-password" placeholder="Mínimo 6 caracteres">
+            </div>
+            <div class="buttons" style="justify-content: flex-start;">
+                <button id="btn-create-sub-reseller">Criar Sub-revendedor</button>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>Lista de Vendedores</h3>
+            <div class="buttons" style="justify-content: flex-start;">
+                <button id="btn-load-my-resellers">Carregar Lista</button>
+            </div>
+            <div id="sub-reseller-list-container" style="margin-top: 16px;">
+            </div>
+        </div>
+      </div>
       
       <div id="admin-view" class="tab-content hidden">
-        <h2>Gerenciamento</h2>
+        <h2>Gerenciamento do Dono</h2>
         <div id="admin-action-status"></div>
 
         <div class="admin-section">
@@ -1057,6 +1129,15 @@
     selectAllCustomersCheckbox: document.getElementById('select-all-customers-checkbox'),
     historySellerFilterContainer: document.getElementById('history-seller-filter-container'),
     historySellerFilter: document.getElementById('history-seller-filter'),
+    resellerPanelView: document.getElementById('reseller-panel-view'),
+    subResellerActionStatus: document.getElementById('sub-reseller-action-status'),
+    newSubResellerUsernameInput: document.getElementById('new-sub-reseller-username'),
+    newSubResellerPasswordInput: document.getElementById('new-sub-reseller-password'),
+    btnCreateSubReseller: document.getElementById('btn-create-sub-reseller'),
+    btnLoadMyResellers: document.getElementById('btn-load-my-resellers'),
+    subResellerListContainer: document.getElementById('sub-reseller-list-container'),
+    addSubResellerSection: document.getElementById('add-sub-reseller-section'),
+    historyViewTeamContainer: document.getElementById('history-view-team-container'),
   };
 
   let currentLang = 'br';
@@ -1070,7 +1151,9 @@
     historyHasNextPage: true,
     salesChartInstance: null,
     tokensChartInstance: null,
-    isCurrentUserAdmin: false,
+    isCurrentUserOwner: false,
+    isCurrentUserAdmin: false, // <-- NOVO ESTADO PARA ADMIN
+    isOfficialReseller: false, 
     currentUsername: null,
     saveTimeout: null,
     currentCustomerUsage: { revive: 0, max: 0 },
@@ -1086,11 +1169,21 @@
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 await user.getIdTokenResult(true).then(async (idTokenResult) => {
-                    this.isCurrentUserAdmin = !!idTokenResult.claims.admin;
+                    this.isCurrentUserOwner = !!idTokenResult.claims.owner;
+                    this.isCurrentUserAdmin = !!idTokenResult.claims.admin; // <-- LÊ O NOVO CLAIM
+                    this.isOfficialReseller = !!idTokenResult.claims.officialReseller;
                     this.currentUsername = user.email.split('@')[0];
+                    
+                    const canManage = this.isCurrentUserOwner || this.isCurrentUserAdmin;
 
-                    document.querySelector('[data-tab="admin-view"]').style.display = this.isCurrentUserAdmin ? 'inline-block' : 'none';
-                    if (this.isCurrentUserAdmin) {
+                    document.querySelector('[data-tab="admin-view"]').style.display = canManage ? 'inline-block' : 'none';
+                    document.querySelector('[data-tab="reseller-panel-view"]').style.display = (this.isOfficialReseller || this.isCurrentUserOwner) ? 'inline-block' : 'none';
+                    
+                    if(dom.historyViewTeamContainer) {
+                        dom.historyViewTeamContainer.style.display = (this.isOfficialReseller || this.isCurrentUserOwner) ? 'contents' : 'none';
+                    }
+
+                    if (this.isCurrentUserOwner || this.isCurrentUserAdmin) {
                         dom.resellerModeContainer.classList.remove('hidden');
                     } else {
                         dom.resellerModeContainer.classList.add('hidden');
@@ -1101,7 +1194,7 @@
 
                     if (!this.calculatorInitialized) {
                         this.addAppEventListeners();
-                        this.setLanguage(currentLang);
+                        this.setLanguage(currentLang, false, true); 
                         await this.loadUserPreferences(user);
                         this.setDefaultTab();
                         const initialMode = dom.modeQtyRadio.checked ? 'quantity' : 'mush';
@@ -1111,11 +1204,15 @@
                     dom.loggedInUserDiv.innerHTML = `<span>${TRANSLATIONS[currentLang].loggedInAs}</span> <span class="username">${this.currentUsername}</span>`;
                 });
             } else {
+                this.isCurrentUserOwner = false;
                 this.isCurrentUserAdmin = false;
+                this.isOfficialReseller = false;
                 this.currentUsername = null;
                 dom.authContainer.classList.remove('hidden');
                 dom.appContainer.classList.add('hidden');
                 dom.resellerModeContainer.classList.add('hidden');
+                document.querySelector('[data-tab="reseller-panel-view"]').style.display = 'none';
+                document.querySelector('[data-tab="admin-view"]').style.display = 'none';
                 this.calculatorInitialized = false;
             }
         });
@@ -1124,181 +1221,168 @@
     },
 
     addAppEventListeners() {
-        dom.descontoInput.addEventListener('input', () => {
-            this.updateUI();
-            this.triggerSavePreferences();
-        });
-        document.getElementById('btnCalcular').addEventListener('click', this.updateUI.bind(this));
-        document.getElementById('btnResetar').addEventListener('click', this.reset.bind(this));
-        document.getElementById('btnGerarImagem').addEventListener('click', this.generateImage.bind(this));
-        dom.themeToggle.addEventListener('click', () => {
-            const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            this.setTheme(newTheme);
-        });
-        dom.accentColorSwitcher.addEventListener('click', (event) => {
-            const color = event.target.dataset.color;
-            if (color) {
-                this.setAccentColor(color);
-            }
-        });
-        dom.langBr.addEventListener('click', () => this.setLanguage('br'));
-        dom.langEn.addEventListener('click', () => this.setLanguage('en'));
-        dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
-        dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
-        dom.resellerModeToggle.addEventListener('change', this.toggleResellerMode.bind(this));
-
-        dom.nomeClienteInput.addEventListener('keyup', () => {});
-
-        dom.resellerCustomerSelect.addEventListener('change', () => {
-            if (dom.resellerCustomerSelect.value === 'manual') {
-                dom.resellerCustomerManualInput.classList.remove('hidden');
-                dom.resellerCustomerManualInput.focus();
-            } else {
-                dom.resellerCustomerManualInput.classList.add('hidden');
-            }
-            this.checkResellerLimit();
-        });
-
-        dom.resellerCustomerManualInput.addEventListener('keyup', this.checkResellerLimit.bind(this));
-
-        dom.totalMushInput.addEventListener('input', () => this.triggerSavePreferences());
-        dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
-        dom.btnDistributeLeftover.addEventListener('click', this.distributeLeftoverMush.bind(this));
-        dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
-        dom.tokenFiltersContainer.addEventListener('change', () => {
-            const selectedCount = dom.tokenFiltersContainer.querySelectorAll('input:checked').length;
-            document.getElementById('two-token-options').classList.toggle('hidden', selectedCount !== 2);
-        });
-        document.querySelectorAll('input[name="history-view-mode"]').forEach(radio => {
-            radio.addEventListener('change', () => this.loadHistory('first'));
-        });
-        dom.historyApplyFilterBtn.addEventListener('click', () => this.loadHistory('first'));
-        dom.btnPrevPage.addEventListener('click', () => this.loadHistory('prev'));
-        dom.btnNextPage.addEventListener('click', () => this.loadHistory('next'));
-        dom.historyTableContainer.addEventListener('click', (event) => {
-            const target = event.target.closest('button');
-            if (!target) return;
-
-            if (target.classList.contains('delete-history-btn')) {
-                this.handleHistoryDelete(target.dataset.id);
-            }
-            if (target.classList.contains('btn-view-receipt')) {
-                this.regenerateReceipt(target.dataset.id);
-            }
-        });
-
-        dom.btnLoadUsers.addEventListener('click', this.loadUsers.bind(this));
-        dom.userListContainer.addEventListener('click', this.handleUserAction.bind(this));
-        dom.btnCreateSeller.addEventListener('click', this.handleCreateSeller.bind(this));
-
-        dom.exportTxtModalBtn.addEventListener('click', this.openTxtExportModal.bind(this));
-        dom.closeTxtExportModalBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
-        dom.cancelTxtExportBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
-        dom.selectAllCustomersCheckbox.addEventListener('change', this.handleSelectAllCustomers.bind(this));
-        dom.generateTxtFileBtn.addEventListener('click', this.generateTxtFile.bind(this));
-        dom.txtExportModal.addEventListener('click', (e) => {
-            if (e.target === dom.txtExportModal) {
-                dom.txtExportModal.classList.add('hidden');
-            }
-        });
+      dom.descontoInput.addEventListener('input', () => { this.updateUI(); this.triggerSaveCalculatorPreferences(); });
+      document.getElementById('btnCalcular').addEventListener('click', this.updateUI.bind(this));
+      document.getElementById('btnResetar').addEventListener('click', this.reset.bind(this));
+      document.getElementById('btnGerarImagem').addEventListener('click', this.generateImage.bind(this));
+      dom.themeToggle.addEventListener('click', () => {
+          const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          this.setTheme(newTheme);
+      });
+      dom.accentColorSwitcher.addEventListener('click', (event) => {
+          const color = event.target.dataset.color;
+          if (color) {
+              this.setAccentColor(color);
+          }
+      });
+      dom.langBr.addEventListener('click', () => { this.setLanguage('br'); });
+      dom.langEn.addEventListener('click', () => { this.setLanguage('en'); });
+      dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
+      dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
+      dom.resellerModeToggle.addEventListener('change', this.toggleResellerMode.bind(this));
+      dom.nomeClienteInput.addEventListener('keyup', () => {});
+      dom.resellerCustomerSelect.addEventListener('change', () => {
+          if (dom.resellerCustomerSelect.value === 'manual') {
+              dom.resellerCustomerManualInput.classList.remove('hidden');
+              dom.resellerCustomerManualInput.focus();
+          } else {
+              dom.resellerCustomerManualInput.classList.add('hidden');
+          }
+          this.checkResellerLimit();
+      });
+      dom.resellerCustomerManualInput.addEventListener('keyup', this.checkResellerLimit.bind(this));
+      dom.totalMushInput.addEventListener('input', () => this.triggerSaveCalculatorPreferences());
+      dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
+      dom.btnDistributeLeftover.addEventListener('click', this.distributeLeftoverMush.bind(this));
+      dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
+      dom.tokenFiltersContainer.addEventListener('change', () => {
+          const selectedCount = dom.tokenFiltersContainer.querySelectorAll('input:checked').length;
+          document.getElementById('two-token-options').classList.toggle('hidden', selectedCount !== 2);
+      });
+      document.querySelectorAll('input[name="history-view-mode"]').forEach(radio => {
+          radio.addEventListener('change', () => this.loadHistory('first'));
+      });
+      dom.historyApplyFilterBtn.addEventListener('click', () => this.loadHistory('first'));
+      dom.btnPrevPage.addEventListener('click', () => this.loadHistory('prev'));
+      dom.btnNextPage.addEventListener('click', () => this.loadHistory('next'));
+      dom.historyTableContainer.addEventListener('click', (event) => {
+          const target = event.target.closest('button');
+          if (!target) return;
+          if (target.classList.contains('delete-history-btn')) this.handleHistoryDelete(target.dataset.id);
+          if (target.classList.contains('btn-view-receipt')) this.regenerateReceipt(target.dataset.id);
+      });
+      dom.btnLoadUsers.addEventListener('click', this.loadUsers.bind(this));
+      dom.userListContainer.addEventListener('click', this.handleUserAction.bind(this));
+      dom.btnCreateSeller.addEventListener('click', this.handleCreateSeller.bind(this));
+      dom.btnCreateSubReseller.addEventListener('click', this.handleCreateSubReseller.bind(this));
+      dom.btnLoadMyResellers.addEventListener('click', this.loadResellerPanelData.bind(this));
+      dom.subResellerListContainer.addEventListener('click', this.handleSubResellerAction.bind(this));
+      dom.exportTxtModalBtn.addEventListener('click', this.openTxtExportModal.bind(this));
+      dom.closeTxtExportModalBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
+      dom.cancelTxtExportBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
+      dom.selectAllCustomersCheckbox.addEventListener('change', this.handleSelectAllCustomers.bind(this));
+      dom.generateTxtFileBtn.addEventListener('click', this.generateTxtFile.bind(this));
+      dom.txtExportModal.addEventListener('click', (e) => { if (e.target === dom.txtExportModal) dom.txtExportModal.classList.add('hidden'); });
     },
 
     async handleLogin() {
-      const username = dom.usernameInput.value.trim();
-      const password = dom.passwordInput.value;
-      const t = TRANSLATIONS[currentLang];
-      if (!username || !password) {
-          dom.authError.textContent = t.errorInvalidCredentials;
-          return;
-      }
-      const email = username + DUMMY_DOMAIN;
-      try {
-          dom.authError.textContent = '';
-          await auth.signInWithEmailAndPassword(email, password);
-      } catch (error) {
-          if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
-              dom.authError.textContent = t.errorInvalidCredentials;
-          } else {
-              dom.authError.textContent = t.errorGeneric;
-          }
-      }
+        const username = dom.usernameInput.value.trim();
+        const password = dom.passwordInput.value;
+        const t = TRANSLATIONS[currentLang];
+        if (!username || !password) {
+            dom.authError.textContent = t.errorInvalidCredentials;
+            return;
+        }
+        const email = username + DUMMY_DOMAIN;
+        try {
+            dom.authError.textContent = '';
+            await auth.signInWithEmailAndPassword(email, password);
+        } catch (error) {
+            if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+                dom.authError.textContent = t.errorInvalidCredentials;
+            } else {
+                dom.authError.textContent = t.errorGeneric;
+            }
+        }
     },
 
     handleLogout() {
-      auth.signOut();
+        auth.signOut();
     },
 
     loadDevicePreferences() {
-      const theme = localStorage.getItem('theme') || 'dark';
-      const accentColor = localStorage.getItem('accentColor') || 'green';
-      this.setTheme(theme, false);
-      this.setAccentColor(accentColor, false);
-      currentLang = localStorage.getItem('language') || 'br';
+        const theme = localStorage.getItem('theme') || 'dark';
+        const accentColor = localStorage.getItem('accentColor') || 'green';
+        this.setTheme(theme, false);
+        this.setAccentColor(accentColor, false);
+        currentLang = localStorage.getItem('language') || 'br';
     },
 
     async loadUserPreferences(user) {
-      if (!user) return;
-      try {
-          const docRef = db.collection('userPreferences').doc(user.uid);
-          const docSnap = await docRef.get();
-          if (docSnap.exists) {
-              const prefs = docSnap.data();
-              if (prefs.theme) this.setTheme(prefs.theme, false);
-              if (prefs.accentColor) this.setAccentColor(prefs.accentColor, false);
-              if (prefs.language) this.setLanguage(prefs.language, false, true);
-
-              if (prefs.calculator) {
-                  dom.descontoInput.value = prefs.calculator.discount || '';
-                  dom.totalMushInput.value = prefs.calculator.totalMush || '';
-                  if (prefs.calculator.quantities) {
-                      for (const key in prefs.calculator.quantities) {
-                          const qtyInput = document.getElementById(`qtd-${key}`);
-                          if (qtyInput) {
-                              qtyInput.value = prefs.calculator.quantities[key];
-                          }
-                      }
-                  }
-              }
-
-              if (prefs.prices) {
-                  for (const key in prefs.prices) {
-                      const priceInput = document.getElementById(`price-${key}`);
-                      if (priceInput && prefs.prices[key]) {
-                          priceInput.value = prefs.prices[key];
-                      }
-                  }
-              }
-              this.updateUI(); 
-          }
-      } catch (error) {
-          console.error("Erro ao carregar preferências do usuário:", error);
-      }
+        if (!user) return;
+        try {
+            const docRef = db.collection('userPreferences').doc(user.uid);
+            const docSnap = await docRef.get();
+            if (docSnap.exists) {
+                const prefs = docSnap.data();
+                if (prefs.theme) this.setTheme(prefs.theme, false);
+                if (prefs.accentColor) this.setAccentColor(prefs.accentColor, false);
+                if (prefs.language) this.setLanguage(prefs.language, false, true);
+                if (prefs.calculator) {
+                    dom.descontoInput.value = prefs.calculator.discount || '';
+                    dom.totalMushInput.value = prefs.calculator.totalMush || '';
+                    if (prefs.calculator.quantities) {
+                        for (const key in prefs.calculator.quantities) {
+                            const qtyInput = document.getElementById(`qtd-${key}`);
+                            if (qtyInput) qtyInput.value = prefs.calculator.quantities[key];
+                        }
+                    }
+                }
+                if (prefs.prices) {
+                    for (const key in prefs.prices) {
+                        const priceInput = document.getElementById(`price-${key}`);
+                        if (priceInput && prefs.prices[key]) priceInput.value = prefs.prices[key];
+                    }
+                }
+                this.updateUI();
+            }
+        } catch (error) {
+            console.error("Erro ao carregar preferências:", error);
+        }
     },
 
-    triggerSavePreferences() {
+    triggerSaveCalculatorPreferences() {
         clearTimeout(this.saveTimeout);
-        this.saveTimeout = setTimeout(() => this.savePreferences(), 1500);
+        this.saveTimeout = setTimeout(() => this.saveCalculatorPreferences(), 1500);
     },
 
-    async savePreferences() {
-        if (!auth.currentUser || dom.resellerModeToggle.checked) return;
+    async saveUiPreferences() {
+        if (!auth.currentUser) return;
+        const prefs = {
+            theme: dom.html.getAttribute('data-theme'),
+            accentColor: dom.html.getAttribute('data-accent-color'),
+            language: currentLang,
+        };
+        try {
+            await db.collection('userPreferences').doc(auth.currentUser.uid).set(prefs, { merge: true });
+        } catch (error) {
+            console.error("Erro ao salvar preferências de UI:", error);
+        }
+    },
 
+    async saveCalculatorPreferences() {
+        if (!auth.currentUser || dom.resellerModeToggle.checked) return;
         const pricesToSave = {};
         for (const key in ITENS_CATALOGO) {
             const priceInput = document.getElementById(`price-${key}`);
             if (priceInput) pricesToSave[key] = parseFloat(priceInput.value) || 0;
         }
-
         const quantitiesToSave = {};
         for (const key in ITENS_CATALOGO) {
             const qtyInput = document.getElementById(`qtd-${key}`);
             if (qtyInput) quantitiesToSave[key] = parseInt(qtyInput.value) || 0;
         }
-
         const prefs = {
-            theme: dom.html.getAttribute('data-theme'),
-            accentColor: dom.html.getAttribute('data-accent-color'),
-            language: currentLang,
             prices: pricesToSave,
             calculator: {
                 discount: parseFloat(dom.descontoInput.value) || 0,
@@ -1306,30 +1390,25 @@
                 quantities: quantitiesToSave
             }
         };
-
         try {
             await db.collection('userPreferences').doc(auth.currentUser.uid).set(prefs, { merge: true });
         } catch (error) {
-            console.error("Erro ao salvar preferências:", error);
+            console.error("Erro ao salvar preferências da calculadora:", error);
         }
     },
 
     setDefaultTab() {
-      dom.tabLinks.forEach(link => link.classList.remove('active'));
-      dom.tabContents.forEach(content => content.classList.add('hidden'));
-
-      const firstTab = document.querySelector('.tab-link');
-      const firstContentId = firstTab.dataset.tab;
-
-      firstTab.classList.add('active');
-      document.getElementById(firstContentId).classList.remove('hidden');
+        dom.tabLinks.forEach(link => link.classList.remove('active'));
+        dom.tabContents.forEach(content => content.classList.add('hidden'));
+        const firstTab = document.querySelector('.tab-link');
+        firstTab.classList.add('active');
+        document.getElementById(firstTab.dataset.tab).classList.remove('hidden');
     },
 
     handleTabClick(event) {
         const clickedTab = event.target.closest('.tab-link');
-        if (!clickedTab || clickedTab.classList.contains('active')) {
-            return;
-        }
+        if (!clickedTab || clickedTab.classList.contains('active')) return;
+        
         dom.tabLinks.forEach(link => link.classList.remove('active'));
         dom.tabContents.forEach(content => content.classList.add('hidden'));
 
@@ -1337,74 +1416,54 @@
         const tabId = clickedTab.dataset.tab;
         document.getElementById(tabId).classList.remove('hidden');
         
-      if (tabId === 'dashboard-view') {
-          this.loadDashboardData();
-      } else if (tabId === 'history-view') {
-          this.loadHistory('first');
-          if (this.isCurrentUserAdmin) {
-            this.populateHistorySellerFilter();
-          } else {
-            dom.historySellerFilterContainer.classList.add('hidden');
-          }
-        } else if (tabId === 'admin-view' && this.isCurrentUserAdmin) {
-            this.loadUsers();
-        }
+        if (tabId === 'dashboard-view') this.loadDashboardData();
+        else if (tabId === 'history-view') {
+            this.loadHistory('first');
+            if (this.isCurrentUserOwner) this.populateHistorySellerFilter();
+            else dom.historySellerFilterContainer.classList.add('hidden');
+        } 
+        else if (tabId === 'admin-view' && (this.isCurrentUserOwner || this.isCurrentUserAdmin)) this.loadUsers();
+        else if (tabId === 'reseller-panel-view' && (this.isOfficialReseller || this.isCurrentUserOwner)) this.loadResellerPanelData();
     },
 
     async handleHistoryDelete(docId) {
         if (!docId) return;
-
-        const confirmDelete = confirm("Tem certeza que deseja excluir este registro de venda? O limite diário do revendedor (se aplicável) será devolvido. Esta ação não pode ser desfeita.");
-
-        if (confirmDelete) {
-            const receiptRef = db.collection('receipts').doc(docId);
-
-            try {
-                await db.runTransaction(async (transaction) => {
-                    const receiptSnap = await transaction.get(receiptRef);
+        if (!confirm("Tem certeza que deseja excluir este registro de venda? O limite diário do revendedor (se aplicável) será devolvido. Esta ação não pode ser desfeita.")) return;
+        
+        const receiptRef = db.collection('receipts').doc(docId);
+        try {
+            await db.runTransaction(async (transaction) => {
+                const receiptSnap = await transaction.get(receiptRef);
+                if (!receiptSnap.exists) throw new Error("Registro de venda não encontrado.");
+                
+                const receiptData = receiptSnap.data();
+                const reviveToDecrement = receiptData.itemsData?.revive?.qty || 0;
+                const maxToDecrement = receiptData.itemsData?.max?.qty || 0;
+                
+                if (reviveToDecrement > 0 || maxToDecrement > 0) {
+                    const customerName = (receiptData.customerName || '').toLowerCase();
+                    const saleDate = receiptData.createdAt.toDate();
+                    const dateStr = this.getFormattedDate(saleDate);
                     
-                    if (!receiptSnap.exists) {
-                        throw new Error("Registro de venda não encontrado.");
-                    }
-                    const receiptData = receiptSnap.data();
-
-                    const reviveToDecrement = receiptData.itemsData?.revive?.qty || 0;
-                    const maxToDecrement = receiptData.itemsData?.max?.qty || 0;
-                    
-                    if (reviveToDecrement > 0 || maxToDecrement > 0) {
-                        const customerName = (receiptData.customerName || '').toLowerCase();
-                        const saleDate = receiptData.createdAt.toDate();
-                        const dateStr = this.getFormattedDate(saleDate);
-                        
-                        if (customerName && customerName !== 'revendedor_nao_identificado') {
-                            const limitDocId = `${customerName}_${dateStr}`;
-                            const limitRef = db.collection('resellerLimits').doc(limitDocId);
-                            
-                            const limitSnap = await transaction.get(limitRef);
-
-                            if (limitSnap.exists) {
-                                const updateData = {};
-                                if (reviveToDecrement > 0) {
-                                    updateData.reviveCount = firebase.firestore.FieldValue.increment(-reviveToDecrement);
-                                }
-                                if (maxToDecrement > 0) {
-                                    updateData.maxCount = firebase.firestore.FieldValue.increment(-maxToDecrement);
-                                }
-                                transaction.update(limitRef, updateData);
-                            }
+                    if (customerName && customerName !== 'revendedor_nao_identificado') {
+                        const limitDocId = `${customerName}_${dateStr}`;
+                        const limitRef = db.collection('resellerLimits').doc(limitDocId);
+                        const limitSnap = await transaction.get(limitRef);
+                        if (limitSnap.exists) {
+                            const updateData = {};
+                            if (reviveToDecrement > 0) updateData.reviveCount = firebase.firestore.FieldValue.increment(-reviveToDecrement);
+                            if (maxToDecrement > 0) updateData.maxCount = firebase.firestore.FieldValue.increment(-maxToDecrement);
+                            transaction.update(limitRef, updateData);
                         }
                     }
-
-                    transaction.delete(receiptRef);
-                });
-
-                alert('Registro excluído com sucesso!');
-                this.loadHistory('first');
-
-            } catch (error) {
-                console.error("Erro ao excluir registro em transação:", error);
-                alert(`Ocorreu um erro ao excluir o registro: ${error.message}.`);
-            }
+                }
+                transaction.delete(receiptRef);
+            });
+            alert('Registro excluído com sucesso!');
+            this.loadHistory('first');
+        } catch (error) {
+            console.error("Erro ao excluir registro em transação:", error);
+            alert(`Ocorreu um erro ao excluir o registro: ${error.message}.`);
         }
     },
 
@@ -1417,25 +1476,14 @@
     async handleCreateSeller() {
         const username = dom.newSellerUsernameInput.value.trim();
         const password = dom.newSellerPasswordInput.value;
-
-        if (!username || !password) {
-            this.displayAdminStatus('Por favor, preencha o usuário e a senha.');
-            return;
-        }
-        if (password.length < 6) {
-            this.displayAdminStatus('A senha deve ter no mínimo 6 caracteres.');
-            return;
-        }
+        if (!username || !password) { this.displayAdminStatus('Por favor, preencha o usuário e a senha.'); return; }
+        if (password.length < 6) { this.displayAdminStatus('A senha deve ter no mínimo 6 caracteres.'); return; }
 
         dom.btnCreateSeller.disabled = true;
         this.displayAdminStatus('Criando vendedor...', true);
-
         try {
             const createUser = functions.httpsCallable('createUser');
-            const result = await createUser({
-                email: username + DUMMY_DOMAIN,
-                password: password
-            });
+            const result = await createUser({ email: username + DUMMY_DOMAIN, password });
             this.displayAdminStatus(result.data.message, true);
             dom.newSellerUsernameInput.value = '';
             dom.newSellerPasswordInput.value = '';
@@ -1446,6 +1494,112 @@
         } finally {
             dom.btnCreateSeller.disabled = false;
         }
+    },
+
+    displaySubResellerStatus(message, isSuccess = false) {
+        dom.subResellerActionStatus.textContent = message;
+        dom.subResellerActionStatus.className = isSuccess ? 'success' : '';
+        setTimeout(() => dom.subResellerActionStatus.textContent = '', 5000);
+    },
+
+    async handleCreateSubReseller() {
+        const username = dom.newSubResellerUsernameInput.value.trim();
+        const password = dom.newSubResellerPasswordInput.value;
+        if (!username || !password) { this.displaySubResellerStatus('Por favor, preencha o usuário e a senha.'); return; }
+        if (password.length < 6) { this.displaySubResellerStatus('A senha deve ter no mínimo 6 caracteres.'); return; }
+
+        dom.btnCreateSubReseller.disabled = true;
+        this.displaySubResellerStatus('Criando sub-revendedor...', true);
+        try {
+            const createSubResellerFunc = functions.httpsCallable('createSubReseller');
+            const result = await createSubResellerFunc({ email: username + DUMMY_DOMAIN, password });
+            this.displaySubResellerStatus(result.data.message, true);
+            dom.newSubResellerUsernameInput.value = '';
+            dom.newSubResellerPasswordInput.value = '';
+            this.loadResellerPanelData();
+        } catch (error) {
+            console.error("Erro ao criar sub-revendedor:", error);
+            this.displaySubResellerStatus(`Erro: ${error.message}`);
+        } finally {
+            dom.btnCreateSubReseller.disabled = false;
+        }
+    },
+    
+    async loadResellerPanelData() {
+        dom.subResellerListContainer.innerHTML = '<p>Carregando vendedores...</p>';
+        if (dom.addSubResellerSection) {
+            dom.addSubResellerSection.style.display = (this.isOfficialReseller || this.isCurrentUserOwner) ? 'flex' : 'none';
+        }
+        
+        try {
+            const listMySubResellersFunc = functions.httpsCallable('listMySubResellers');
+            const result = await listMySubResellersFunc();
+            const subResellers = result.data;
+            this.renderSubResellerList(subResellers);
+        } catch (error) {
+            console.error("Erro ao carregar lista de revendedores:", error);
+            dom.subResellerListContainer.innerHTML = `<p style="color: var(--text-error);">Erro ao carregar lista: ${error.message}</p>`;
+        }
+    },
+    
+    async handleSubResellerAction(event) {
+        const target = event.target.closest('.btn-delete-user');
+        if (!target) return;
+
+        const uid = target.dataset.uid;
+        const username = target.closest('tr').cells[0].textContent;
+
+        if (!uid || !username) return;
+
+        if (confirm(`Tem certeza que deseja EXCLUIR o vendedor "${username}"? Esta ação não pode ser desfeita.`)) {
+            target.disabled = true;
+            this.displaySubResellerStatus('Excluindo vendedor...', true);
+
+            try {
+                const deleteUserFunc = functions.httpsCallable('deleteUserByUid');
+                const result = await deleteUserFunc({ uid: uid });
+                this.displaySubResellerStatus(result.data.message, true);
+                this.loadResellerPanelData();
+            } catch (error) {
+                console.error("Erro ao excluir sub-revendedor:", error);
+                this.displaySubResellerStatus(`Erro: ${error.message}`);
+                target.disabled = false;
+            }
+        }
+    },
+
+    renderSubResellerList(subResellers) {
+        if (!subResellers || subResellers.length === 0) {
+            dom.subResellerListContainer.innerHTML = '<p>Nenhum sub-revendedor encontrado.</p>';
+            return;
+        }
+        
+        let tableHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Email</th>
+                        <th style="text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        subResellers.forEach(user => {
+            tableHTML += `
+                <tr>
+                    <td data-label="Usuário">${user.username}</td>
+                    <td data-label="Email">${user.email}</td>
+                    <td data-label="Ações" style="text-align: center;">
+                        <button class="btn-delete-user" data-uid="${user.uid}" title="Excluir sub-revendedor">Excluir</button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `</tbody></table>`;
+        dom.subResellerListContainer.innerHTML = tableHTML;
     },
 
     async loadUsers() {
@@ -1460,72 +1614,18 @@
         }
     },
 
-    async populateResellerCustomerDropdown() {
-      try {
-          const listAllUsers = functions.httpsCallable('listAllUsers');
-          const result = await listAllUsers();
-          const users = result.data;
-
-          dom.resellerCustomerSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
-
-          users.forEach(user => {
-              if (user.email === auth.currentUser.email) return;
-
-              const username = user.email.split('@')[0];
-              const option = document.createElement('option');
-              option.value = username;
-              option.textContent = username;
-              dom.resellerCustomerSelect.appendChild(option);
-          });
-
-          const manualOption = document.createElement('option');
-          manualOption.value = 'manual';
-          manualOption.textContent = 'Digitar nome manualmente...';
-          dom.resellerCustomerSelect.appendChild(manualOption);
-
-      } catch (error) {
-          console.error("Erro ao carregar lista de clientes revendedores:", error);
-          dom.resellerCustomerSelect.innerHTML = `<option value="">Erro ao carregar</option>`;
-      }
-    },
-
-    async populateHistorySellerFilter() {
-      if (!this.isCurrentUserAdmin) return;
-      dom.historySellerFilterContainer.classList.remove('hidden');
-      try {
-          const listAllUsers = functions.httpsCallable('listAllUsers');
-          const result = await listAllUsers();
-          const users = result.data;
-
-          dom.historySellerFilter.innerHTML = '<option value="">Todos os Vendedores</option>';
-
-          users.forEach(user => {
-              const username = user.email.split('@')[0];
-              const option = document.createElement('option');
-              option.value = username;
-              option.textContent = username;
-              dom.historySellerFilter.appendChild(option);
-          });
-      } catch (error) {
-          console.error("Erro ao carregar lista de vendedores para filtro:", error);
-          dom.historySellerFilter.innerHTML = `<option value="">Erro ao carregar</option>`;
-      }
-    },
-
     renderUserList(users) {
         if (!users || users.length === 0) {
             dom.userListContainer.innerHTML = '<p>Nenhum usuário encontrado.</p>';
             return;
         }
 
-        const isSuperAdmin = this.currentUsername === 'risk29';
-
         let tableHTML = `
-            <table style="width: 100%;">
+            <table>
                 <thead>
                     <tr>
                         <th>Usuário</th>
-                        <th>Status</th>
+                        <th>Cargo</th>
                         <th style="text-align: center;">Ações</th>
                     </tr>
                 </thead>
@@ -1533,29 +1633,55 @@
         `;
 
         users.forEach(user => {
-            const username = user.email.split('@')[0];
+            const username = user.username;
             const isCurrentUser = auth.currentUser.uid === user.uid;
+            const userRole = user.role;
 
-            const canManageThisUser = !isCurrentUser && (isSuperAdmin || !user.isAdmin);
+            let roleDisplay = '';
+            switch(userRole) {
+                case 'owner': roleDisplay = '<b>👑 Dono</b>'; break;
+                case 'admin': roleDisplay = '<b>🛡️ Admin</b>'; break;
+                case 'official_reseller': roleDisplay = '<b>Revendedor Oficial</b>'; break;
+                case 'sub_reseller': roleDisplay = `Sub-revendedor (de: ${user.parentResellerUsername || 'N/A'})`; break;
+                default: roleDisplay = 'Vendedor';
+            }
+
+            let actionsHtml = '';
+            // Ações que o DONO pode tomar
+            if (this.isCurrentUserOwner && !isCurrentUser) {
+                if (userRole !== 'owner') {
+                  actionsHtml += `<button class="btn-promote-owner" data-uid="${user.uid}" title="Promover a Dono">Tornar Dono</button>`;
+                }
+                if (userRole !== 'admin') {
+                  actionsHtml += `<button class="btn-promote-admin" data-uid="${user.uid}" title="Promover a Admin">Tornar Admin</button>`;
+                } else { // Se o usuário JÁ é admin
+                  actionsHtml += `<button class="btn-demote-admin" data-uid="${user.uid}" title="Rebaixar para Vendedor">Rebaixar Admin</button>`;
+                }
+                if (userRole === 'seller') {
+                    actionsHtml += `<button class="btn-promote-official" data-uid="${user.uid}" title="Promover a Revendedor Oficial">Tornar Oficial</button>`;
+                }
+                if (userRole === 'official_reseller') {
+                    actionsHtml += `<button class="btn-demote-seller" data-uid="${user.uid}" title="Rebaixar para Vendedor">Rebaixar</button>`;
+                }
+                actionsHtml += `<button class="btn-delete-user" data-uid="${user.uid}" title="Excluir usuário">Excluir</button>`;
+            } 
+            // Ações que um ADMIN pode tomar
+            else if (this.isCurrentUserAdmin && !isCurrentUser && userRole !== 'owner' && userRole !== 'admin') {
+                if (userRole === 'seller') {
+                    actionsHtml += `<button class="btn-promote-official" data-uid="${user.uid}" title="Promover a Revendedor Oficial">Tornar Oficial</button>`;
+                }
+                if (userRole === 'official_reseller') {
+                    actionsHtml += `<button class="btn-demote-seller" data-uid="${user.uid}" title="Rebaixar para Vendedor">Rebaixar</button>`;
+                }
+                actionsHtml += `<button class="btn-delete-user" data-uid="${user.uid}" title="Excluir usuário">Excluir</button>`;
+            }
+
 
             tableHTML += `
                 <tr>
-                    <td>${username}</td>
-                    <td>${user.isAdmin ? '<b>Admin</b>' : 'Vendedor'}</td>
-                    <td style="display: flex; justify-content: center; gap: 8px;">
-            `;
-
-            if (!user.isAdmin) {
-                tableHTML += `<button class="btn-promote-admin" data-uid="${user.uid}" data-email="${user.email}" ${!canManageThisUser ? 'disabled' : ''} title="Promover a admin">Promover</button>`;
-            }
-
-            if (user.isAdmin && isSuperAdmin && !isCurrentUser) {
-                tableHTML += `<button class="btn-demote-admin" data-uid="${user.uid}" data-email="${user.email}" title="Rebaixar para Vendedor">Demover</button>`;
-            }
-
-            tableHTML += `
-                        <button class="btn-delete-user" data-uid="${user.uid}" ${!canManageThisUser ? 'disabled' : ''} title="${isCurrentUser ? 'Não pode se auto-excluir' : 'Excluir usuário'}">Excluir</button>
-                    </td>
+                    <td data-label="Usuário">${username}</td>
+                    <td data-label="Cargo">${roleDisplay}</td>
+                    <td data-label="Ações" style="text-align:center; display:flex; flex-wrap:wrap; gap: 8px; justify-content: flex-end;">${actionsHtml}</td>
                 </tr>
             `;
         });
@@ -1569,164 +1695,225 @@
         if (!target.matches('button')) return;
 
         const uid = target.dataset.uid;
-        const email = target.dataset.email;
-        const username = email ? email.split('@')[0] : target.closest('tr').cells[0].textContent;
+        const username = target.closest('tr').cells[0].textContent;
+        const fullEmail = username + DUMMY_DOMAIN;
 
         target.disabled = true;
 
-        if (target.classList.contains('btn-promote-admin')) {
-            if (confirm(`Tem certeza que deseja promover o usuário ${username} a administrador?`)) {
-                this.callAdminFunction('setAdminClaim', { email }, `Usuário ${username} promovido.`, `Erro ao promover ${username}.`, target);
+        if (target.classList.contains('btn-promote-owner')) {
+            if (confirm(`ATENÇÃO: Esta ação dará privilégios TOTAIS e IRREVOGÁVEIS ao usuário ${username}.\nTem certeza que deseja promover ${username} a Dono?`)) {
+                this.callAdminFunction('setOwnerClaim', { email: fullEmail }, `Usuário ${username} promovido a Dono.`, `Erro ao promover ${username}.`, target);
             } else {
                 target.disabled = false;
             }
-        }
-
-        if (target.classList.contains('btn-demote-admin')) {
-            if (confirm(`Tem certeza que deseja REBAIXAR o admin ${username} para vendedor? Ele perderá as permissões de admin.`)) {
-                this.callAdminFunction('removeAdminClaim', { email }, `Admin ${username} rebaixado para vendedor.`, `Erro ao rebaixar ${username}.`, target);
+        } else if (target.classList.contains('btn-promote-admin')) {
+            if (confirm(`Tem certeza que deseja promover o usuário ${username} a Admin?`)) {
+                this.callAdminFunction('setAdminClaim', { uid }, `Usuário ${username} promovido a Admin.`, `Erro ao promover ${username}.`, target);
             } else {
                 target.disabled = false;
             }
-        }
-
-        if (target.classList.contains('btn-delete-user')) {
+        } else if (target.classList.contains('btn-demote-admin')) {
+            if (confirm(`Tem certeza que deseja rebaixar o Admin ${username} para Vendedor?`)) {
+                this.callAdminFunction('demoteAdminToSeller', { uid }, `Usuário ${username} rebaixado para Vendedor.`, `Erro ao rebaixar ${username}.`, target);
+            } else {
+                target.disabled = false;
+            }
+        } else if (target.classList.contains('btn-promote-official')) {
+            if (confirm(`Tem certeza que deseja promover o usuário ${username} a Revendedor Oficial?`)) {
+                this.callAdminFunction('setOfficialReseller', { uid }, `Usuário ${username} promovido.`, `Erro ao promover ${username}.`, target);
+            } else {
+                target.disabled = false;
+            }
+        } else if (target.classList.contains('btn-demote-seller')) {
+            if (confirm(`Tem certeza que deseja rebaixar o usuário ${username} para Vendedor? Ele perderá as permissões especiais.`)) {
+                this.callAdminFunction('demoteToSeller', { uid }, `Usuário ${username} rebaixado para Vendedor.`, `Erro ao rebaixar ${username}.`, target);
+            } else {
+                target.disabled = false;
+            }
+        } else if (target.classList.contains('btn-delete-user')) {
             if (confirm(`ATENÇÃO: Esta ação é irreversível!\nTem certeza que deseja excluir o usuário ${username}?`)) {
                 this.callAdminFunction('deleteUserByUid', { uid }, `Usuário ${username} excluído.`, `Erro ao excluir ${username}.`, target);
             } else {
                 target.disabled = false;
             }
+        } else {
+            target.disabled = false;
         }
     },
 
     async callAdminFunction(functionName, params, successMsg, errorMsg, buttonElement) {
-      try {
-          const func = functions.httpsCallable(functionName);
-          const result = await func(params);
-          this.displayAdminStatus(result.data.message || successMsg, true);
-          this.loadUsers();
-      } catch (error) {
-          console.error(`${errorMsg}:`, error);
-          this.displayAdminStatus(`${errorMsg}: ${error.message}`);
-          if (buttonElement) buttonElement.disabled = false;
-      }
+        try {
+            const func = functions.httpsCallable(functionName);
+            const result = await func(params);
+            this.displayAdminStatus(result.data.message || successMsg, true);
+            this.loadUsers();
+        } catch (error) {
+            console.error(`${errorMsg}:`, error);
+            this.displayAdminStatus(`${errorMsg}: ${error.message}`);
+            if (buttonElement) buttonElement.disabled = false;
+        }
     },
 
     async loadHistory(direction = 'first') {
-        const t = TRANSLATIONS[currentLang];
-        dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
+      const t = TRANSLATIONS[currentLang];
+      dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
+      dom.historyPaginationControls.classList.add('hidden');
+
+      if (direction === 'first') {
+          this.historyPageCursors = [null];
+          this.historyCurrentPage = 0;
+      }
+
+      let pageToLoad = this.historyCurrentPage;
+      if (direction === 'next') pageToLoad++;
+      else if (direction === 'prev' && pageToLoad > 0) pageToLoad--;
+
+      const lastDoc = this.historyPageCursors[pageToLoad];
+      const viewMode = document.querySelector('input[name="history-view-mode"]:checked').value;
+      const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
+      const selectedSeller = dom.historySellerFilter.value;
+
+      let startDate = null;
+      if (dom.historyDateStart.value) {
+          const parts = dom.historyDateStart.value.split('-');
+          startDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+      let endDate = null;
+      if (dom.historyDateEnd.value) {
+          const parts = dom.historyDateEnd.value.split('-');
+          endDate = new Date(parts[0], parts[1] - 1, parts[2]);
+          endDate.setHours(23, 59, 59, 999);
+      }
+
+      try {
+          if (viewMode === 'summary') {
+              await this.renderSummaryView(searchTerm, startDate, endDate, selectedSeller);
+              return;
+          } else if (viewMode === 'team' && (this.isOfficialReseller || this.isCurrentUserOwner)) {
+              await this.renderTeamView(searchTerm, startDate, endDate, selectedSeller);
+              return;
+          }
+
+          let query = db.collection("receipts");
+
+          if (!this.isCurrentUserOwner && !this.isCurrentUserAdmin) {
+              query = query.where('seller', '==', this.currentUsername);
+          } else if (selectedSeller) {
+              query = query.where('seller', '==', selectedSeller);
+          }
+
+          if (startDate) query = query.where('createdAt', '>=', startDate);
+          if (endDate) query = query.where('createdAt', '<=', endDate);
+          query = query.orderBy('createdAt', 'desc');
+          if (lastDoc) query = query.startAfter(lastDoc);
+          query = query.limit(this.historyPageSize + 1);
+
+          let querySnapshot = await query.get();
+          let docs = querySnapshot.docs;
+
+          this.historyHasNextPage = docs.length > this.historyPageSize;
+          if (this.historyHasNextPage) docs.pop();
+
+          const lastVisibleDoc = docs[docs.length - 1];
+          if (direction === 'next' && lastVisibleDoc) {
+              this.historyPageCursors[pageToLoad] = lastVisibleDoc;
+          }
+          this.historyCurrentPage = pageToLoad;
+
+          if (searchTerm) {
+              docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
+          }
+
+          if (docs.length === 0 && this.historyCurrentPage === 0) {
+              dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
+              return;
+          }
+
+          this.renderAllSalesView(docs);
+
+          dom.historyPaginationControls.classList.remove('hidden');
+          dom.pageNumberDisplay.textContent = `Página ${this.historyCurrentPage + 1}`;
+          dom.btnPrevPage.disabled = this.historyCurrentPage === 0;
+          dom.btnNextPage.disabled = !this.historyHasNextPage;
+
+      } catch (error) {
+          console.error("Erro ao buscar histórico: ", error);
+          if (error.code === 'failed-precondition') {
+              dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro que você está tentando usar precisa de um índice no banco de dados. Por favor, abra o console do seu navegador (F12), encontre a mensagem de erro em vermelho do Firebase e clique no link fornecido para criar o índice automaticamente. A criação pode levar alguns minutos.</p>`;
+              console.error("MENSAGEM DO FIREBASE (copie o link abaixo e cole no navegador para criar o índice): ", error.message);
+          } else {
+              dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
+          }
+      }
+    },
+    
+    async renderTeamView(searchTerm, startDate, endDate, selectedSeller) {
+        dom.historyTableContainer.innerHTML = `<p>Carregando vendas da equipe...</p>`;
         dom.historyPaginationControls.classList.add('hidden');
 
-        if (direction === 'first') {
-            this.historyPageCursors = [null];
-            this.historyCurrentPage = 0;
-        }
-
-        let pageToLoad = this.historyCurrentPage;
-        if (direction === 'next') {
-            pageToLoad++;
-        } else if (direction === 'prev' && pageToLoad > 0) {
-            pageToLoad--;
-        }
-
-        const lastDoc = this.historyPageCursors[pageToLoad];
-        const viewMode = document.querySelector('input[name="history-view-mode"]:checked').value;
-        const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
-        const selectedSeller = dom.historySellerFilter.value;
-
-        let startDate = null;
-        if (dom.historyDateStart.value) {
-            const parts = dom.historyDateStart.value.split('-');
-            startDate = new Date(parts[0], parts[1] - 1, parts[2]);
-        }
-        let endDate = null;
-        if (dom.historyDateEnd.value) {
-            const parts = dom.historyDateEnd.value.split('-');
-            endDate = new Date(parts[0], parts[1] - 1, parts[2]);
-            endDate.setHours(23, 59, 59, 999);
-        }
-
         try {
-            if (viewMode === 'summary') {
-                await this.renderSummaryView(searchTerm, startDate, endDate, selectedSeller);
+            const teamUsernames = [this.currentUsername];
+
+            const listMySubResellersFunc = functions.httpsCallable('listMySubResellers');
+            const result = await listMySubResellersFunc();
+            if (result.data && result.data.length > 0) {
+                teamUsernames.push(...result.data.map(sub => sub.username));
+            }
+            
+            if (teamUsernames.length === 0) {
+                dom.historyTableContainer.innerHTML = `<p>Nenhum vendedor na sua equipe.</p>`;
                 return;
             }
-
-            let query = db.collection("receipts");
-
-            if (!this.isCurrentUserAdmin) {
-                query = query.where('seller', '==', this.currentUsername);
-            } else if (selectedSeller) {
-                query = query.where('seller', '==', selectedSeller);
+            
+            let finalTeamFilter = teamUsernames;
+            if (selectedSeller && teamUsernames.includes(selectedSeller)) {
+                finalTeamFilter = [selectedSeller];
             }
+            
+            let query = db.collection("receipts").where('seller', 'in', finalTeamFilter);
 
             if (startDate) query = query.where('createdAt', '>=', startDate);
             if (endDate) query = query.where('createdAt', '<=', endDate);
+            
             query = query.orderBy('createdAt', 'desc');
-            if (lastDoc) query = query.startAfter(lastDoc);
-            query = query.limit(this.historyPageSize + 1);
 
-            let querySnapshot = await query.get();
+            const querySnapshot = await query.get();
             let docs = querySnapshot.docs;
-
-            this.historyHasNextPage = docs.length > this.historyPageSize;
-            if (this.historyHasNextPage) docs.pop();
-
-            const lastVisibleDoc = docs[docs.length - 1];
-            if (direction === 'next' && lastVisibleDoc) {
-                this.historyPageCursors[pageToLoad] = lastVisibleDoc;
-            }
-            this.historyCurrentPage = pageToLoad;
-
+            
             if (searchTerm) {
                 docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
             }
-
-            if (docs.length === 0 && this.historyCurrentPage === 0) {
-                dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
-                return;
-            }
-
             this.renderAllSalesView(docs);
 
-            dom.historyPaginationControls.classList.remove('hidden');
-            dom.pageNumberDisplay.textContent = `Página ${this.historyCurrentPage + 1}`;
-            dom.btnPrevPage.disabled = this.historyCurrentPage === 0;
-            dom.btnNextPage.disabled = !this.historyHasNextPage;
-
         } catch (error) {
-            console.error("Erro ao buscar histórico: ", error);
-            if (error.code === 'failed-precondition') {
-                dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro que você está tentando usar precisa de um índice no banco de dados. Por favor, abra o console do seu navegador (F12), encontre a mensagem de erro em vermelho do Firebase e clique no link fornecido para criar o índice automaticamente. A criação pode levar alguns minutos.</p>`;
-                console.error("MENSAGEM DO FIREBASE (copie o link abaixo e cole no navegador para criar o índice): ", error.message);
-            } else {
-                dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
-            }
+            console.error("Erro ao carregar vendas da equipe:", error);
+            dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">Erro ao carregar vendas da equipe: ${error.message}</p>`;
         }
     },
 
     renderAllSalesView(docs) {
         const t = TRANSLATIONS[currentLang];
         let tableHTML = `<table><thead><tr><th>${t.historyCustomer}</th>`;
-        if (this.isCurrentUserAdmin) {
+        if (this.isCurrentUserOwner || this.isCurrentUserAdmin || document.querySelector('input[name="history-view-mode"]:checked').value === 'team') {
           tableHTML += `<th>${t.historySeller}</th>`;
         }
         tableHTML += `<th>${t.historyTotal}</th><th>${t.historyDate}</th><th>Ações</th></tr></thead><tbody>`;
 
         docs.forEach(doc => {
             const data = doc.data();
-            tableHTML += `<tr><td>${data.customerName || 'N/A'}</td>`;
-            if (this.isCurrentUserAdmin) {
-              tableHTML += `<td>${(data.seller || 'N/A').split('@')[0]}</td>`;
+            tableHTML += `<tr data-id="${doc.id}">
+                            <td data-label="${t.historyCustomer}">${data.customerName || 'N/A'}</td>`;
+            if (this.isCurrentUserOwner || this.isCurrentUserAdmin || document.querySelector('input[name="history-view-mode"]:checked').value === 'team') {
+              tableHTML += `<td data-label="${t.historySeller}">${(data.seller || 'N/A').split('@')[0]}</td>`;
             }
             tableHTML += `
-                                <td>${this.formatCurrency(data.grandTotal || 0)}</td>
-                                <td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td>
-                                <td style="display: flex; gap: 8px; justify-content: center;">
+                                <td data-label="${t.historyTotal}">${this.formatCurrency(data.grandTotal || 0)}</td>
+                                <td data-label="${t.historyDate}">${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td>
+                                <td data-label="Ações" style="display: flex; gap: 8px; justify-content: center;">
                                     <button class="btn-view-receipt" data-id="${doc.id}" title="Ver Recibo">
                                         <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-receipt"></use></svg>
                                     </button>`;
-            if (this.isCurrentUserAdmin) {
+            if (this.isCurrentUserOwner) {
                 tableHTML += `
                                     <button class="delete-history-btn" data-id="${doc.id}" title="Excluir">
                                         <svg class="icon" style="margin-right:0;"><use xlink:href="#icon-reset"></use></svg>
@@ -1738,111 +1925,133 @@
     },
 
     async renderSummaryView(searchTerm, startDate, endDate, selectedSeller) {
-        let query = db.collection("receipts");
+      let query = db.collection("receipts");
 
-        if (!this.isCurrentUserAdmin) {
-            query = query.where('seller', '==', this.currentUsername);
-        } else if (selectedSeller) {
-            query = query.where('seller', '==', selectedSeller);
-        }
+      if (!this.isCurrentUserOwner && !this.isCurrentUserAdmin) {
+          query = query.where('seller', '==', this.currentUsername);
+      } else if (selectedSeller) {
+          query = query.where('seller', '==', selectedSeller);
+      }
 
-        if (startDate) query = query.where('createdAt', '>=', startDate);
-        if (endDate) query = query.where('createdAt', '<=', endDate);
+      if (startDate) query = query.where('createdAt', '>=', startDate);
+      if (endDate) query = query.where('createdAt', '<=', endDate);
 
-        const allDocsSnapshot = await query.get();
-        let docs = allDocsSnapshot.docs;
+      const allDocsSnapshot = await query.get();
+      let docs = allDocsSnapshot.docs;
 
-        if (searchTerm) {
-            docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
-        }
-        if (docs.length === 0) {
-            dom.historyTableContainer.innerHTML = `<p>${TRANSLATIONS[currentLang].historyNoRecords}</p>`;
-            return;
-        }
-        const customerSummary = {};
-        docs.forEach(doc => {
-            const data = doc.data();
-            const customerName = data.customerName || 'Cliente Não Identificado';
-            if (!customerSummary[customerName]) {
-                customerSummary[customerName] = { totalSpent: 0, salesCount: 0, lastSaleDate: null };
-            }
-            customerSummary[customerName].totalSpent += data.grandTotal || 0;
-            customerSummary[customerName].salesCount++;
-            const saleDate = data.createdAt?.toDate;
-            if (saleDate && (!customerSummary[customerName].lastSaleDate || saleDate > customerSummary[customerName].lastSaleDate)) {
-                customerSummary[customerName].lastSaleDate = saleDate;
-            }
-        });
-        const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
-        let tableHTML = `<table><thead><tr><th>Cliente</th><th>Total Gasto</th><th>Nº de Compras</th><th>Última Compra</th></tr></thead><tbody>`;
-        summaryArray.forEach(summary => {
-            tableHTML += `<tr><td>${summary.name}</td><td>${this.formatCurrency(summary.totalSpent)}</td><td>${summary.salesCount}</td><td>${summary.lastSaleDate ? summary.lastSaleDate.toLocaleDateString(currentLang) : 'N/A'}</td></tr>`;
-        });
-        dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
+      if (searchTerm) {
+          docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
+      }
+      if (docs.length === 0) {
+          dom.historyTableContainer.innerHTML = `<p>${TRANSLATIONS[currentLang].historyNoRecords}</p>`;
+          return;
+      }
+      const customerSummary = {};
+      docs.forEach(doc => {
+          const data = doc.data();
+          const customerName = data.customerName || 'Cliente Não Identificado';
+          if (!customerSummary[customerName]) {
+              customerSummary[customerName] = { totalSpent: 0, salesCount: 0, lastSaleDate: null };
+          }
+          customerSummary[customerName].totalSpent += data.grandTotal || 0;
+          customerSummary[customerName].salesCount++;
+          const saleDate = data.createdAt?.toDate(); 
+          if (saleDate && (!customerSummary[customerName].lastSaleDate || saleDate > customerSummary[customerName].lastSaleDate)) {
+              customerSummary[customerName].lastSaleDate = saleDate;
+          }
+      });
+      const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
+      let tableHTML = `<table><thead><tr><th>Cliente</th><th>Total Gasto</th><th>Nº de Compras</th><th>Última Compra</th></tr></thead><tbody>`;
+      summaryArray.forEach(summary => {
+          tableHTML += `<tr><td data-label="Cliente">${summary.name}</td><td data-label="Total Gasto">${this.formatCurrency(summary.totalSpent)}</td><td data-label="Nº de Compras">${summary.salesCount}</td><td data-label="Última Compra">${summary.lastSaleDate ? summary.lastSaleDate.toLocaleDateString(currentLang) : 'N/A'}</td></tr>`;
+      });
+      dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
     },
+    
+    async populateHistorySellerFilter() {
+        if (!this.isCurrentUserOwner && !this.isCurrentUserAdmin) return;
+        dom.historySellerFilterContainer.classList.remove('hidden');
+        try {
+            const listAllUsers = functions.httpsCallable('listAllUsers');
+            const result = await listAllUsers();
+            const users = result.data;
+            dom.historySellerFilter.innerHTML = '<option value="">Todos os Vendedores</option>';
+            users.forEach(user => {
+                const username = user.email.split('@')[0];
+                const option = document.createElement('option');
+                option.value = username;
+                option.textContent = username;
+                dom.historySellerFilter.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Erro ao carregar lista de vendedores para filtro:", error);
+            dom.historySellerFilter.innerHTML = `<option value="">Erro ao carregar</option>`;
+        }
+    },
+
+    // A partir daqui, as funções restantes (dashboard, calculadora, etc.) não precisam de alteração.
+    // O código abaixo é o mesmo da versão anterior.
 
     async loadDashboardData() {
-      if (this.salesChartInstance) this.salesChartInstance.destroy();
-      if (this.tokensChartInstance) this.tokensChartInstance.destroy();
-      try {
-          let query = db.collection("receipts");
+        if (this.salesChartInstance) this.salesChartInstance.destroy();
+        if (this.tokensChartInstance) this.tokensChartInstance.destroy();
+        try {
+            let query = db.collection("receipts");
 
-          if (!this.isCurrentUserAdmin) {
-              query = query.where('seller', '==', this.currentUsername);
-          }
+            if (!this.isCurrentUserOwner && !this.isCurrentUserAdmin) {
+                query = query.where('seller', '==', this.currentUsername);
+            }
 
-          const querySnapshot = await query.get();
-          const receipts = querySnapshot.docs.map(doc => doc.data());
-          const salesByDay = {};
-          receipts.forEach(receipt => {
-              if (receipt.createdAt) {
-                  const date = receipt.createdAt.toDate();
-                  const dateString = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toLocaleDateString(currentLang, { year: '2-digit', month: '2-digit', day: '2-digit' });
-                  salesByDay[dateString] = (salesByDay[dateString] || 0) + (receipt.grandTotal || 0);
-              }
-          });
-          const sortedSales = Object.entries(salesByDay).sort((a, b) => {
-              const dateA = new Date(a[0].split('/').reverse().join('-'));
-              const dateB = new Date(b[0].split('/').reverse().join('-'));
-              return dateA - dateB;
-          });
-          const salesLabels = sortedSales.map(entry => entry[0]);
-          const salesData = sortedSales.map(entry => entry[1]);
-          this.renderSalesChart(salesLabels, salesData);
-          const tokenCounts = {};
-          receipts.forEach(receipt => {
-              if (receipt.itemsData && typeof receipt.itemsData === 'object') {
-                  for (const tokenKey in receipt.itemsData) {
-                      tokenCounts[tokenKey] = (tokenCounts[tokenKey] || 0) + receipt.itemsData[tokenKey].qty;
-                  }
-              }
-          });
-          const tokenLabels = Object.keys(tokenCounts).map(key => ITENS_CATALOGO[key]?.[`name_${currentLang}`] || key);
-          const tokenData = Object.values(tokenCounts);
-          this.renderTokensChart(tokenLabels, tokenData);
-      } catch (error) {
-          console.error("Erro ao carregar dados do dashboard:", error);
-      }
+            const querySnapshot = await query.get();
+            const receipts = querySnapshot.docs.map(doc => doc.data());
+            const salesByDay = {};
+            receipts.forEach(receipt => {
+                if (receipt.createdAt) {
+                    const date = receipt.createdAt.toDate();
+                    const dateString = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toLocaleDateString(currentLang, { year: '2-digit', month: '2-digit', day: '2-digit' });
+                    salesByDay[dateString] = (salesByDay[dateString] || 0) + (receipt.grandTotal || 0);
+                }
+            });
+            const sortedSales = Object.entries(salesByDay).sort((a, b) => {
+                const dateA = new Date(a[0].split('/').reverse().join('-'));
+                const dateB = new Date(b[0].split('/').reverse().join('-'));
+                return dateA - dateB;
+            });
+            const salesLabels = sortedSales.map(entry => entry[0]);
+            const salesData = sortedSales.map(entry => entry[1]);
+            this.renderSalesChart(salesLabels, salesData);
+            const tokenCounts = {};
+            receipts.forEach(receipt => {
+                if (receipt.itemsData && typeof receipt.itemsData === 'object') {
+                    for (const tokenKey in receipt.itemsData) {
+                        tokenCounts[tokenKey] = (tokenCounts[tokenKey] || 0) + receipt.itemsData[tokenKey].qty;
+                    }
+                }
+            });
+            const tokenLabels = Object.keys(tokenCounts).map(key => ITENS_CATALOGO[key]?.[`name_${currentLang}`] || key);
+            const tokenData = Object.values(tokenCounts);
+            this.renderTokensChart(tokenLabels, tokenData);
+        } catch (error) {
+            console.error("Erro ao carregar dados do dashboard:", error);
+        }
     },
 
-  hexToRgb(hex, asString = false) {
-      let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      if (!result) return asString ? '0,0,0' : 'rgb(0,0,0)';
-      const rgb = {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16)
-      };
-      return asString ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-  },
+    hexToRgb(hex, asString = false) {
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        if (!result) return asString ? '0,0,0' : 'rgb(0,0,0)';
+        const rgb = {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        };
+        return asString ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+    },
 
     renderSalesChart(labels, data) {
         if (this.salesChartInstance) this.salesChartInstance.destroy();
-
         const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim();
         const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
         const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
-
         this.salesChartInstance = new Chart(dom.salesOverTimeChart, {
             type: 'line',
             data: {
@@ -1883,7 +2092,6 @@
 
     renderTokensChart(labels, data) {
         if (this.tokensChartInstance) this.tokensChartInstance.destroy();
-
         const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
         const colorSet = {
             green: ['#34d399', '#10b981', '#059669', '#047857'],
@@ -1892,7 +2100,6 @@
             yellow: ['#facc15', '#f59e0b', '#d97706', '#b45309']
         };
         const currentAccent = dom.html.dataset.accentColor || 'green';
-
         this.tokensChartInstance = new Chart(dom.tokensSoldChart, {
             type: 'doughnut',
             data: {
@@ -1915,51 +2122,48 @@
     },
     
     setLanguage(lang, shouldSave = true, skipReload = false) {
-        currentLang = lang;
-        localStorage.setItem('language', lang);
-        document.querySelectorAll('[data-translate-key]').forEach(el => {
-            const key = el.dataset.translateKey;
-            const translation = TRANSLATIONS[lang][key];
-            if (translation && typeof translation !== 'function') {
-                el.innerText = translation;
-            }
-        });
-        document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
-            const key = el.dataset.translateKeyPlaceholder;
-            if (TRANSLATIONS[lang][key]) {
-                el.placeholder = TRANSLATIONS[lang][key];
-            }
-        });
-        document.title = TRANSLATIONS[lang].pageTitle;
-        dom.langBr.classList.toggle('active', lang === 'br');
-        dom.langEn.classList.toggle('active', lang === 'en');
-
-        if (!skipReload) {
-            this.loadTable();
-            this.buildTokenFilters(dom.tokenFiltersContainer);
-            this.updateUI();
-        }
-
-        if (shouldSave) {
-            this.triggerSavePreferences();
-        }
+      currentLang = lang;
+      if (shouldSave) localStorage.setItem('language', lang);
+      document.querySelectorAll('[data-translate-key]').forEach(el => {
+          const key = el.dataset.translateKey;
+          const translation = TRANSLATIONS[lang][key];
+          if (translation && typeof translation !== 'function') {
+              el.innerText = translation;
+          }
+      });
+      document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
+          const key = el.dataset.translateKeyPlaceholder;
+          if (TRANSLATIONS[lang][key]) {
+              el.placeholder = TRANSLATIONS[lang][key];
+          }
+      });
+      document.title = TRANSLATIONS[lang].pageTitle;
+      dom.langBr.classList.toggle('active', lang === 'br');
+      dom.langEn.classList.toggle('active', lang === 'en');
+      if (!skipReload) {
+          this.loadTable();
+          this.buildTokenFilters(dom.tokenFiltersContainer);
+          this.updateUI();
+      }
+      if (shouldSave) {
+          this.saveUiPreferences();
+      }
     },
 
     toggleMode(mode) {
-      dom.distributorSection.style.display = mode === 'mush' ? 'flex' : 'none';
-      const isMushMode = mode === 'mush';
-      dom.tabelaItensBody.querySelectorAll('input').forEach(input => {
-          if (input.id.startsWith('qtd-')) {
-              input.disabled = isMushMode;
-          }
-      });
-      document.getElementById('btnCalcular').style.display = isMushMode ? 'none' : 'inline-block';
-      if (isMushMode) this.buildTokenFilters(dom.tokenFiltersContainer);
+        dom.distributorSection.style.display = mode === 'mush' ? 'flex' : 'none';
+        const isMushMode = mode === 'mush';
+        dom.tabelaItensBody.querySelectorAll('input').forEach(input => {
+            if (input.id.startsWith('qtd-')) {
+                input.disabled = isMushMode;
+            }
+        });
+        document.getElementById('btnCalcular').style.display = isMushMode ? 'none' : 'inline-block';
+        if (isMushMode) this.buildTokenFilters(dom.tokenFiltersContainer);
     },
 
     async toggleResellerMode(event) {
         const isResellerMode = event.target.checked;
-
         if (isResellerMode) {
             dom.customerNameContainer.classList.add('hidden');
             dom.resellerCustomerSelectionContainer.classList.remove('hidden');
@@ -1971,7 +2175,6 @@
             dom.resellerLimitStatus.classList.add('hidden');
             clearInterval(this.resellerLimitInterval);
         }
-
         if (isResellerMode) {
             for (const key in PRECOS_RESELLER) {
                 const priceInput = document.getElementById(`price-${key}`);
@@ -1994,26 +2197,23 @@
 
     setTheme(theme, shouldSave = true) {
         dom.html.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-      if(!document.getElementById('dashboard-view').classList.contains('hidden')) {
+        if(shouldSave) localStorage.setItem('theme', theme);
+        if(!document.getElementById('dashboard-view').classList.contains('hidden')) {
             this.loadDashboardData();
-      }
-        if (shouldSave) this.triggerSavePreferences();
+        }
+        if (shouldSave) this.saveUiPreferences();
     },
 
     setAccentColor(color, shouldSave = true) {
         dom.html.setAttribute('data-accent-color', color);
-        localStorage.setItem('accentColor', color);
-
+        if(shouldSave) localStorage.setItem('accentColor', color);
         document.querySelectorAll('.color-box').forEach(box => {
             box.classList.toggle('active', box.dataset.color === color);
         });
-
         if (!document.getElementById('dashboard-view').classList.contains('hidden')) {
             this.loadDashboardData();
         }
-
-        if (shouldSave) this.triggerSavePreferences();
+        if (shouldSave) this.saveUiPreferences();
     },
 
     buildTokenFilters(container) {
@@ -2042,28 +2242,23 @@
             clearInterval(this.resellerLimitInterval);
             return;
         }
-
         let customerName;
         if (dom.resellerCustomerSelect.value === 'manual') {
             customerName = dom.resellerCustomerManualInput.value.trim().toLowerCase();
         } else {
             customerName = dom.resellerCustomerSelect.value.trim().toLowerCase();
         }
-
         if (!customerName) {
             dom.resellerLimitStatus.classList.add('hidden');
             clearInterval(this.resellerLimitInterval);
             this.currentCustomerUsage = { revive: 0, max: 0 };
             return;
         }
-
         const dateStr = this.getFormattedDate();
         const docId = `${customerName}_${dateStr}`;
-
         try {
             const docRef = db.collection('resellerLimits').doc(docId);
             const docSnap = await docRef.get();
-
             if (docSnap.exists) {
                 const data = docSnap.data();
                 this.currentCustomerUsage.revive = data.reviveCount || 0;
@@ -2071,10 +2266,8 @@
             } else {
                 this.currentCustomerUsage = { revive: 0, max: 0 };
             }
-
             this.updateResellerLimitStatusUI();
             dom.resellerLimitStatus.classList.remove('hidden');
-
         } catch (error) {
             console.error("Erro ao verificar limite do revendedor:", error);
             this.currentCustomerUsage = { revive: 0, max: 0 };
@@ -2083,34 +2276,29 @@
     },
 
     updateResellerLimitStatusUI() {
-            clearInterval(this.resellerLimitInterval);
-
-            const updateTimer = () => {
-                const now = new Date();
-                const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-                const diff = endOfDay - now;
-
-                if (diff < 0) {
-                    this.checkResellerLimit();
-                    return;
-                }
-
-                const hours = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
-                const minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-                const seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
-                const timeString = `${hours}:${minutes}:${seconds}`;
-
-                const t = TRANSLATIONS[currentLang];
-                dom.resellerLimitStatus.innerHTML = t.resellerLimitStatus(
-                    this.currentCustomerUsage.revive,
-                    this.currentCustomerUsage.max,
-                    RESELLER_DAILY_LIMIT,
-                    timeString
-                );
-            };
-
-            updateTimer();
-            this.resellerLimitInterval = setInterval(updateTimer, 1000);
+        clearInterval(this.resellerLimitInterval);
+        const updateTimer = () => {
+            const now = new Date();
+            const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+            const diff = endOfDay - now;
+            if (diff < 0) {
+                this.checkResellerLimit();
+                return;
+            }
+            const hours = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
+            const minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+            const seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+            const timeString = `${hours}:${minutes}:${seconds}`;
+            const t = TRANSLATIONS[currentLang];
+            dom.resellerLimitStatus.innerHTML = t.resellerLimitStatus(
+                this.currentCustomerUsage.revive,
+                this.currentCustomerUsage.max,
+                RESELLER_DAILY_LIMIT,
+                timeString
+            );
+        };
+        updateTimer();
+        this.resellerLimitInterval = setInterval(updateTimer, 1000);
     },
 
     loadTable() {
@@ -2119,7 +2307,6 @@
         for (const key in ITENS_CATALOGO) {
             const item = ITENS_CATALOGO[key];
             const tr = document.createElement('tr');
-
             tr.innerHTML = `
                 <td data-label="${t.tableItem}">${item[`name_${currentLang}`]}</td>
                 <td data-label="${t.tablePrice}">
@@ -2134,13 +2321,11 @@
                 </td>
                 <td data-label="${t.tableTotal}">0,00</td>
             `;
-
             tr.querySelector(`td:nth-child(4)`).appendChild(this.createCoinIcon());
             dom.tabelaItensBody.appendChild(tr);
-
             tr.querySelector(`#qtd-${key}`).addEventListener('input', () => {
                 this.updateUI();
-                this.triggerSavePreferences();
+                this.triggerSaveCalculatorPreferences();
             });
             tr.querySelector(`#price-${key}`).addEventListener('change', (event) => this.handlePriceChange(event, key));
         }
@@ -2151,22 +2336,19 @@
         const input = event.target;
         let novoPreco = parseFloat(input.value);
         const precoMinimo = PRECOS_MINIMOS[key];
-
-        if (!this.isCurrentUserAdmin) {
+        if (!this.isCurrentUserOwner) {
             if (novoPreco < precoMinimo) {
                 alert(`O valor mínimo para este item é ${precoMinimo}.`);
                 novoPreco = precoMinimo;
                 input.value = novoPreco;
             }
         }
-
         if (novoPreco < 0) {
             novoPreco = 0;
             input.value = novoPreco;
         }
-
         this.updateUI();
-        this.triggerSavePreferences();
+        this.triggerSaveCalculatorPreferences();
     },
 
     formatCurrency(number) {
@@ -2184,40 +2366,29 @@
         const fatorDesconto = 1 - (descontoPercentual / 100);
         let totalFinal = 0;
         const itensCalculados = {};
-
         const isResellerMode = dom.resellerModeToggle.checked;
-
         let reviveLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive;
         let maxLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max;
-
         for (const key in ITENS_CATALOGO) {
             const precoBase = ITENS_CATALOGO[key].preco;
             const precoRevendedor = PRECOS_RESELLER[key];
-
             const quantidadeInput = document.getElementById(`qtd-${key}`);
             const quantidade = quantidadeInput ? parseInt(quantidadeInput.value) || 0 : 0;
             let subtotal = 0;
             let precoAplicado = precoBase;
-
             if (isResellerMode && (key === 'revive' || key === 'max')) {
                 const limitRemaining = (key === 'revive') ? reviveLimitRemaining : maxLimitRemaining;
-
                 const tokensDentroDoLimite = Math.max(0, Math.min(quantidade, limitRemaining));
                 const tokensForaDoLimite = Math.max(0, quantidade - tokensDentroDoLimite);
-
                 subtotal += tokensDentroDoLimite * precoRevendedor;
                 subtotal += tokensForaDoLimite * precoBase;
-
                 precoAplicado = precoRevendedor;
-
             } else {
                 const precoInput = document.getElementById(`price-${key}`);
                 precoAplicado = isResellerMode ? PRECOS_RESELLER[key] : (precoInput ? parseFloat(precoInput.value) || precoBase : precoBase);
                 subtotal = quantidade * (precoAplicado * fatorDesconto);
             }
-
             totalFinal += subtotal;
-
             itensCalculados[key] = {
                 quantidade,
                 precoAtual: precoAplicado,
@@ -2225,23 +2396,19 @@
                 subtotal
             };
         }
-
         return { totalFinal, descontoPercentual, itens: itensCalculados };
     },
 
     updateUI() {
         const calculo = this.calculateValues();
         if (!calculo) return;
-
         Array.from(dom.tabelaItensBody.rows).forEach((row, index) => {
             const key = Object.keys(ITENS_CATALOGO)[index];
             const itemCalculado = calculo.itens[key];
-
             const totalCell = row.cells[3];
             totalCell.innerHTML = `${this.formatCurrency(itemCalculado.subtotal)} `;
             totalCell.appendChild(this.createCoinIcon());
         });
-
         dom.totalGeralCell.innerHTML = `<b>${this.formatCurrency(calculo.totalFinal)}</b> `;
         dom.totalGeralCell.appendChild(this.createCoinIcon());
     },
@@ -2252,26 +2419,22 @@
         dom.resellerCustomerSelect.value = '';
         dom.resellerCustomerManualInput.value = '';
         dom.resellerCustomerManualInput.classList.add('hidden');
-
         if (clearDistributor) {
             dom.totalMushInput.value = '';
             dom.leftoverMushDiv.innerHTML = '';
             dom.leftoverDistributorSection.classList.add('hidden');
         }
-
         Object.keys(ITENS_CATALOGO).forEach(key => {
             const qtdInput = document.getElementById(`qtd-${key}`);
             if (qtdInput) qtdInput.value = 0;
-
             if (clearPrices && !dom.resellerModeToggle.checked) {
                 const priceInput = document.getElementById(`price-${key}`);
                 if (priceInput) priceInput.value = ITENS_CATALOGO[key].preco;
             }
         });
-
         this.checkResellerLimit();
         this.updateUI();
-        this.triggerSavePreferences();
+        this.triggerSaveCalculatorPreferences();
     },
 
     distributeMush() {
@@ -2280,13 +2443,11 @@
         if (totalMush <= 0) { this.updateUI(); return; }
         const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
         if (selectedTokenKeys.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
-
         let tokens = selectedTokenKeys.map(key => ({
             key,
             preco: parseFloat(document.getElementById(`price-${key}`).value) || ITENS_CATALOGO[key].preco,
             quantidade: 0
         }));
-
         if (tokens.length === 2 && document.querySelector('input[name="two-token-strategy"]:checked').value === 'split') {
             const mushPerToken = totalMush / 2;
             tokens.forEach(token => {
@@ -2298,37 +2459,31 @@
             this.runFairDistribution(tokens, totalMush);
         }
         this.updateDistributionUI(tokens);
-        this.triggerSavePreferences();
+        this.triggerSaveCalculatorPreferences();
     },
 
     distributeLeftoverMush() {
         const selectedTokenKeysForLeftover = Array.from(dom.leftoverTokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
         if (selectedTokenKeysForLeftover.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
-
         let tokensForDistribution = selectedTokenKeysForLeftover.map(key => ({
             key,
             preco: parseFloat(document.getElementById(`price-${key}`).value) || ITENS_CATALOGO[key].preco,
             quantidade: 0
         }));
-
         this.runFairDistribution(tokensForDistribution, this.currentLeftover);
-
         tokensForDistribution.forEach(token => {
             const qtyInput = document.getElementById(`qtd-${token.key}`);
             const currentQty = parseInt(qtyInput.value) || 0;
             qtyInput.value = currentQty + token.quantidade;
         });
-
         dom.leftoverDistributorSection.classList.add('hidden');
-
         const newCalculo = this.calculateValues();
         const totalMushInputted = parseFloat(dom.totalMushInput.value) || 0;
         this.currentLeftover = totalMushInputted - newCalculo.totalFinal;
         dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `;
         dom.leftoverMushDiv.appendChild(this.createCoinIcon());
-
         this.updateUI();
-        this.triggerSavePreferences();
+        this.triggerSaveCalculatorPreferences();
     },
 
     runFairDistribution(tokens, totalMush) {
@@ -2381,7 +2536,6 @@
         const t = TRANSLATIONS[currentLang];
         let subtotalBruto = 0;
         let itemsHtml = '';
-
         for (const key in receiptData.itemsData) {
             const item = receiptData.itemsData[key];
             const catalogoItem = ITENS_CATALOGO[key];
@@ -2391,10 +2545,8 @@
                 subtotalBruto += subtotalItem;
             }
         }
-
         const valorDesconto = subtotalBruto - receiptData.grandTotal;
         const dataVenda = receiptData.createdAt?.toDate ? receiptData.createdAt.toDate().toLocaleString(currentLang) : new Date().toLocaleString(currentLang);
-
         let receiptHtml = `
             <h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2>
             <p style="text-align: center; color: var(--text-secondary); margin-bottom: 10px;">${receiptData.customerName}</p>
@@ -2411,130 +2563,81 @@
     },
 
     async generateImage() {
-      const isResellerMode = dom.resellerModeToggle.checked;
-      if (isResellerMode) {
-          const reviveQty = parseInt(document.getElementById('qtd-revive').value) || 0;
-          const maxQty = parseInt(document.getElementById('qtd-max').value) || 0;
-          const reviveLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive;
-          const maxLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max;
-
-          if (reviveQty > reviveLimitRemaining || maxQty > maxLimitRemaining) {
-              alert(TRANSLATIONS[currentLang].resellerLimitExceededWarning);
-          }
-      }
-
-      const calculo = this.calculateValues();
-      if (!calculo) return;
-      const t = TRANSLATIONS[currentLang];
-      let temItens = Object.values(calculo.itens).some(item => item.quantidade > 0);
-      if (!temItens) { alert(t.alertNoItems); return; }
-
-      let customerName;
-      if (isResellerMode) {
-          if (dom.resellerCustomerSelect.value === 'manual') {
-              customerName = dom.resellerCustomerManualInput.value.trim() || 'Revendedor_Nao_Identificado';
-          } else {
-              customerName = dom.resellerCustomerSelect.value || 'Revendedor_Nao_Identificado';
-          }
-      } else {
-          customerName = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
-      }
-
-      const itemsToSave = {};
-      for (const key in calculo.itens) {
-          if (calculo.itens[key].quantidade > 0) {
-              itemsToSave[key] = {
-                  qty: calculo.itens[key].quantidade,
-                  price: calculo.itens[key].precoAtual
-              };
-          }
-      }
-      const receiptData = {
-          customerName: customerName,
-          discountApplied: calculo.descontoPercentual,
-          grandTotal: calculo.totalFinal,
-          itemsData: itemsToSave,
-          seller: this.currentUsername,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-
-      try {
-          await db.collection("receipts").add(receiptData);
-
-          if (isResellerMode && customerName !== 'Revendedor_Nao_Identificado') {
-              const reviveComprados = calculo.itens.revive?.quantidade || 0;
-              const maxComprados = calculo.itens.max?.quantidade || 0;
-
-              if (reviveComprados > 0 || maxComprados > 0) {
-                  const customerNameForDb = customerName.toLowerCase();
-                  const dateStr = this.getFormattedDate();
-                  const docId = `${customerNameForDb}_${dateStr}`;
-                  const docRef = db.collection('resellerLimits').doc(docId);
-
-                  const updateData = {
-                      customerName: customerNameForDb,
-                      date: dateStr,
-                      lastUpdatedBy: auth.currentUser.email
-                  };
-                  if (reviveComprados > 0) {
-                      updateData.reviveCount = firebase.firestore.FieldValue.increment(reviveComprados);
-                  }
-                  if (maxComprados > 0) {
-                      updateData.maxCount = firebase.firestore.FieldValue.increment(maxComprados);
-                  }
-
-                  await docRef.set(updateData, { merge: true });
-
-                  this.currentCustomerUsage.revive += reviveComprados;
-                  this.currentCustomerUsage.max += maxComprados;
-                  this.updateResellerLimitStatusUI();
-              }
-          }
-      } catch(e) {
-          console.error("Erro ao salvar no Firestore: ", e);
-          alert("Houve um erro ao salvar o recibo ou atualizar o limite no banco de dados.");
-          return;
-      }
-
-      const receiptHtml = this.buildReceiptHtml(receiptData);
-
-      const resultadoDiv = document.getElementById('resultado');
-      resultadoDiv.innerHTML = receiptHtml;
-      resultadoDiv.style.display = 'block';
-      resultadoDiv.style.position = 'fixed';
-      resultadoDiv.style.top = '50%';
-      resultadoDiv.style.left = '50%';
-      resultadoDiv.style.transform = 'translate(-50%, -50%)';
-      resultadoDiv.style.zIndex = '1000';
-      setTimeout(() => {
-          html2canvas(resultadoDiv, { backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), scale: 2 }).then(canvas => {
-              const link = document.createElement('a');
-              const nomeSanitizado = customerName.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
-              link.download = `${nomeSanitizado}_recibo.png`;
-              link.href = canvas.toDataURL('image/png');
-              link.click();
-              resultadoDiv.style.display = 'none';
-              resultadoDiv.style.top = '-100%';
-              resultadoDiv.style.zIndex = '-1';
-          });
-      }, 300);
-    },
-
-    async regenerateReceipt(docId) {
-      if (!docId) return;
-
-      try {
-        const docRef = db.collection('receipts').doc(docId);
-        const docSnap = await docRef.get();
-
-        if (!docSnap.exists) {
-          alert("Erro: Recibo não encontrado no banco de dados.");
-          return;
+        const isResellerMode = dom.resellerModeToggle.checked;
+        if (isResellerMode) {
+            const reviveQty = parseInt(document.getElementById('qtd-revive').value) || 0;
+            const maxQty = parseInt(document.getElementById('qtd-max').value) || 0;
+            const reviveLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive;
+            const maxLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max;
+            if (reviveQty > reviveLimitRemaining || maxQty > maxLimitRemaining) {
+                alert(TRANSLATIONS[currentLang].resellerLimitExceededWarning);
+            }
         }
-
-        const receiptData = docSnap.data();
+        const calculo = this.calculateValues();
+        if (!calculo) return;
+        const t = TRANSLATIONS[currentLang];
+        let temItens = Object.values(calculo.itens).some(item => item.quantidade > 0);
+        if (!temItens) { alert(t.alertNoItems); return; }
+        let customerName;
+        if (isResellerMode) {
+            if (dom.resellerCustomerSelect.value === 'manual') {
+                customerName = dom.resellerCustomerManualInput.value.trim() || 'Revendedor_Nao_Identificado';
+            } else {
+                customerName = dom.resellerCustomerSelect.value || 'Revendedor_Nao_Identificado';
+            }
+        } else {
+            customerName = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+        }
+        const itemsToSave = {};
+        for (const key in calculo.itens) {
+            if (calculo.itens[key].quantidade > 0) {
+                itemsToSave[key] = {
+                    qty: calculo.itens[key].quantidade,
+                    price: calculo.itens[key].precoAtual
+                };
+            }
+        }
+        const receiptData = {
+            customerName: customerName,
+            discountApplied: calculo.descontoPercentual,
+            grandTotal: calculo.totalFinal,
+            itemsData: itemsToSave,
+            seller: this.currentUsername,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        try {
+            await db.collection("receipts").add(receiptData);
+            if (isResellerMode && customerName !== 'Revendedor_Nao_Identificado') {
+                const reviveComprados = calculo.itens.revive?.quantidade || 0;
+                const maxComprados = calculo.itens.max?.quantidade || 0;
+                if (reviveComprados > 0 || maxComprados > 0) {
+                    const customerNameForDb = customerName.toLowerCase();
+                    const dateStr = this.getFormattedDate();
+                    const docId = `${customerNameForDb}_${dateStr}`;
+                    const docRef = db.collection('resellerLimits').doc(docId);
+                    const updateData = {
+                        customerName: customerNameForDb,
+                        date: dateStr,
+                        lastUpdatedBy: auth.currentUser.email
+                    };
+                    if (reviveComprados > 0) {
+                        updateData.reviveCount = firebase.firestore.FieldValue.increment(reviveComprados);
+                    }
+                    if (maxComprados > 0) {
+                        updateData.maxCount = firebase.firestore.FieldValue.increment(maxComprados);
+                    }
+                    await docRef.set(updateData, { merge: true });
+                    this.currentCustomerUsage.revive += reviveComprados;
+                    this.currentCustomerUsage.max += maxComprados;
+                    this.updateResellerLimitStatusUI();
+                }
+            }
+        } catch(e) {
+            console.error("Erro ao salvar no Firestore: ", e);
+            alert("Houve um erro ao salvar o recibo ou atualizar o limite no banco de dados.");
+            return;
+        }
         const receiptHtml = this.buildReceiptHtml(receiptData);
-        
         const resultadoDiv = document.getElementById('resultado');
         resultadoDiv.innerHTML = receiptHtml;
         resultadoDiv.style.display = 'block';
@@ -2543,14 +2646,15 @@
         resultadoDiv.style.left = '50%';
         resultadoDiv.style.transform = 'translate(-50%, -50%)';
         resultadoDiv.style.zIndex = '1000';
-
         setTimeout(() => {
-            html2canvas(resultadoDiv, { backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), scale: 2 }).then(canvas => {
+            html2canvas(resultadoDiv, { 
+                backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), 
+                scale: 2,
+                willReadFrequently: true 
+            }).then(canvas => {
                 const link = document.createElement('a');
-                const customerName = receiptData.customerName || 'recibo';
-                const date = receiptData.createdAt.toDate().toISOString().split('T')[0];
                 const nomeSanitizado = customerName.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
-                link.download = `${nomeSanitizado}_recibo_${date}.png`;
+                link.download = `${nomeSanitizado}_recibo.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
                 resultadoDiv.style.display = 'none';
@@ -2558,121 +2662,147 @@
                 resultadoDiv.style.zIndex = '-1';
             });
         }, 300);
+      },
 
-      } catch (error) {
-        console.error("Erro ao regenerar recibo:", error);
-        alert("Ocorreu um erro ao buscar os dados do recibo.");
-      }
-    },
-
-    async openTxtExportModal() {
-      dom.customerListForExport.innerHTML = `<p>${TRANSLATIONS[currentLang].historyLoading}</p>`;
-      dom.txtExportModal.classList.remove('hidden');
-
-      const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
-      let startDate = null;
-      if (dom.historyDateStart.value) {
-          const parts = dom.historyDateStart.value.split('-');
-          startDate = new Date(parts[0], parts[1] - 1, parts[2]);
-      }
-      let endDate = null;
-      if (dom.historyDateEnd.value) {
-          const parts = dom.historyDateEnd.value.split('-');
-          endDate = new Date(parts[0], parts[1] - 1, parts[2]);
-          endDate.setHours(23, 59, 59, 999);
-      }
-      
-      let query = db.collection("receipts");
-      if (startDate) query = query.where('createdAt', '>=', startDate);
-      if (endDate) query = query.where('createdAt', '<=', endDate);
-      
-      try {
-        const allDocsSnapshot = await query.get();
-        let docs = allDocsSnapshot.docs;
-        
-        if (searchTerm) {
-            docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
-        }
-        if (docs.length === 0) {
-            dom.customerListForExport.innerHTML = `<p>${TRANSLATIONS[currentLang].historyNoRecords}</p>`;
-            return;
-        }
-        const customerSummary = {};
-        docs.forEach(doc => {
-            const data = doc.data();
-            const customerName = data.customerName || 'Cliente Não Identificado';
-            if (!customerSummary[customerName]) {
-                customerSummary[customerName] = { totalSpent: 0 };
+      async regenerateReceipt(docId) {
+        if (!docId) return;
+        try {
+            const docRef = db.collection('receipts').doc(docId);
+            const docSnap = await docRef.get();
+            if (!docSnap.exists) {
+              alert("Erro: Recibo não encontrado no banco de dados.");
+              return;
             }
-            customerSummary[customerName].totalSpent += data.grandTotal || 0;
+            const receiptData = docSnap.data();
+            const receiptHtml = this.buildReceiptHtml(receiptData);
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = receiptHtml;
+            resultadoDiv.style.display = 'block';
+            resultadoDiv.style.position = 'fixed';
+            resultadoDiv.style.top = '50%';
+            resultadoDiv.style.left = '50%';
+            resultadoDiv.style.transform = 'translate(-50%, -50%)';
+            resultadoDiv.style.zIndex = '1000';
+            setTimeout(() => {
+                html2canvas(resultadoDiv, { 
+                    backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), 
+                    scale: 2,
+                    willReadFrequently: true
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    const customerName = receiptData.customerName || 'recibo';
+                    const date = receiptData.createdAt.toDate().toISOString().split('T')[0];
+                    const nomeSanitizado = customerName.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+                    link.download = `${nomeSanitizado}_recibo_${date}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    resultadoDiv.style.display = 'none';
+                    resultadoDiv.style.top = '-100%';
+                    resultadoDiv.style.zIndex = '-1';
+                });
+            }, 300);
+        } catch (error) {
+            console.error("Erro ao regenerar recibo:", error);
+            alert("Ocorreu um erro ao buscar os dados do recibo.");
+        }
+      },
+
+      async openTxtExportModal() {
+        dom.customerListForExport.innerHTML = `<p>${TRANSLATIONS[currentLang].historyLoading}</p>`;
+        dom.txtExportModal.classList.remove('hidden');
+        const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
+        let startDate = null;
+        if (dom.historyDateStart.value) {
+            const parts = dom.historyDateStart.value.split('-');
+            startDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        let endDate = null;
+        if (dom.historyDateEnd.value) {
+            const parts = dom.historyDateEnd.value.split('-');
+            endDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            endDate.setHours(23, 59, 59, 999);
+        }
+        let query = db.collection("receipts");
+        if (startDate) query = query.where('createdAt', '>=', startDate);
+        if (endDate) query = query.where('createdAt', '<=', endDate);
+        try {
+            const allDocsSnapshot = await query.get();
+            let docs = allDocsSnapshot.docs;
+            if (searchTerm) {
+                docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
+            }
+            if (docs.length === 0) {
+                dom.customerListForExport.innerHTML = `<p>${TRANSLATIONS[currentLang].historyNoRecords}</p>`;
+                return;
+            }
+            const customerSummary = {};
+            docs.forEach(doc => {
+                const data = doc.data();
+                const customerName = data.customerName || 'Cliente Não Identificado';
+                if (!customerSummary[customerName]) {
+                    customerSummary[customerName] = { totalSpent: 0 };
+                }
+                customerSummary[customerName].totalSpent += data.grandTotal || 0;
+            });
+            const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
+            dom.customerListForExport.innerHTML = '';
+            dom.selectAllCustomersCheckbox.checked = false;
+            summaryArray.forEach(summary => {
+                const label = document.createElement('label');
+                label.innerHTML = `
+                  <input type="checkbox" value="${summary.name}" data-total="${summary.totalSpent}">
+                  <div class="customer-info">
+                    <span>${summary.name}</span>
+                    <span class="customer-total">R$ ${this.formatCurrency(summary.totalSpent)}</span>
+                  </div>
+                `;
+                dom.customerListForExport.appendChild(label);
+            });
+        } catch (error) {
+            console.error("Erro ao gerar resumo para exportação:", error);
+            dom.customerListForExport.innerHTML = `<p style="color: var(--text-error);">${TRANSLATIONS[currentLang].errorGeneric}</p>`;
+        }
+      },
+
+      handleSelectAllCustomers(event) {
+        const checkboxes = dom.customerListForExport.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+          checkbox.checked = event.target.checked;
         });
+      },
 
-        const summaryArray = Object.keys(customerSummary).map(name => ({ name, ...customerSummary[name] })).sort((a, b) => b.totalSpent - a.totalSpent);
-        
-        dom.customerListForExport.innerHTML = '';
-        dom.selectAllCustomersCheckbox.checked = false;
-        summaryArray.forEach(summary => {
-          const label = document.createElement('label');
-          label.innerHTML = `
-            <input type="checkbox" value="${summary.name}" data-total="${summary.totalSpent}">
-            <div class="customer-info">
-              <span>${summary.name}</span>
-              <span class="customer-total">R$ ${this.formatCurrency(summary.totalSpent)}</span>
-            </div>
-          `;
-          dom.customerListForExport.appendChild(label);
+      generateTxtFile() {
+        const linesToExport = [];
+        const checkedCustomers = dom.customerListForExport.querySelectorAll('input[type="checkbox"]:checked');
+        if (checkedCustomers.length === 0) {
+          alert("Nenhum cliente selecionado para exportar.");
+          return;
+        }
+        checkedCustomers.forEach(checkbox => {
+            const customerName = checkbox.value;
+            const totalSpent = parseFloat(checkbox.dataset.total);
+            linesToExport.push(`${customerName}: R$ ${this.formatCurrency(totalSpent)}`);
         });
-
-      } catch (error) {
-        console.error("Erro ao gerar resumo para exportação:", error);
-        dom.customerListForExport.innerHTML = `<p style="color: var(--text-error);">${TRANSLATIONS[currentLang].errorGeneric}</p>`;
+        const fileContent = linesToExport.join('\r\n');
+        const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const fileName = `Relatorio_Clientes_${dateStr}.txt`;
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", fileName);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        dom.txtExportModal.classList.add('hidden');
       }
-    },
-
-    handleSelectAllCustomers(event) {
-      const checkboxes = dom.customerListForExport.querySelectorAll('input[type="checkbox"]');
-      checkboxes.forEach(checkbox => {
-        checkbox.checked = event.target.checked;
-      });
-    },
-
-    generateTxtFile() {
-      const linesToExport = [];
-      const checkedCustomers = dom.customerListForExport.querySelectorAll('input[type="checkbox"]:checked');
-
-      if (checkedCustomers.length === 0) {
-        alert("Nenhum cliente selecionado para exportar.");
-        return;
-      }
-
-      checkedCustomers.forEach(checkbox => {
-        const customerName = checkbox.value;
-        const totalSpent = parseFloat(checkbox.dataset.total);
-        linesToExport.push(`${customerName}: R$ ${this.formatCurrency(totalSpent)}`);
-      });
-
-      const fileContent = linesToExport.join('\r\n');
-      const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
-      const dateStr = new Date().toISOString().slice(0, 10);
-      const fileName = `Relatorio_Clientes_${dateStr}.txt`;
-      
-      const link = document.createElement("a");
-      if (link.download !== undefined) {
-          const url = URL.createObjectURL(blob);
-          link.setAttribute("href", url);
-          link.setAttribute("download", fileName);
-          link.style.visibility = 'hidden';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-      }
-
-      dom.txtExportModal.classList.add('hidden');
-    }
-
   };
-  
+
   app.init();
+
 </script>
 </body>
 </html>
