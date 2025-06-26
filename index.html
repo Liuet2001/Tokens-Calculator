@@ -2787,7 +2787,7 @@
                   <input type="checkbox" value="${summary.name}" data-total="${summary.totalSpent}">
                   <div class="customer-info">
                     <span>${summary.name}</span>
-                    <span class="customer-total">R$ ${this.formatCurrency(summary.totalSpent)}</span>
+                    <span class="customer-total">M$ ${this.formatCurrency(summary.totalSpent)}</span>
                   </div>
                 `;
                 dom.customerListForExport.appendChild(label);
@@ -2815,7 +2815,7 @@
         checkedCustomers.forEach(checkbox => {
             const customerName = checkbox.value;
             const totalSpent = parseFloat(checkbox.dataset.total);
-            linesToExport.push(`${customerName}: R$ ${this.formatCurrency(totalSpent)}`);
+            linesToExport.push(`${customerName}: M$ ${this.formatCurrency(totalSpent)}`);
         });
         const fileContent = linesToExport.join('\r\n');
         const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
