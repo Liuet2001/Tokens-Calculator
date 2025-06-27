@@ -499,6 +499,10 @@
       flex-direction: column;
       align-items: stretch;
     }
+    #history-filter-bar .buttons {
+        flex-direction: row; /* Mantém os botões lado a lado no mobile */
+        justify-content: space-around;
+    }
     .settings-bar {
       flex-direction: column;
       gap: 16px;
@@ -508,9 +512,7 @@
       max-height: 85vh;
     }
   }
-</style>
 
-<style>
   /* === INÍCIO DAS MELHORIAS DE UX PARA DESKTOP === */
 
   /* Estas regras só se aplicam em telas maiores que 768px (desktop) */
@@ -654,6 +656,13 @@
       justify-content: flex-end; /* Alinha botões à direita por padrão */
       gap: 16px;
     }
+
+    /* ** ALTERAÇÃO: Centralizar botões da barra de filtro ** */
+    #history-filter-bar .buttons {
+        justify-content: center;
+        width: 100%; /* Garante que o container ocupe o espaço */
+        grid-column: 1 / -1; /* Ocupa toda a largura da grid de filtros */
+    }
     
     #calculator-view .buttons {
         grid-column: 1 / -1; /* Faz o container de botões ocupar toda a largura da grid */
@@ -698,6 +707,25 @@
     }
   }
   /* === FIM DAS MELHORIAS DE UX PARA DESKTOP === */
+
+  /* NOVO ESTILO PARA A TAG REVENDEDOR */
+  .reseller-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 6px;
+    background-color: var(--accent-warning);
+    color: #fff;
+    vertical-align: middle;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  html[data-theme='light'] .reseller-tag {
+    color: var(--bg-secondary);
+  }
 </style>
 
 </head>
@@ -874,6 +902,14 @@
               <div class="input-group" style="flex-grow: 1;">
                   <label for="history-search-input">Buscar por Nome</label>
                   <input type="text" id="history-search-input" placeholder="Digite o nome do cliente...">
+              </div>
+              <div class="input-group">
+                  <label for="history-sale-type-filter">Tipo de Venda</label>
+                  <select id="history-sale-type-filter">
+                      <option value="all">Todas as Vendas</option>
+                      <option value="regular">Vendas Normais</option>
+                      <option value="reseller">Apenas Revendedores</option>
+                  </select>
               </div>
               <div class="input-group">
                   <label for="history-date-start">Data Início</label>
@@ -1153,6 +1189,7 @@
     selectAllCustomersCheckbox: document.getElementById('select-all-customers-checkbox'),
     historySellerFilterContainer: document.getElementById('history-seller-filter-container'),
     historySellerFilter: document.getElementById('history-seller-filter'),
+    historySaleTypeFilter: document.getElementById('history-sale-type-filter'),
     resellerPanelView: document.getElementById('reseller-panel-view'),
     subResellerActionStatus: document.getElementById('sub-reseller-action-status'),
     newSubResellerUsernameInput: document.getElementById('new-sub-reseller-username'),
@@ -1806,6 +1843,7 @@
       const viewMode = document.querySelector('input[name="history-view-mode"]:checked').value;
       const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
       const selectedSeller = dom.historySellerFilter.value;
+      const saleTypeFilter = dom.historySaleTypeFilter.value;
 
       let startDate = null;
       if (dom.historyDateStart.value) {
@@ -1821,15 +1859,21 @@
 
       try {
           if (viewMode === 'summary') {
-              await this.renderSummaryView(searchTerm, startDate, endDate, selectedSeller);
+              await this.renderSummaryView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter);
               return;
           } else if (viewMode === 'team' && (this.isOfficialReseller || this.isCurrentUserOwner)) {
-              await this.renderTeamView(searchTerm, startDate, endDate, selectedSeller);
+              await this.renderTeamView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter);
               return;
           }
 
           let query = db.collection("receipts");
 
+          if (saleTypeFilter === 'reseller') {
+              query = query.where('isResellerSale', '==', true);
+          } else if (saleTypeFilter === 'regular') {
+              query = query.where('isResellerSale', '!=', true);
+          }
+          
           if (!this.isCurrentUserOwner && !this.isCurrentUserAdmin) {
               query = query.where('seller', '==', this.currentUsername);
           } else if (selectedSeller) {
@@ -1881,7 +1925,7 @@
       }
     },
     
-    async renderTeamView(searchTerm, startDate, endDate, selectedSeller) {
+    async renderTeamView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter) {
         dom.historyTableContainer.innerHTML = `<p>Carregando vendas da equipe...</p>`;
         dom.historyPaginationControls.classList.add('hidden');
 
@@ -1905,6 +1949,12 @@
             }
             
             let query = db.collection("receipts").where('seller', 'in', finalTeamFilter);
+
+            if (saleTypeFilter === 'reseller') {
+                query = query.where('isResellerSale', '==', true);
+            } else if (saleTypeFilter === 'regular') {
+                query = query.where('isResellerSale', '!=', true);
+            }
 
             if (startDate) query = query.where('createdAt', '>=', startDate);
             if (endDate) query = query.where('createdAt', '<=', endDate);
@@ -1935,8 +1985,10 @@
 
         docs.forEach(doc => {
             const data = doc.data();
+            const resellerTagHtml = data.isResellerSale ? '<span class="reseller-tag">Revendedor</span>' : '';
+
             tableHTML += `<tr data-id="${doc.id}">
-                            <td data-label="${t.historyCustomer}">${data.customerName || 'N/A'}</td>`;
+                            <td data-label="${t.historyCustomer}">${data.customerName || 'N/A'} ${resellerTagHtml}</td>`;
             if (this.isCurrentUserOwner || this.isCurrentUserAdmin || document.querySelector('input[name="history-view-mode"]:checked').value === 'team') {
               tableHTML += `<td data-label="${t.historySeller}">${(data.seller || 'N/A').split('@')[0]}</td>`;
             }
@@ -1958,8 +2010,14 @@
         dom.historyTableContainer.innerHTML = tableHTML + `</tbody></table>`;
     },
 
-    async renderSummaryView(searchTerm, startDate, endDate, selectedSeller) {
+    async renderSummaryView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter) {
       let query = db.collection("receipts");
+
+      if (saleTypeFilter === 'reseller') {
+          query = query.where('isResellerSale', '==', true);
+      } else if (saleTypeFilter === 'regular') {
+          query = query.where('isResellerSale', '!=', true);
+      }
 
       if (!this.isCurrentUserOwner && !this.isCurrentUserAdmin) {
           query = query.where('seller', '==', this.currentUsername);
@@ -2594,6 +2652,9 @@
 
     buildReceiptHtml(receiptData) {
         const t = TRANSLATIONS[currentLang];
+        // **ALTERAÇÃO**: Criar o HTML da imagem do Mush para ser inserido como string
+        const coinIconHtml = `<img src="${MOEDA_BASE64}" style="width: 14px; height: 14px; vertical-align: -2px; margin-left: 4px;" alt="mush">`;
+        
         let subtotalBruto = 0;
         let itemsHtml = '';
         for (const key in receiptData.itemsData) {
@@ -2601,22 +2662,27 @@
             const catalogoItem = ITENS_CATALOGO[key];
             if (item.qty > 0 && catalogoItem) {
                 const subtotalItem = item.qty * item.price;
-                itemsHtml += `<tr><td style="padding: 5px 0;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td style="padding: 5px 0; text-align: right;">${this.formatCurrency(subtotalItem)}</td></tr>`;
+                // **ALTERAÇÃO**: Adicionar o ícone do Mush como string
+                itemsHtml += `<tr><td style="padding: 5px 0;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td style="padding: 5px 0; text-align: right;">${this.formatCurrency(subtotalItem)}${coinIconHtml}</td></tr>`;
                 subtotalBruto += subtotalItem;
             }
         }
         const valorDesconto = subtotalBruto - receiptData.grandTotal;
         const dataVenda = receiptData.createdAt?.toDate ? receiptData.createdAt.toDate().toLocaleString(currentLang) : new Date().toLocaleString(currentLang);
+        
+        // **ALTERAÇÃO**: Adicionar a tag "(Revendedor)" se aplicável
+        const resellerTagHtml = receiptData.isResellerSale ? '<span style="font-size: 0.8em; color: var(--accent-warning); font-weight: bold;"> (Revendedor)</span>' : '';
+
         let receiptHtml = `
             <h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2>
-            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 10px;">${receiptData.customerName}</p>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 10px;">${receiptData.customerName}${resellerTagHtml}</p>
             <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px; font-size: 0.8em;">${dataVenda}</p>
             <h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3>
             <table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>${itemsHtml}</tbody></table>
             <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.9em;">
-                <p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${this.formatCurrency(subtotalBruto)}</span></p>
-                <p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${this.formatCurrency(valorDesconto)}</span></p>
-                <p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${this.formatCurrency(receiptData.grandTotal)}</span></p>
+                <p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${this.formatCurrency(subtotalBruto)}${coinIconHtml}</span></p>
+                <p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${this.formatCurrency(valorDesconto)}${coinIconHtml}</span></p>
+                <p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${this.formatCurrency(receiptData.grandTotal)}${coinIconHtml}</span></p>
             </div>
             <p style="text-align: center; margin-top: 20px; font-size: 0.9em;">${t.receiptThanks}</p>`;
         return receiptHtml;
@@ -2663,6 +2729,7 @@
             grandTotal: calculo.totalFinal,
             itemsData: itemsToSave,
             seller: this.currentUsername,
+            isResellerSale: isResellerMode,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         try {
@@ -2710,6 +2777,7 @@
             html2canvas(resultadoDiv, { 
                 backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), 
                 scale: 2,
+                useCORS: true, // Adicionado para melhor compatibilidade
                 willReadFrequently: true 
             }).then(canvas => {
                 const link = document.createElement('a');
@@ -2747,6 +2815,7 @@
                 html2canvas(resultadoDiv, { 
                     backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), 
                     scale: 2,
+                    useCORS: true, // Adicionado para melhor compatibilidade
                     willReadFrequently: true
                 }).then(canvas => {
                     const link = document.createElement('a');
