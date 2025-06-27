@@ -1176,7 +1176,7 @@
     salesChartInstance: null,
     tokensChartInstance: null,
     isCurrentUserOwner: false,
-    isCurrentUserAdmin: false, // <-- NOVO ESTADO PARA ADMIN
+    isCurrentUserAdmin: false, 
     isOfficialReseller: false, 
     currentUsername: null,
     saveTimeout: null,
@@ -1194,7 +1194,7 @@
             if (user) {
                 await user.getIdTokenResult(true).then(async (idTokenResult) => {
                     this.isCurrentUserOwner = !!idTokenResult.claims.owner;
-                    this.isCurrentUserAdmin = !!idTokenResult.claims.admin; // <-- LÊ O NOVO CLAIM
+                    this.isCurrentUserAdmin = !!idTokenResult.claims.admin; 
                     this.isOfficialReseller = !!idTokenResult.claims.officialReseller;
                     this.currentUsername = user.email.split('@')[0];
                     
@@ -2023,9 +2023,6 @@
         }
     },
 
-    // A partir daqui, as funções restantes (dashboard, calculadora, etc.) não precisam de alteração.
-    // O código abaixo é o mesmo da versão anterior.
-
     async loadDashboardData() {
         if (this.salesChartInstance) this.salesChartInstance.destroy();
         if (this.tokensChartInstance) this.tokensChartInstance.destroy();
@@ -2227,6 +2224,35 @@
             await this.loadUserPreferences(auth.currentUser);
         }
         this.updateUI();
+    },
+
+    async populateResellerCustomerDropdown() {
+        dom.resellerCustomerSelect.innerHTML = `
+            <option value="">Selecione um usuário...</option>
+            <option value="manual">Digitar nome manualmente...</option>
+        `;
+        try {
+            const listAllUsersFunc = functions.httpsCallable('listAllUsers');
+            const result = await listAllUsersFunc();
+            const users = result.data;
+
+            if (!users || users.length === 0) {
+                console.warn("Nenhum usuário encontrado para popular a lista.");
+                return;
+            }
+
+            const sortedUsers = users.sort((a, b) => a.username.localeCompare(b.username));
+
+            sortedUsers.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.username;
+                option.textContent = user.username;
+                dom.resellerCustomerSelect.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error("Erro ao popular dropdown de usuários:", error);
+        }
     },
 
     setTheme(theme, shouldSave = true) {
