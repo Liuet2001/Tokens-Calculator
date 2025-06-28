@@ -217,8 +217,8 @@
   button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
   button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;}
   
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #btn-create-sub-reseller { background: var(--accent-primary); color: #fff; }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #btn-load-users:hover, #btn-create-sub-reseller:hover { background: var(--accent-hover); }
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #btn-create-sub-reseller, #btn-open-resale-modal { background: var(--accent-primary); color: #fff; }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #btn-load-users:hover, #btn-create-sub-reseller:hover, #btn-open-resale-modal:hover { background: var(--accent-hover); }
 
   #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
 
@@ -238,13 +238,13 @@
   .container {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
   }
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #generate-txt-file-btn, #btn-create-sub-reseller {
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #generate-txt-file-btn, #btn-create-sub-reseller, #btn-open-resale-modal, #save-resale-prices-btn {
     background-image: linear-gradient(to right, var(--accent-primary) 0%, var(--accent-hover) 100%);
     background-size: 200% auto;
     transition: all 0.4s ease-in-out;
     border: none;
   }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #generate-txt-file-btn:hover, #btn-create-sub-reseller:hover {
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #generate-txt-file-btn:hover, #btn-create-sub-reseller:hover, #btn-open-resale-modal:hover, #save-resale-prices-btn:hover {
     background-position: right center;
     background-color: var(--accent-hover);
   }
@@ -332,7 +332,7 @@
   /* --- FIM DA CORREÇÃO --- */
 
 
-  /* --- ESTILOS PARA O MODAL DE EXPORTAÇÃO --- */
+  /* --- ESTILOS PARA O MODAL --- */
   .modal {
     position: fixed;
     z-index: 1001;
@@ -819,6 +819,11 @@
                 <label for="mode-mush" data-translate-key="modeMush">Por Mush</label>
               </div>
             </div>
+
+            <div class="input-group">
+                <label for="btn-open-resale-modal" data-translate-key="resalePricesLabel">Preços Personalizados</label>
+                <button id="btn-open-resale-modal" data-translate-key="resalePricesBtn">Definir Preços de Revenda</button>
+            </div>
           </div> 
 
           <div class="input-group hidden" id="reseller-mode-container">
@@ -827,6 +832,14 @@
               Modo Revendedor
             </label>
           </div>
+
+          <div class="input-group" id="custom-resale-mode-container">
+            <label class="reseller-label">
+              <input type="checkbox" id="custom-resale-toggle">
+              <span data-translate-key="customResaleModeLabel">Modo Revenda (Preços Personalizados)</span>
+            </label>
+          </div>
+          
           <div id="reseller-limit-status" class="hidden"></div>
           
           <div class="distributor-container" id="distributor-section" style="display: none;">
@@ -1011,7 +1024,7 @@
     </div>
 </div>
 
-<div id="resultado" style="display: none; padding: 20px; background: var(--bg-secondary); color: var(--text-primary); width: 400px; border-radius: 15px; border: 1px solid var(--border-color); position: fixed; top: -100%; left: 50%; transform: translateX(-50%); z-index: -1;">
+<div id="resultado" style="display: none; padding: 20px; background: var(--bg-secondary); color: var(--text-primary); width: 480px; border-radius: 15px; border: 1px solid var(--border-color); position: fixed; top: -100%; left: 50%; transform: translateX(-50%); z-index: -1;">
 </div>
 
 <div id="txt-export-modal" class="modal hidden">
@@ -1031,6 +1044,40 @@
     <div class="modal-footer">
       <button id="cancel-txt-export-btn">Cancelar</button>
       <button id="generate-txt-file-btn">Gerar .TXT</button>
+    </div>
+  </div>
+</div>
+
+<div id="resale-price-modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 data-translate-key="resaleModalHeader">Definir Preços de Revenda</h3>
+      <button class="close-btn" id="close-resale-modal-btn">&times;</button>
+    </div>
+    <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px; margin: 16px 0;">
+        <p data-translate-key="resaleModalDesc" style="color: var(--text-secondary); font-size: 14px;">
+            Estes preços serão usados quando o "Modo Revenda" estiver ativo. Para editar, use este modal.
+        </p>
+        <div class="input-group">
+            <label for="resale-price-revive">Revive Token</label>
+            <input type="number" id="resale-price-revive" placeholder="Preço de revenda do Revive">
+        </div>
+        <div class="input-group">
+            <label for="resale-price-max">Max Growth Token</label>
+            <input type="number" id="resale-price-max" placeholder="Preço de revenda do Max">
+        </div>
+        <div class="input-group">
+            <label for="resale-price-partial">Partial Growth Token</label>
+            <input type="number" id="resale-price-partial" placeholder="Preço de revenda do Partial">
+        </div>
+        <div class="input-group">
+            <label for="resale-price-change">Appearance Change Token</label>
+            <input type="number" id="resale-price-change" placeholder="Preço de revenda do Change">
+        </div>
+    </div>
+    <div class="modal-footer">
+      <button id="cancel-resale-prices-btn" data-translate-key="cancelButton">Cancelar</button>
+      <button id="save-resale-prices-btn" data-translate-key="saveButton">Salvar</button>
     </div>
   </div>
 </div>
@@ -1077,6 +1124,13 @@
     change: 65
   };
 
+  const PRECOS_VOLUME = {
+    revive: 795,
+    max: 565,
+    partial: 185,
+    change: 85
+  };
+
   const TRANSLATIONS = {
     br: {
         pageTitle: "Painel", mainHeader: "Calculadora de Tokens", themeLabel: "Tema Claro",
@@ -1086,6 +1140,8 @@
         btnExport: "Exportar para PNG", alertNoItems: "Nenhum item foi selecionado para gerar o recibo.",
         receiptHeader: "Recibo", receiptItemsHeader: "Itens Comprados", receiptSubtotal: "Subtotal",
         receiptDiscount: "Desconto", receiptFinalTotal: "Total Final", receiptThanks: "✨ Agradecemos a preferência! ✨",
+        receiptUnitPrice: "Preço Unit.",
+        volumePriceLegend: "* Preço aplicado p/ compras > 84 unidades",
         calculationMode: "Modo de Cálculo", modeQty: "Por Quantidade", modeMush: "Por Mush",
         distributeTokensLabel: "Tokens Desejáveis para Distribuição", totalMushLabel: "Total de Mush a Gastar",
         btnDistribute: "Distribuir", leftoverMushText: "Sobrou:",
@@ -1098,7 +1154,14 @@
         loggedInAs: "Usuário:",
         resellerCustomerLabel: "Cliente Revendedor", resellerCustomerManualPlaceholder: "Digite o nome do cliente revendedor",
         resellerLimitStatus: (revive, max, total, time) => `Limite Cliente: <b>Revive</b> (${revive}/${total}) | <b>Max</b> (${max}/${total}). Reseta em <b>${time}</b>.`,
-        resellerLimitExceededWarning: "Atenção: O limite diário do cliente para um ou mais itens foi excedido. Itens acima do limite serão cobrados com o preço base."
+        resellerLimitExceededWarning: "Atenção: O limite diário do cliente para um ou mais itens foi excedido. Itens acima do limite serão cobrados com o preço base.",
+        resalePricesLabel: "Preços Personalizados",
+        resalePricesBtn: "Definir Preços de Revenda",
+        customResaleModeLabel: "Modo Revenda (Preços Personalizados)",
+        resaleModalHeader: "Definir Preços de Revenda",
+        resaleModalDesc: "Estes preços serão usados quando o \"Modo Revenda\" estiver ativo. Para editar, use este modal.",
+        cancelButton: "Cancelar",
+        saveButton: "Salvar"
     },
     en: {
         pageTitle: "Panel", mainHeader: "Token Calculator", themeLabel: "Light Theme",
@@ -1108,6 +1171,8 @@
         btnExport: "Export to PNG", alertNoItems: "No items were selected to generate the receipt.",
         receiptHeader: "Receipt", receiptItemsHeader: "Purchased Items", receiptSubtotal: "Subtotal",
         receiptDiscount: "Discount", receiptFinalTotal: "Final Total", receiptThanks: "✨ Thank you for your preference! ✨",
+        receiptUnitPrice: "Unit Price",
+        volumePriceLegend: "* Price applied for purchases > 84 units",
         calculationMode: "Calculation Mode", modeQty: "By Quantity", modeMush: "By Mush",
         distributeTokensLabel: "Desirable Tokens for Distribution", totalMushLabel: "Total Mush to Spend",
         btnDistribute: "Distribute", leftoverMushText: "Leftover:",
@@ -1120,7 +1185,14 @@
         loggedInAs: "User:",
         resellerCustomerLabel: "Reseller Customer", resellerCustomerManualPlaceholder: "Enter reseller customer's name",
         resellerLimitStatus: (revive, max, total, time) => `Customer Limit: <b>Revive</b> (${revive}/${total}) | <b>Max</b> (${max}/${total}). Resets in <b>${time}</b>.`,
-        resellerLimitExceededWarning: "Warning: The customer's daily limit for one or more items has been exceeded. Items above the limit will be charged at the base price."
+        resellerLimitExceededWarning: "Warning: The customer's daily limit for one or more items has been exceeded. Items above the limit will be charged at the base price.",
+        resalePricesLabel: "Custom Prices",
+        resalePricesBtn: "Set Resale Prices",
+        customResaleModeLabel: "Resale Mode (Custom Prices)",
+        resaleModalHeader: "Set Resale Prices",
+        resaleModalDesc: "These prices will be used when \"Resale Mode\" is active. To edit, use this modal.",
+        cancelButton: "Cancel",
+        saveButton: "Save"
     }
   };
 
@@ -1199,6 +1271,13 @@
     subResellerListContainer: document.getElementById('sub-reseller-list-container'),
     addSubResellerSection: document.getElementById('add-sub-reseller-section'),
     historyViewTeamContainer: document.getElementById('history-view-team-container'),
+    btnOpenResaleModal: document.getElementById('btn-open-resale-modal'),
+    resalePriceModal: document.getElementById('resale-price-modal'),
+    closeResaleModalBtn: document.getElementById('close-resale-modal-btn'),
+    saveResalePricesBtn: document.getElementById('save-resale-prices-btn'),
+    cancelResalePricesBtn: document.getElementById('cancel-resale-prices-btn'),
+    customResaleToggle: document.getElementById('custom-resale-toggle'),
+    customResaleModeContainer: document.getElementById('custom-resale-mode-container'),
   };
 
   let currentLang = 'br';
@@ -1219,6 +1298,8 @@
     saveTimeout: null,
     currentCustomerUsage: { revive: 0, max: 0 },
     resellerLimitInterval: null,
+    manualPrices: {},
+    customResalePrices: {},
 
     init() {
         this.loadDevicePreferences();
@@ -1277,15 +1358,15 @@
                 this.calculatorInitialized = false;
             }
         });
-        dom.btnLogin.addEventListener('click', this.handleLogin.bind(this));
-        dom.btnLogout.addEventListener('click', this.handleLogout.bind(this));
+        dom.btnLogin.addEventListener('click', () => this.handleLogin());
+        dom.btnLogout.addEventListener('click', () => this.handleLogout());
     },
 
     addAppEventListeners() {
       dom.descontoInput.addEventListener('input', () => { this.updateUI(); this.triggerSaveCalculatorPreferences(); });
-      document.getElementById('btnCalcular').addEventListener('click', this.updateUI.bind(this));
-      document.getElementById('btnResetar').addEventListener('click', this.reset.bind(this));
-      document.getElementById('btnGerarImagem').addEventListener('click', this.generateImage.bind(this));
+      document.getElementById('btnCalcular').addEventListener('click', () => this.updateUI());
+      document.getElementById('btnResetar').addEventListener('click', () => this.reset({ fullReset: true }));
+      document.getElementById('btnGerarImagem').addEventListener('click', () => this.generateImage());
       dom.themeToggle.addEventListener('click', () => {
           const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
           this.setTheme(newTheme);
@@ -1296,11 +1377,11 @@
               this.setAccentColor(color);
           }
       });
-      dom.langBr.addEventListener('click', () => { this.setLanguage('br'); });
-      dom.langEn.addEventListener('click', () => { this.setLanguage('en'); });
+      dom.langBr.addEventListener('click', () => this.setLanguage('br'));
+      dom.langEn.addEventListener('click', () => this.setLanguage('en'));
       dom.modeQtyRadio.addEventListener('change', () => this.toggleMode('quantity'));
       dom.modeMushRadio.addEventListener('change', () => this.toggleMode('mush'));
-      dom.resellerModeToggle.addEventListener('change', this.toggleResellerMode.bind(this));
+      dom.resellerModeToggle.addEventListener('change', (e) => this.toggleResellerMode(e));
       dom.nomeClienteInput.addEventListener('keyup', () => {});
       dom.resellerCustomerSelect.addEventListener('change', () => {
           if (dom.resellerCustomerSelect.value === 'manual') {
@@ -1311,11 +1392,11 @@
           }
           this.checkResellerLimit();
       });
-      dom.resellerCustomerManualInput.addEventListener('keyup', this.checkResellerLimit.bind(this));
+      dom.resellerCustomerManualInput.addEventListener('keyup', () => this.checkResellerLimit());
       dom.totalMushInput.addEventListener('input', () => this.triggerSaveCalculatorPreferences());
-      dom.btnDistribute.addEventListener('click', this.distributeMush.bind(this));
-      dom.btnDistributeLeftover.addEventListener('click', this.distributeLeftoverMush.bind(this));
-      dom.tabNavigation.addEventListener('click', this.handleTabClick.bind(this));
+      dom.btnDistribute.addEventListener('click', () => this.distributeMush());
+      dom.btnDistributeLeftover.addEventListener('click', () => this.distributeLeftoverMush());
+      dom.tabNavigation.addEventListener('click', (e) => this.handleTabClick(e));
       dom.tokenFiltersContainer.addEventListener('change', () => {
           const selectedCount = dom.tokenFiltersContainer.querySelectorAll('input:checked').length;
           document.getElementById('two-token-options').classList.toggle('hidden', selectedCount !== 2);
@@ -1332,18 +1413,24 @@
           if (target.classList.contains('delete-history-btn')) this.handleHistoryDelete(target.dataset.id);
           if (target.classList.contains('btn-view-receipt')) this.regenerateReceipt(target.dataset.id);
       });
-      dom.btnLoadUsers.addEventListener('click', this.loadUsers.bind(this));
-      dom.userListContainer.addEventListener('click', this.handleUserAction.bind(this));
-      dom.btnCreateSeller.addEventListener('click', this.handleCreateSeller.bind(this));
-      dom.btnCreateSubReseller.addEventListener('click', this.handleCreateSubReseller.bind(this));
-      dom.btnLoadMyResellers.addEventListener('click', this.loadResellerPanelData.bind(this));
-      dom.subResellerListContainer.addEventListener('click', this.handleSubResellerAction.bind(this));
-      dom.exportTxtModalBtn.addEventListener('click', this.openTxtExportModal.bind(this));
+      dom.btnLoadUsers.addEventListener('click', () => this.loadUsers());
+      dom.userListContainer.addEventListener('click', (e) => this.handleUserAction(e));
+      dom.btnCreateSeller.addEventListener('click', () => this.handleCreateSeller());
+      dom.btnCreateSubReseller.addEventListener('click', () => this.handleCreateSubReseller());
+      dom.btnLoadMyResellers.addEventListener('click', () => this.loadResellerPanelData());
+      dom.subResellerListContainer.addEventListener('click', (e) => this.handleSubResellerAction(e));
+      dom.exportTxtModalBtn.addEventListener('click', () => this.openTxtExportModal());
       dom.closeTxtExportModalBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
       dom.cancelTxtExportBtn.addEventListener('click', () => dom.txtExportModal.classList.add('hidden'));
-      dom.selectAllCustomersCheckbox.addEventListener('change', this.handleSelectAllCustomers.bind(this));
-      dom.generateTxtFileBtn.addEventListener('click', this.generateTxtFile.bind(this));
+      dom.selectAllCustomersCheckbox.addEventListener('change', (e) => this.handleSelectAllCustomers(e));
+      dom.generateTxtFileBtn.addEventListener('click', () => this.generateTxtFile());
       dom.txtExportModal.addEventListener('click', (e) => { if (e.target === dom.txtExportModal) dom.txtExportModal.classList.add('hidden'); });
+      dom.btnOpenResaleModal.addEventListener('click', () => this.openResaleModal());
+      dom.closeResaleModalBtn.addEventListener('click', () => dom.resalePriceModal.classList.add('hidden'));
+      dom.cancelResalePricesBtn.addEventListener('click', () => dom.resalePriceModal.classList.add('hidden'));
+      dom.saveResalePricesBtn.addEventListener('click', () => this.saveResalePrices());
+      dom.customResaleToggle.addEventListener('change', (e) => this.toggleCustomResaleMode(e.target.checked));
+      dom.resalePriceModal.addEventListener('click', (e) => { if (e.target === dom.resalePriceModal) dom.resalePriceModal.classList.add('hidden'); });
     },
 
     async handleLogin() {
@@ -1384,11 +1471,23 @@
         try {
             const docRef = db.collection('userPreferences').doc(user.uid);
             const docSnap = await docRef.get();
+
+            this.manualPrices = {};
+            this.customResalePrices = {};
+
             if (docSnap.exists) {
                 const prefs = docSnap.data();
                 if (prefs.theme) this.setTheme(prefs.theme, false);
                 if (prefs.accentColor) this.setAccentColor(prefs.accentColor, false);
                 if (prefs.language) this.setLanguage(prefs.language, false, true);
+                
+                if (prefs.customResalePrices) {
+                    this.customResalePrices = prefs.customResalePrices;
+                }
+                if (prefs.prices) {
+                    this.manualPrices = prefs.prices;
+                }
+
                 if (prefs.calculator) {
                     dom.descontoInput.value = prefs.calculator.discount || '';
                     dom.totalMushInput.value = prefs.calculator.totalMush || '';
@@ -1399,14 +1498,12 @@
                         }
                     }
                 }
-                if (prefs.prices) {
-                    for (const key in prefs.prices) {
-                        const priceInput = document.getElementById(`price-${key}`);
-                        if (priceInput && prefs.prices[key]) priceInput.value = prefs.prices[key];
-                    }
-                }
-                this.updateUI();
             }
+            
+            this.applyManualOrCatalogPrices();
+            this.populateResaleModalInputs();
+            this.updateUI();
+
         } catch (error) {
             console.error("Erro ao carregar preferências:", error);
         }
@@ -1414,7 +1511,10 @@
 
     triggerSaveCalculatorPreferences() {
         clearTimeout(this.saveTimeout);
-        this.saveTimeout = setTimeout(() => this.saveCalculatorPreferences(), 1500);
+        this.saveTimeout = setTimeout(() => {
+            if (dom.resellerModeToggle.checked || dom.customResaleToggle.checked) return;
+            this.saveManualPricesToFirestore();
+        }, 1500);
     },
 
     async saveUiPreferences() {
@@ -1431,20 +1531,17 @@
         }
     },
 
-    async saveCalculatorPreferences() {
-        if (!auth.currentUser || dom.resellerModeToggle.checked) return;
-        const pricesToSave = {};
-        for (const key in ITENS_CATALOGO) {
-            const priceInput = document.getElementById(`price-${key}`);
-            if (priceInput) pricesToSave[key] = parseFloat(priceInput.value) || 0;
-        }
+    async saveManualPricesToFirestore() {
+        if (!auth.currentUser) return;
+        
         const quantitiesToSave = {};
         for (const key in ITENS_CATALOGO) {
             const qtyInput = document.getElementById(`qtd-${key}`);
             if (qtyInput) quantitiesToSave[key] = parseInt(qtyInput.value) || 0;
         }
+
         const prefs = {
-            prices: pricesToSave,
+            prices: this.manualPrices,
             calculator: {
                 discount: parseFloat(dom.descontoInput.value) || 0,
                 totalMush: parseFloat(dom.totalMushInput.value) || 0,
@@ -1457,7 +1554,18 @@
             console.error("Erro ao salvar preferências da calculadora:", error);
         }
     },
-
+    
+    async saveCustomResalePricesToFirestore() {
+        if (!auth.currentUser) return;
+        try {
+            await db.collection('userPreferences').doc(auth.currentUser.uid).set({
+                customResalePrices: this.customResalePrices
+            }, { merge: true });
+        } catch (error) {
+            console.error("Erro ao salvar preços de revenda personalizados:", error);
+        }
+    },
+    
     setDefaultTab() {
         dom.tabLinks.forEach(link => link.classList.remove('active'));
         dom.tabContents.forEach(content => content.classList.add('hidden'));
@@ -1824,107 +1932,107 @@
             if (buttonElement) buttonElement.disabled = false;
         }
     },
-
-    async loadHistory(direction = 'first') {
-      const t = TRANSLATIONS[currentLang];
-      dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
-      dom.historyPaginationControls.classList.add('hidden');
-
-      if (direction === 'first') {
-          this.historyPageCursors = [null];
-          this.historyCurrentPage = 0;
-      }
-
-      let pageToLoad = this.historyCurrentPage;
-      if (direction === 'next') pageToLoad++;
-      else if (direction === 'prev' && pageToLoad > 0) pageToLoad--;
-
-      const lastDoc = this.historyPageCursors[pageToLoad];
-      const viewMode = document.querySelector('input[name="history-view-mode"]:checked').value;
-      const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
-      const selectedSeller = dom.historySellerFilter.value;
-      const saleTypeFilter = dom.historySaleTypeFilter.value;
-
-      let startDate = null;
-      if (dom.historyDateStart.value) {
-          const parts = dom.historyDateStart.value.split('-');
-          startDate = new Date(parts[0], parts[1] - 1, parts[2]);
-      }
-      let endDate = null;
-      if (dom.historyDateEnd.value) {
-          const parts = dom.historyDateEnd.value.split('-');
-          endDate = new Date(parts[0], parts[1] - 1, parts[2]);
-          endDate.setHours(23, 59, 59, 999);
-      }
-
-      try {
-          if (viewMode === 'summary') {
-              await this.renderSummaryView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter);
-              return;
-          } else if (viewMode === 'team' && (this.isOfficialReseller || this.isCurrentUserOwner)) {
-              await this.renderTeamView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter);
-              return;
-          }
-
-          let query = db.collection("receipts");
-
-          if (saleTypeFilter === 'reseller') {
-              query = query.where('isResellerSale', '==', true);
-          } else if (saleTypeFilter === 'regular') {
-              query = query.where('isResellerSale', '!=', true);
-          }
-          
-          if (!this.isCurrentUserOwner && !this.isCurrentUserAdmin) {
-              query = query.where('seller', '==', this.currentUsername);
-          } else if (selectedSeller) {
-              query = query.where('seller', '==', selectedSeller);
-          }
-
-          if (startDate) query = query.where('createdAt', '>=', startDate);
-          if (endDate) query = query.where('createdAt', '<=', endDate);
-          query = query.orderBy('createdAt', 'desc');
-          if (lastDoc) query = query.startAfter(lastDoc);
-          query = query.limit(this.historyPageSize + 1);
-
-          let querySnapshot = await query.get();
-          let docs = querySnapshot.docs;
-
-          this.historyHasNextPage = docs.length > this.historyPageSize;
-          if (this.historyHasNextPage) docs.pop();
-
-          const lastVisibleDoc = docs[docs.length - 1];
-          if (direction === 'next' && lastVisibleDoc) {
-              this.historyPageCursors[pageToLoad] = lastVisibleDoc;
-          }
-          this.historyCurrentPage = pageToLoad;
-
-          if (searchTerm) {
-              docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
-          }
-
-          if (docs.length === 0 && this.historyCurrentPage === 0) {
-              dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
-              return;
-          }
-
-          this.renderAllSalesView(docs);
-
-          dom.historyPaginationControls.classList.remove('hidden');
-          dom.pageNumberDisplay.textContent = `Página ${this.historyCurrentPage + 1}`;
-          dom.btnPrevPage.disabled = this.historyCurrentPage === 0;
-          dom.btnNextPage.disabled = !this.historyHasNextPage;
-
-      } catch (error) {
-          console.error("Erro ao buscar histórico: ", error);
-          if (error.code === 'failed-precondition') {
-              dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro que você está tentando usar precisa de um índice no banco de dados. Por favor, abra o console do seu navegador (F12), encontre a mensagem de erro em vermelho do Firebase e clique no link fornecido para criar o índice automaticamente. A criação pode levar alguns minutos.</p>`;
-              console.error("MENSAGEM DO FIREBASE (copie o link abaixo e cole no navegador para criar o índice): ", error.message);
-          } else {
-              dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
-          }
-      }
-    },
     
+    async loadHistory(direction = 'first') {
+        const t = TRANSLATIONS[currentLang];
+        dom.historyTableContainer.innerHTML = `<p>${t.historyLoading}</p>`;
+        dom.historyPaginationControls.classList.add('hidden');
+  
+        if (direction === 'first') {
+            this.historyPageCursors = [null];
+            this.historyCurrentPage = 0;
+        }
+  
+        let pageToLoad = this.historyCurrentPage;
+        if (direction === 'next') pageToLoad++;
+        else if (direction === 'prev' && pageToLoad > 0) pageToLoad--;
+  
+        const lastDoc = this.historyPageCursors[pageToLoad];
+        const viewMode = document.querySelector('input[name="history-view-mode"]:checked').value;
+        const searchTerm = dom.historySearchInput.value.toLowerCase().trim();
+        const selectedSeller = dom.historySellerFilter.value;
+        const saleTypeFilter = dom.historySaleTypeFilter.value;
+  
+        let startDate = null;
+        if (dom.historyDateStart.value) {
+            const parts = dom.historyDateStart.value.split('-');
+            startDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        let endDate = null;
+        if (dom.historyDateEnd.value) {
+            const parts = dom.historyDateEnd.value.split('-');
+            endDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            endDate.setHours(23, 59, 59, 999);
+        }
+  
+        try {
+            if (viewMode === 'summary') {
+                await this.renderSummaryView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter);
+                return;
+            } else if (viewMode === 'team' && (this.isOfficialReseller || this.isCurrentUserOwner)) {
+                await this.renderTeamView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter);
+                return;
+            }
+  
+            let query = db.collection("receipts");
+  
+            if (saleTypeFilter === 'reseller') {
+                query = query.where('isResellerSale', '==', true);
+            } else if (saleTypeFilter === 'regular') {
+                query = query.where('isResellerSale', '!=', true);
+            }
+            
+            if (!this.isCurrentUserOwner && !this.isCurrentUserAdmin) {
+                query = query.where('seller', '==', this.currentUsername);
+            } else if (selectedSeller) {
+                query = query.where('seller', '==', selectedSeller);
+            }
+  
+            if (startDate) query = query.where('createdAt', '>=', startDate);
+            if (endDate) query = query.where('createdAt', '<=', endDate);
+            query = query.orderBy('createdAt', 'desc');
+            if (lastDoc) query = query.startAfter(lastDoc);
+            query = query.limit(this.historyPageSize + 1);
+  
+            let querySnapshot = await query.get();
+            let docs = querySnapshot.docs;
+  
+            this.historyHasNextPage = docs.length > this.historyPageSize;
+            if (this.historyHasNextPage) docs.pop();
+  
+            const lastVisibleDoc = docs[docs.length - 1];
+            if (direction === 'next' && lastVisibleDoc) {
+                this.historyPageCursors[pageToLoad] = lastVisibleDoc;
+            }
+            this.historyCurrentPage = pageToLoad;
+  
+            if (searchTerm) {
+                docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
+            }
+  
+            if (docs.length === 0 && this.historyCurrentPage === 0) {
+                dom.historyTableContainer.innerHTML = `<p>${t.historyNoRecords}</p>`;
+                return;
+            }
+  
+            this.renderAllSalesView(docs);
+  
+            dom.historyPaginationControls.classList.remove('hidden');
+            dom.pageNumberDisplay.textContent = `Página ${this.historyCurrentPage + 1}`;
+            dom.btnPrevPage.disabled = this.historyCurrentPage === 0;
+            dom.btnNextPage.disabled = !this.historyHasNextPage;
+  
+        } catch (error) {
+            console.error("Erro ao buscar histórico: ", error);
+            if (error.code === 'failed-precondition') {
+                dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);"><b>Ação Necessária:</b> O filtro que você está tentando usar precisa de um índice no banco de dados. Por favor, abra o console do seu navegador (F12), encontre a mensagem de erro em vermelho do Firebase e clique no link fornecido para criar o índice automaticamente. A criação pode levar alguns minutos.</p>`;
+                console.error("MENSAGEM DO FIREBASE (copie o link abaixo e cole no navegador para criar o índice): ", error.message);
+            } else {
+                dom.historyTableContainer.innerHTML = `<p style="color: var(--text-error);">${t.errorGeneric}</p>`;
+            }
+        }
+      },
+
     async renderTeamView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter) {
         dom.historyTableContainer.innerHTML = `<p>Carregando vendas da equipe...</p>`;
         dom.historyPaginationControls.classList.add('hidden');
@@ -2197,7 +2305,7 @@
                     label: 'Quantidade Vendida',
                     data: data,
                     backgroundColor: colorSet[currentAccent],
-                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary'),
+                    borderColor: getComputedStyle(document.body).getPropertyValue('--bg-primary'),
                     borderWidth: 2
                 }]
             },
@@ -2253,6 +2361,12 @@
 
     async toggleResellerMode(event) {
         const isResellerMode = event.target.checked;
+        
+        if (isResellerMode && dom.customResaleToggle.checked) {
+            dom.customResaleToggle.checked = false;
+        }
+        dom.customResaleModeContainer.style.display = isResellerMode ? 'none' : 'flex';
+
         if (isResellerMode) {
             dom.customerNameContainer.classList.add('hidden');
             dom.resellerCustomerSelectionContainer.classList.remove('hidden');
@@ -2264,22 +2378,17 @@
             dom.resellerLimitStatus.classList.add('hidden');
             clearInterval(this.resellerLimitInterval);
         }
-        if (isResellerMode) {
-            for (const key in PRECOS_RESELLER) {
-                const priceInput = document.getElementById(`price-${key}`);
-                if (priceInput) {
+        
+        for (const key in ITENS_CATALOGO) {
+            const priceInput = document.getElementById(`price-${key}`);
+            if (priceInput) {
+                priceInput.disabled = isResellerMode;
+                if (isResellerMode) {
                     priceInput.value = PRECOS_RESELLER[key];
-                    priceInput.disabled = true;
+                } else {
+                    this.applyManualOrCatalogPrices();
                 }
             }
-        } else {
-            for (const key in ITENS_CATALOGO) {
-                const priceInput = document.getElementById(`price-${key}`);
-                if (priceInput) {
-                    priceInput.disabled = false;
-                }
-            }
-            await this.loadUserPreferences(auth.currentUser);
         }
         this.updateUI();
     },
@@ -2429,7 +2538,7 @@
                 <td data-label="${t.tableItem}">${item[`name_${currentLang}`]}</td>
                 <td data-label="${t.tablePrice}">
                     <div style="width: 100px; margin: 0 auto;">
-                        <input type="number" class="price-input" id="price-${key}" value="${item.preco}" step="10" placeholder="Insira o valor aqui">
+                        <input type="number" class="price-input" id="price-${key}" step="10" placeholder="Insira o valor aqui">
                     </div>
                 </td>
                 <td data-label="${t.tableQty}">
@@ -2445,14 +2554,18 @@
                 this.updateUI();
                 this.triggerSaveCalculatorPreferences();
             });
-            tr.querySelector(`#price-${key}`).addEventListener('change', (event) => this.handlePriceChange(event, key));
+            tr.querySelector(`#price-${key}`).addEventListener('input', (event) => this.handlePriceChange(event, key));
         }
+        this.applyManualOrCatalogPrices();
         this.updateUI();
     },
 
     handlePriceChange(event, key) {
         const input = event.target;
         let novoPreco = parseFloat(input.value);
+        
+        if (isNaN(novoPreco)) return;
+
         const precoMinimo = PRECOS_MINIMOS[key];
         if (!this.isCurrentUserOwner) {
             if (novoPreco < precoMinimo) {
@@ -2465,8 +2578,75 @@
             novoPreco = 0;
             input.value = novoPreco;
         }
+
+        this.manualPrices[key] = novoPreco;
         this.updateUI();
         this.triggerSaveCalculatorPreferences();
+    },
+
+    openResaleModal() {
+        this.populateResaleModalInputs();
+        dom.resalePriceModal.classList.remove('hidden');
+    },
+
+    populateResaleModalInputs() {
+        for (const key in ITENS_CATALOGO) {
+            const input = document.getElementById(`resale-price-${key}`);
+            if (input) {
+                input.value = this.customResalePrices[key] || '';
+            }
+        }
+    },
+
+    async saveResalePrices() {
+        const pricesToSave = {};
+        for (const key in ITENS_CATALOGO) {
+            const input = document.getElementById(`resale-price-${key}`);
+            const value = parseFloat(input.value);
+            if (!isNaN(value) && value > 0) {
+                pricesToSave[key] = value;
+            } else {
+                delete pricesToSave[key];
+            }
+        }
+        
+        this.customResalePrices = pricesToSave;
+        await this.saveCustomResalePricesToFirestore();
+
+        alert("Preços de revenda salvos com sucesso!");
+        dom.resalePriceModal.classList.add('hidden');
+        
+        if (dom.customResaleToggle.checked) {
+            this.toggleCustomResaleMode(true);
+        }
+    },
+    
+    toggleCustomResaleMode(isChecked) {
+        for (const key in ITENS_CATALOGO) {
+            const priceInput = document.getElementById(`price-${key}`);
+            if (priceInput) {
+                priceInput.disabled = isChecked;
+                if (isChecked) {
+                    if (dom.resellerModeToggle.checked) {
+                        dom.resellerModeToggle.checked = false;
+                        this.toggleResellerMode({ target: dom.resellerModeToggle });
+                    }
+                    priceInput.value = this.customResalePrices[key] || ITENS_CATALOGO[key].preco;
+                } else {
+                    this.applyManualOrCatalogPrices();
+                }
+            }
+        }
+        this.updateUI();
+    },
+
+    applyManualOrCatalogPrices() {
+        for (const key in ITENS_CATALOGO) {
+            const priceInput = document.getElementById(`price-${key}`);
+            if (priceInput) {
+                priceInput.value = this.manualPrices[key] || ITENS_CATALOGO[key].preco;
+            }
+        }
     },
 
     formatCurrency(number) {
@@ -2485,32 +2665,46 @@
         let totalFinal = 0;
         const itensCalculados = {};
         const isResellerMode = dom.resellerModeToggle.checked;
+        const isCustomResaleMode = dom.customResaleToggle.checked;
+
         let reviveLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.revive;
         let maxLimitRemaining = RESELLER_DAILY_LIMIT - this.currentCustomerUsage.max;
+
         for (const key in ITENS_CATALOGO) {
             const precoBase = ITENS_CATALOGO[key].preco;
-            const precoRevendedor = PRECOS_RESELLER[key];
             const quantidadeInput = document.getElementById(`qtd-${key}`);
             const quantidade = quantidadeInput ? parseInt(quantidadeInput.value) || 0 : 0;
             let subtotal = 0;
-            let precoAplicado = precoBase;
-            if (isResellerMode && (key === 'revive' || key === 'max')) {
-                const limitRemaining = (key === 'revive') ? reviveLimitRemaining : maxLimitRemaining;
-                const tokensDentroDoLimite = Math.max(0, Math.min(quantidade, limitRemaining));
-                const tokensForaDoLimite = Math.max(0, quantidade - tokensDentroDoLimite);
-                subtotal += tokensDentroDoLimite * precoRevendedor;
-                subtotal += tokensForaDoLimite * precoBase;
-                precoAplicado = precoRevendedor;
+            let precoAplicado;
+
+            if (isResellerMode) {
+                precoAplicado = PRECOS_RESELLER[key];
+                if(key === 'revive' || key === 'max'){
+                    const limitRemaining = (key === 'revive') ? reviveLimitRemaining : maxLimitRemaining;
+                    const tokensDentroDoLimite = Math.max(0, Math.min(quantidade, limitRemaining));
+                    const tokensForaDoLimite = Math.max(0, quantidade - tokensDentroDoLimite);
+                    subtotal += tokensDentroDoLimite * PRECOS_RESELLER[key];
+                    subtotal += tokensForaDoLimite * precoBase;
+                } else {
+                    subtotal = quantidade * PRECOS_RESELLER[key];
+                }
+            } else if (isCustomResaleMode) {
+                if (quantidade > 84 && PRECOS_VOLUME[key]) {
+                    precoAplicado = PRECOS_VOLUME[key];
+                } else {
+                    precoAplicado = this.customResalePrices[key] || precoBase;
+                }
+                subtotal = quantidade * (precoAplicado * fatorDesconto);
             } else {
                 const precoInput = document.getElementById(`price-${key}`);
-                precoAplicado = isResellerMode ? PRECOS_RESELLER[key] : (precoInput ? parseFloat(precoInput.value) || precoBase : precoBase);
+                precoAplicado = precoInput ? parseFloat(precoInput.value) || precoBase : precoBase;
                 subtotal = quantidade * (precoAplicado * fatorDesconto);
             }
+
             totalFinal += subtotal;
             itensCalculados[key] = {
                 quantidade,
-                precoAtual: precoAplicado,
-                precoComDesconto: subtotal / quantidade || 0,
+                precoUnitario: precoAplicado,
                 subtotal
             };
         }
@@ -2531,41 +2725,58 @@
         dom.totalGeralCell.appendChild(this.createCoinIcon());
     },
 
-    reset(clearDistributor = true, clearPrices = false) {
-        dom.nomeClienteInput.value = '';
-        dom.descontoInput.value = '';
-        dom.resellerCustomerSelect.value = '';
-        dom.resellerCustomerManualInput.value = '';
-        dom.resellerCustomerManualInput.classList.add('hidden');
-        if (clearDistributor) {
-            dom.totalMushInput.value = '';
-            dom.leftoverMushDiv.innerHTML = '';
-            dom.leftoverDistributorSection.classList.add('hidden');
+    reset({ fullReset = false } = {}) {
+        if (fullReset) {
+            dom.nomeClienteInput.value = '';
+            dom.resellerCustomerSelect.value = '';
+            dom.resellerCustomerManualInput.value = '';
+            dom.resellerCustomerManualInput.classList.add('hidden');
+            dom.descontoInput.value = '';
+
+            if (dom.resellerModeToggle.checked) {
+                dom.resellerModeToggle.checked = false;
+                this.toggleResellerMode({ target: dom.resellerModeToggle });
+            }
+            if (dom.customResaleToggle.checked) {
+                dom.customResaleToggle.checked = false;
+                this.toggleCustomResaleMode(false);
+            }
+            
+            this.manualPrices = {};
+            this.applyManualOrCatalogPrices();
+            this.checkResellerLimit();
         }
+
+        dom.totalMushInput.value = '';
+        dom.leftoverMushDiv.innerHTML = '';
+        dom.leftoverDistributorSection.classList.add('hidden');
+        
         Object.keys(ITENS_CATALOGO).forEach(key => {
             const qtdInput = document.getElementById(`qtd-${key}`);
             if (qtdInput) qtdInput.value = 0;
-            if (clearPrices && !dom.resellerModeToggle.checked) {
-                const priceInput = document.getElementById(`price-${key}`);
-                if (priceInput) priceInput.value = ITENS_CATALOGO[key].preco;
-            }
         });
-        this.checkResellerLimit();
+        
         this.updateUI();
         this.triggerSaveCalculatorPreferences();
     },
 
     distributeMush() {
-        this.reset(false, false);
         const totalMush = parseFloat(dom.totalMushInput.value) || 0;
+        this.reset({ fullReset: false }); 
+        
         if (totalMush <= 0) { this.updateUI(); return; }
         const selectedTokenKeys = Array.from(dom.tokenFiltersContainer.querySelectorAll('input:checked')).map(cb => cb.value);
         if (selectedTokenKeys.length === 0) { alert(TRANSLATIONS[currentLang].alertNoItems); return; }
-        let tokens = selectedTokenKeys.map(key => ({
-            key,
-            preco: parseFloat(document.getElementById(`price-${key}`).value) || ITENS_CATALOGO[key].preco,
-            quantidade: 0
-        }));
+        
+        let tokens = selectedTokenKeys.map(key => {
+            const priceInput = document.getElementById(`price-${key}`);
+            return {
+                key,
+                preco: parseFloat(priceInput.value) || ITENS_CATALOGO[key].preco,
+                quantidade: 0
+            }
+        });
+
         if (tokens.length === 2 && document.querySelector('input[name="two-token-strategy"]:checked').value === 'split') {
             const mushPerToken = totalMush / 2;
             tokens.forEach(token => {
@@ -2576,8 +2787,7 @@
         } else {
             this.runFairDistribution(tokens, totalMush);
         }
-        this.updateDistributionUI(tokens);
-        this.triggerSaveCalculatorPreferences();
+        this.updateDistributionUI(tokens, totalMush);
     },
 
     distributeLeftoverMush() {
@@ -2594,14 +2804,9 @@
             const currentQty = parseInt(qtyInput.value) || 0;
             qtyInput.value = currentQty + token.quantidade;
         });
-        dom.leftoverDistributorSection.classList.add('hidden');
-        const newCalculo = this.calculateValues();
+        
         const totalMushInputted = parseFloat(dom.totalMushInput.value) || 0;
-        this.currentLeftover = totalMushInputted - newCalculo.totalFinal;
-        dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `;
-        dom.leftoverMushDiv.appendChild(this.createCoinIcon());
-        this.updateUI();
-        this.triggerSaveCalculatorPreferences();
+        this.updateDistributionUI([], totalMushInputted);
     },
 
     runFairDistribution(tokens, totalMush) {
@@ -2622,18 +2827,26 @@
         return tokens;
     },
 
-    updateDistributionUI(tokens) {
-        let mushGasto = 0;
+    updateDistributionUI(tokens, totalMushInputted) {
         tokens.forEach(token => {
             document.getElementById(`qtd-${token.key}`).value = token.quantidade;
-            mushGasto += token.quantidade * token.preco;
         });
-        const mushTotal = parseFloat(dom.totalMushInput.value) || 0;
-        this.currentLeftover = mushTotal - mushGasto;
+
+        const calculoAtual = this.calculateValues();
+        this.currentLeftover = totalMushInputted - calculoAtual.totalFinal;
+
         dom.leftoverMushDiv.innerHTML = `${TRANSLATIONS[currentLang].leftoverMushText} <b>${this.formatCurrency(this.currentLeftover)}</b> `;
         dom.leftoverMushDiv.appendChild(this.createCoinIcon());
-        const cheapestPrice = Math.min(...Object.values(ITENS_CATALOGO).map(t => t.preco));
-        if (this.currentLeftover >= cheapestPrice) {
+        
+        let cheapestPrice = Infinity;
+        for (const key in ITENS_CATALOGO) {
+            const price = parseFloat(document.getElementById(`price-${key}`).value) || ITENS_CATALOGO[key].preco;
+            if (price < cheapestPrice) {
+                cheapestPrice = price;
+            }
+        }
+
+        if (this.currentLeftover >= cheapestPrice && this.currentLeftover > 0) {
             dom.leftoverDistributorSection.classList.remove('hidden');
             this.buildTokenFilters(dom.leftoverTokenFiltersContainer);
         } else {
@@ -2652,44 +2865,72 @@
 
     buildReceiptHtml(receiptData) {
         const t = TRANSLATIONS[currentLang];
-        // **ALTERAÇÃO**: Criar o HTML da imagem do Mush para ser inserido como string
         const coinIconHtml = `<img src="${MOEDA_BASE64}" style="width: 14px; height: 14px; vertical-align: -2px; margin-left: 4px;" alt="mush">`;
         
         let subtotalBruto = 0;
-        let itemsHtml = '';
+        let showVolumeLegend = false;
+        
+        let itemsTableHead = `<thead>
+            <tr style="text-align: left; color: var(--text-secondary);">
+                <th style="padding: 5px 2px; width: 45%;">Item</th>
+                <th style="padding: 5px 2px; text-align: right; width: 27%;">${t.receiptUnitPrice}</th>
+                <th style="padding: 5px 2px; text-align: right; width: 28%;">Total</th>
+            </tr>
+        </thead>`;
+        let itemsTableBody = '<tbody>';
+
         for (const key in receiptData.itemsData) {
             const item = receiptData.itemsData[key];
             const catalogoItem = ITENS_CATALOGO[key];
             if (item.qty > 0 && catalogoItem) {
                 const subtotalItem = item.qty * item.price;
-                // **ALTERAÇÃO**: Adicionar o ícone do Mush como string
-                itemsHtml += `<tr><td style="padding: 5px 0;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td style="padding: 5px 0; text-align: right;">${this.formatCurrency(subtotalItem)}${coinIconHtml}</td></tr>`;
                 subtotalBruto += subtotalItem;
+                
+                let volumeMarker = '';
+                if (item.isVolumePrice) {
+                    volumeMarker = ' *';
+                    showVolumeLegend = true;
+                }
+
+                itemsTableBody += `
+                    <tr>
+                        <td style="padding: 5px 2px;">${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td>
+                        <td style="padding: 5px 2px; text-align: right;">${this.formatCurrency(item.price)}${volumeMarker}${coinIconHtml}</td>
+                        <td style="padding: 5px 2px; text-align: right;">${this.formatCurrency(subtotalItem)}${coinIconHtml}</td>
+                    </tr>`;
             }
         }
+        itemsTableBody += '</tbody>';
+
         const valorDesconto = subtotalBruto - receiptData.grandTotal;
         const dataVenda = receiptData.createdAt?.toDate ? receiptData.createdAt.toDate().toLocaleString(currentLang) : new Date().toLocaleString(currentLang);
         
-        // **ALTERAÇÃO**: Adicionar a tag "(Revendedor)" se aplicável
         const resellerTagHtml = receiptData.isResellerSale ? '<span style="font-size: 0.8em; color: var(--accent-warning); font-weight: bold;"> (Revendedor)</span>' : '';
+        const volumeLegendHtml = showVolumeLegend ? `<p style="text-align: center; margin-top: 10px; font-size: 0.8em; color: var(--text-secondary);">${t.volumePriceLegend}</p>` : '';
 
         let receiptHtml = `
             <h2 style="font-family: 'Poppins', sans-serif; color: var(--accent-primary); text-align: center;">${t.receiptHeader}</h2>
             <p style="text-align: center; color: var(--text-secondary); margin-bottom: 10px;">${receiptData.customerName}${resellerTagHtml}</p>
             <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px; font-size: 0.8em;">${dataVenda}</p>
             <h3 style="margin-top: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-size: 1em;">${t.receiptItemsHeader}</h3>
-            <table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;"><tbody>${itemsHtml}</tbody></table>
+            <table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9em;">
+                ${itemsTableHead}
+                ${itemsTableBody}
+            </table>
             <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.9em;">
                 <p style="display: flex; justify-content: space-between;"><span>${t.receiptSubtotal}:</span> <span>${this.formatCurrency(subtotalBruto)}${coinIconHtml}</span></p>
                 <p style="display: flex; justify-content: space-between;"><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${this.formatCurrency(valorDesconto)}${coinIconHtml}</span></p>
                 <p style="display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-primary); font-size: 1.2em; margin-top: 5px;"><span>${t.receiptFinalTotal}:</span> <span>${this.formatCurrency(receiptData.grandTotal)}${coinIconHtml}</span></p>
             </div>
+            ${volumeLegendHtml}
             <p style="text-align: center; margin-top: 20px; font-size: 0.9em;">${t.receiptThanks}</p>`;
         return receiptHtml;
     },
 
     async generateImage() {
         const isResellerMode = dom.resellerModeToggle.checked;
+        const isCustomResaleMode = dom.customResaleToggle.checked;
+
         if (isResellerMode) {
             const reviveQty = parseInt(document.getElementById('qtd-revive').value) || 0;
             const maxQty = parseInt(document.getElementById('qtd-max').value) || 0;
@@ -2714,15 +2955,18 @@
         } else {
             customerName = dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
         }
+
         const itemsToSave = {};
         for (const key in calculo.itens) {
             if (calculo.itens[key].quantidade > 0) {
                 itemsToSave[key] = {
                     qty: calculo.itens[key].quantidade,
-                    price: calculo.itens[key].precoAtual
+                    price: calculo.itens[key].precoUnitario,
+                    isVolumePrice: isCustomResaleMode && calculo.itens[key].quantidade > 85 && PRECOS_VOLUME[key] && calculo.itens[key].precoUnitario === PRECOS_VOLUME[key]
                 };
             }
         }
+        
         const receiptData = {
             customerName: customerName,
             discountApplied: calculo.descontoPercentual,
@@ -2759,6 +3003,9 @@
                     this.updateResellerLimitStatusUI();
                 }
             }
+            
+            this.reset({ fullReset: false });
+
         } catch(e) {
             console.error("Erro ao salvar no Firestore: ", e);
             alert("Houve um erro ao salvar o recibo ou atualizar o limite no banco de dados.");
@@ -2777,7 +3024,7 @@
             html2canvas(resultadoDiv, { 
                 backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), 
                 scale: 2,
-                useCORS: true, // Adicionado para melhor compatibilidade
+                useCORS: true,
                 willReadFrequently: true 
             }).then(canvas => {
                 const link = document.createElement('a');
@@ -2815,7 +3062,7 @@
                 html2canvas(resultadoDiv, { 
                     backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'), 
                     scale: 2,
-                    useCORS: true, // Adicionado para melhor compatibilidade
+                    useCORS: true,
                     willReadFrequently: true
                 }).then(canvas => {
                     const link = document.createElement('a');
@@ -2931,7 +3178,4 @@
   };
 
   app.init();
-
 </script>
-</body>
-</html>
