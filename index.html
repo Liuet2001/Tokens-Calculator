@@ -1636,7 +1636,7 @@
         loggedInAs: "Usuário:",
         resellerCustomerLabel: "Cliente Revendedor", resellerCustomerManualPlaceholder: "Digite o nome do cliente revendedor",
         resellerLimitStatus: (revive, total, time) => `Limite Cliente: <b>Revive</b> (${revive}/${total}). Reseta em <b>${time}</b>.`,
-        resellerLimitExceededWarning: "Atenção: O limite diário do cliente para um ou mais itens foi excedido. Itens acima do limite serão cobrados com o preço base.",
+        resellerLimitExceededWarning: "Atenção: O limite diário do cliente para Revive Token foi excedido!",
         receiptResellerLimit: (count, total) => `Limite Diário (Revive): ${count} / ${total}`,
         resalePricesLabel: "Preços Personalizados",
         resalePricesBtn: "Definir Preços de Revenda",
@@ -1644,7 +1644,9 @@
         resaleModalHeader: "Definir Preços de Revenda",
         resaleModalDesc: "Estes preços serão usados quando o \"Modo Revenda\" estiver ativo. Para editar, use este modal.",
         cancelButton: "Cancelar",
-        saveButton: "Salvar"
+        saveButton: "Salvar",
+        limitExceededDetail: (qty, price) => `${qty}x excedente(s) ao preço de M$ ${price}`,
+        confirmLimitSale: "Atenção: Esta venda excede o limite diário do cliente. Parte dos itens será cobrada com preço normal. Deseja continuar?",
     },
     en: {
         pageTitle: "Panel", mainHeader: "Token Calculator", themeLabel: "Light Theme",
@@ -1670,7 +1672,7 @@
         loggedInAs: "User:",
         resellerCustomerLabel: "Reseller Customer", resellerCustomerManualPlaceholder: "Enter reseller customer's name",
         resellerLimitStatus: (revive, total, time) => `Customer Limit: <b>Revive</b> (${revive}/${total}). Resets in <b>${time}</b>.`,
-        resellerLimitExceededWarning: "Warning: The customer's daily limit for one or more items has been exceeded. Items above the limit will be charged at the base price.",
+        resellerLimitExceededWarning: "Warning: The customer's daily limit for Revive Token has been exceeded!",
         receiptResellerLimit: (count, total) => `Daily Limit (Revive): ${count} / ${total}`,
         resalePricesLabel: "Custom Prices",
         resalePricesBtn: "Set Resale Prices",
@@ -1678,7 +1680,9 @@
         resaleModalHeader: "Set Resale Prices",
         resaleModalDesc: "These prices will be used when \"Resale Mode\" is active. To edit, use this modal.",
         cancelButton: "Cancel",
-        saveButton: "Save"
+        saveButton: "Save",
+        limitExceededDetail: (qty, price) => `${qty}x item(s) over limit at M$ ${price}`,
+        confirmLimitSale: "Warning: This sale exceeds the customer's daily limit. Part of the items will be charged at the normal price. Do you wish to continue?",
     }
   };
 
@@ -1868,10 +1872,15 @@
                     app.isOfficialReseller = !!idTokenResult.claims.officialReseller;
                     app.currentUsername = user.email.split('@')[0];
                     const canManage = app.isCurrentUserOwner || app.isCurrentUserAdmin;
+                    
                     document.querySelector('[data-tab="admin-view"]').style.display = canManage ? 'inline-block' : 'none';
-                    document.querySelector('[data-tab="reseller-panel-view"]').style.display = (app.isOfficialReseller || app.isCurrentUserOwner) ? 'inline-block' : 'none';
+                    
+                    const canAccessResellerPanel = app.isOfficialReseller || app.isCurrentUserOwner || app.isCurrentUserAdmin;
+                    document.querySelector('[data-tab="reseller-panel-view"]').style.display = canAccessResellerPanel ? 'inline-block' : 'none';
+                    
                     if(dom.historyViewTeamContainer) {
-                        dom.historyViewTeamContainer.style.display = (app.isOfficialReseller || app.isCurrentUserOwner) ? 'contents' : 'none';
+                        const canSeeTeamView = app.isOfficialReseller || app.isCurrentUserOwner || app.isCurrentUserAdmin;
+                        dom.historyViewTeamContainer.style.display = canSeeTeamView ? 'contents' : 'none';
                     }
                     if (app.isCurrentUserOwner || app.isCurrentUserAdmin) {
                         dom.resellerModeContainer.classList.remove('hidden');
@@ -2123,15 +2132,24 @@
         if (tabId === 'dashboard-view') app.loadDashboardData();
         else if (tabId === 'history-view') {
             app.loadHistory('first');
-            if (app.isCurrentUserOwner) app.populateHistorySellerFilter();
-            else dom.historySellerFilterContainer.classList.add('hidden');
+            if (app.isCurrentUserOwner || app.isCurrentUserAdmin) {
+                app.populateHistorySellerFilter();
+            } else {
+                dom.historySellerFilterContainer.classList.add('hidden');
+            }
         } 
         else if (tabId === 'admin-view' && (app.isCurrentUserOwner || app.isCurrentUserAdmin)) app.loadUsers();
-        else if (tabId === 'reseller-panel-view' && (app.isOfficialReseller || app.isCurrentUserOwner)) app.loadResellerPanelData();
+        else if (tabId === 'reseller-panel-view' && (app.isOfficialReseller || app.isCurrentUserOwner || app.isCurrentUserAdmin)) app.loadResellerPanelData();
     },
 
     handleHistoryDelete(docIds) {
         if (!docIds || docIds.length === 0) return;
+        
+        if (!app.isCurrentUserOwner && !app.isCurrentUserAdmin) {
+            app.showNotification("Você não tem permissão para excluir registros.", "error");
+            return;
+        }
+
         const message = docIds.length > 1 ? `Tem certeza que deseja excluir os ${docIds.length} registros? Esta ação também irá reverter os limites de revenda diários, se aplicável.` : "Tem certeza que deseja excluir este registro? Esta ação também irá reverter o limite de revenda diário, se aplicável.";
         
         app.showConfirmation(message, async () => {
@@ -2285,7 +2303,8 @@
     async loadResellerPanelData() {
         app.showLoading(dom.subResellerListContainer);
         if (dom.addSubResellerSection) {
-            dom.addSubResellerSection.style.display = (app.isOfficialReseller || app.isCurrentUserOwner) ? 'flex' : 'none';
+            const canAddSubReseller = app.isOfficialReseller || app.isCurrentUserOwner || app.isCurrentUserAdmin;
+            dom.addSubResellerSection.style.display = canAddSubReseller ? 'flex' : 'none';
         }
         const result = await app.callCloudFunction('listMySubResellers');
         if (result.success) {
@@ -2434,7 +2453,10 @@
         const endDate = dom.historyDateEnd.value ? new Date(dom.historyDateEnd.value + 'T23:59:59') : null;
         try {
             if (viewMode === 'summary') return await app.renderSummaryView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter);
-            if (viewMode === 'team' && (app.isOfficialReseller || app.isCurrentUserOwner)) return await app.renderTeamView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter);
+            
+            const canSeeTeamView = app.isOfficialReseller || app.isCurrentUserOwner || app.isCurrentUserAdmin;
+            if (viewMode === 'team' && canSeeTeamView) return await app.renderTeamView(searchTerm, startDate, endDate, selectedSeller, saleTypeFilter);
+
             let query = db.collection("receipts");
             if (saleTypeFilter === 'reseller') query = query.where('isResellerSale', '==', true);
             else if (saleTypeFilter === 'regular') query = query.where('isResellerSale', 'in', [false, null]);
@@ -2536,7 +2558,7 @@
                           <td data-label="${t.historyDate}">${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString(currentLang) : 'N/A'}</td>
                           <td data-label="Ações" style="display: flex; gap: 8px; justify-content: center;">
                               <button class="btn-view-receipt" data-id="${doc.id}" title="Ver Recibo"><svg class="icon" style="margin-right:0;"><use xlink:href="#icon-receipt"></use></svg></button>`;
-            if (app.isCurrentUserOwner) {
+            if (app.isCurrentUserOwner || app.isCurrentUserAdmin) {
                 tableHTML += `<button class="delete-history-btn btn-action delete" data-id="${doc.id}" title="Excluir"><svg class="icon" style="margin-right:0;"><use xlink:href="#icon-reset"></use></svg></button>`;
             }
             tableHTML += `</td></tr>`;
@@ -2864,6 +2886,7 @@
         for (const key in ITENS_CATALOGO) {
             const item = ITENS_CATALOGO[key];
             const tr = document.createElement('tr');
+            tr.dataset.key = key;
             tr.innerHTML = `<td data-label="${t.tableItem}">${item[`name_${currentLang}`]}</td>
                 <td data-label="${t.tablePrice}"><div style="width:100px;margin:0 auto;"><input type="number" class="price-input" id="price-${key}" step="10"></div></td>
                 <td data-label="Preço c/ Desc." class="discounted-price-col"><span class="discounted-price-value" id="discounted-price-${key}">-</span></td>
@@ -2882,12 +2905,15 @@
         const input = event.target;
         let novoPreco = parseFloat(input.value);
         if (isNaN(novoPreco)) return;
+
         const precoMinimo = PRECOS_MINIMOS[key];
-        if (!app.isCurrentUserOwner && novoPreco < precoMinimo) {
+        
+        if (!(app.isCurrentUserOwner || app.isCurrentUserAdmin) && novoPreco < precoMinimo) {
             app.showNotification(`O valor mínimo para este item é ${precoMinimo}.`, 'error');
             novoPreco = precoMinimo;
             input.value = novoPreco;
         }
+
         if (novoPreco < 0) input.value = 0;
         app.manualPrices[key] = novoPreco;
         app.updateUI();
@@ -2948,25 +2974,42 @@
     formatCurrency(number) { return (number || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); },
 
     calculateValues() {
+        const t = TRANSLATIONS[currentLang];
         const descontoPercentual = parseFloat(dom.descontoInput.value) || 0;
         const fatorDesconto = 1 - (descontoPercentual / 100);
         let totalFinal = 0;
         const itensCalculados = {};
         const isResellerMode = dom.resellerModeToggle.checked;
         const isCustomResaleMode = dom.customResaleToggle.checked;
-        let reviveLimitRemaining = app.CONFIG.RESELLER_DAILY_LIMIT - app.currentCustomerUsage.revive;
-        
+        let reviveLimitRemaining = app.CONFIG.RESELLER_DAILY_LIMIT - (app.currentCustomerUsage.revive || 0);
+
+        const limitDetails = {};
+        let notificationShown = false;
+
         for (const key in ITENS_CATALOGO) {
             const precoBase = ITENS_CATALOGO[key].preco;
             const quantidade = parseInt(document.getElementById(`qtd-${key}`)?.value) || 0;
             let subtotal = 0;
             let precoAplicado;
+            
             if (isResellerMode) {
                 precoAplicado = PRECOS_RESELLER[key];
-                if(key === 'revive'){
-                    const limitRemaining = reviveLimitRemaining;
-                    const tokensDentroDoLimite = Math.max(0, Math.min(quantidade, limitRemaining));
+                if(key === 'revive' && quantidade > 0){
+                    const tokensDentroDoLimite = Math.max(0, Math.min(quantidade, reviveLimitRemaining));
                     const tokensForaDoLimite = Math.max(0, quantidade - tokensDentroDoLimite);
+                    
+                    if (tokensForaDoLimite > 0) {
+                        if (!notificationShown) {
+                           app.showNotification(t.resellerLimitExceededWarning, 'error');
+                           notificationShown = true;
+                        }
+                        limitDetails[key] = {
+                            qty: tokensForaDoLimite,
+                            price: precoBase,
+                            text: t.limitExceededDetail(tokensForaDoLimite, app.formatCurrency(precoBase))
+                        };
+                    }
+                    
                     subtotal += tokensDentroDoLimite * PRECOS_RESELLER[key];
                     subtotal += tokensForaDoLimite * precoBase;
                 } else { 
@@ -2982,22 +3025,28 @@
             totalFinal += subtotal;
             itensCalculados[key] = { quantidade, precoUnitario: precoAplicado, subtotal };
         }
-        return { totalFinal, descontoPercentual, itens: itensCalculados };
+        return { totalFinal, descontoPercentual, itens: itensCalculados, limitDetails };
     },
 
     updateUI() {
         const calculo = app.calculateValues();
         if (!calculo) return;
 
+        document.querySelectorAll('.limit-detail-row').forEach(row => row.remove());
+
         const isDiscountApplicable = !dom.resellerModeToggle.checked && !dom.customResaleToggle.checked;
         const fatorDesconto = 1 - (calculo.descontoPercentual / 100);
         const tfootTD = dom.calculatorTable.querySelector('tfoot td:first-child');
         const showDiscount = isDiscountApplicable && calculo.descontoPercentual > 0;
         dom.calculatorTable.classList.toggle('show-discount', showDiscount);
-        tfootTD.setAttribute('colspan', showDiscount ? '4' : '3');
+        
+        const colspanValue = showDiscount ? 4 : 3;
+        tfootTD.setAttribute('colspan', colspanValue);
 
         Array.from(dom.tabelaItensBody.rows).forEach((row, index) => {
-            const key = Object.keys(ITENS_CATALOGO)[index];
+            const key = row.dataset.key;
+            if (!key || !calculo.itens[key]) return;
+
             const itemCalculado = calculo.itens[key];
             const priceInput = document.getElementById(`price-${key}`);
             if (dom.customResaleToggle.checked && priceInput) {
@@ -3017,6 +3066,14 @@
             const totalCell = row.cells[row.cells.length - 1];
             totalCell.innerHTML = `${app.formatCurrency(itemCalculado.subtotal)} `;
             totalCell.appendChild(app.createCoinIcon());
+
+            if (calculo.limitDetails[key]) {
+                const detailRow = document.createElement('tr');
+                detailRow.className = 'limit-detail-row';
+                // A coluna extra de detalhe ocupa todas as colunas da tabela
+                detailRow.innerHTML = `<td colspan="${colspanValue + 1}">${calculo.limitDetails[key].text}</td>`;
+                row.after(detailRow);
+            }
         });
 
         dom.totalGeralCell.innerHTML = `<b>${app.formatCurrency(calculo.totalFinal)}</b> `;
@@ -3131,11 +3188,38 @@
         for (const key in receiptData.itemsData) {
             const item = receiptData.itemsData[key];
             const catalogoItem = ITENS_CATALOGO[key];
-            if (item.qty > 0 && catalogoItem) {
-                const precoOriginal = item.price; 
+            if (!item.qty || !catalogoItem) continue;
+
+            const precoOriginal = item.price; 
+            
+            if (receiptData.isResellerSale && key === 'revive' && receiptData.limitDetails && receiptData.limitDetails.revive) {
+                const detail = receiptData.limitDetails.revive;
+                const qtyComDesconto = item.qty - detail.qty;
+
+                if (qtyComDesconto > 0) {
+                    const subtotalComDesconto = qtyComDesconto * PRECOS_RESELLER[key];
+                    subtotalBruto += subtotalComDesconto;
+                    itemsTableRows += `<tr>
+                        <td>${catalogoItem[`name_${currentLang}`]} x ${qtyComDesconto} (c/ desconto)</td>
+                        <td>${app.formatCurrency(PRECOS_RESELLER[key])}</td>
+                        <td>${app.formatCurrency(subtotalComDesconto)}</td>
+                    </tr>`;
+                }
+                const subtotalSemDesconto = detail.qty * detail.price;
+                subtotalBruto += subtotalSemDesconto;
+                itemsTableRows += `<tr>
+                    <td>${catalogoItem[`name_${currentLang}`]} x ${detail.qty} (preço normal)</td>
+                    <td>${app.formatCurrency(detail.price)}</td>
+                    <td>${app.formatCurrency(subtotalSemDesconto)}</td>
+                </tr>`;
+            } else {
                 const subtotalItemSemDesconto = item.qty * precoOriginal;
                 subtotalBruto += subtotalItemSemDesconto;
-                itemsTableRows += `<tr><td>${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td>${app.formatCurrency(precoOriginal)}</td><td>${app.formatCurrency(subtotalItemSemDesconto * fatorDesconto)}</td></tr>`;
+                itemsTableRows += `<tr>
+                    <td>${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td>
+                    <td>${app.formatCurrency(precoOriginal)}</td>
+                    <td>${app.formatCurrency(subtotalItemSemDesconto * fatorDesconto)}</td>
+                </tr>`;
             }
         }
 
@@ -3162,7 +3246,7 @@
                     </table>
                     <div class="receipt-totals">
                         <div><span>${t.receiptSubtotal}:</span> <span>${app.formatCurrency(subtotalBruto)}</span></div>
-                        <div><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${app.formatCurrency(valorDesconto)}</span></div>
+                        ${receiptData.discountApplied > 0 ? `<div><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${app.formatCurrency(valorDesconto)}</span></div>` : ''}
                         <div class="final-total"><span>${t.receiptFinalTotal}:</span> <span>${app.formatCurrency(receiptData.grandTotal)}${coinIconHtml}</span></div>
                     </div>
                     <div class="receipt-footer">
@@ -3173,13 +3257,26 @@
                 </div>`;
     },
     
+    // CORREÇÃO: Adicionada a lógica de confirmação
     async processSaleAndGenerateReceipt() {
         const receiptData = app.prepareSaleData();
         if (!receiptData) return;
-        const savedDoc = await app.saveSaleAndUpdateLimits(receiptData);
-        if (!savedDoc) return; 
-        await app.createAndDownloadReceiptImage(receiptData, savedDoc.id);
-        app.reset({ fullReset: true });
+
+        const executeSale = async () => {
+            const savedDoc = await app.saveSaleAndUpdateLimits(receiptData);
+            if (!savedDoc) return; 
+            await app.createAndDownloadReceiptImage(receiptData, savedDoc.id);
+            app.reset({ fullReset: true });
+        };
+
+        // Verifica se há detalhes de limite e se o modo revendedor está ativo
+        if (dom.resellerModeToggle.checked && Object.keys(receiptData.limitDetails).length > 0) {
+            app.showConfirmation(TRANSLATIONS[currentLang].confirmLimitSale, () => {
+                executeSale();
+            });
+        } else {
+            executeSale();
+        }
     },
 
     prepareSaleData() {
@@ -3194,10 +3291,6 @@
         let finalCustomerUsage = null;
 
         if (isResellerMode) {
-            const reviveLimitRemaining = app.CONFIG.RESELLER_DAILY_LIMIT - app.currentCustomerUsage.revive;
-            if (reviveQty > reviveLimitRemaining) {
-                app.showNotification(TRANSLATIONS[currentLang].resellerLimitExceededWarning, 'error');
-            }
             finalCustomerUsage = {
                 revive: (app.currentCustomerUsage.revive || 0) + reviveQty
             };
@@ -3222,14 +3315,13 @@
             isResellerSale: isResellerMode, 
             isCustomResale: isCustomResaleMode, 
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            finalCustomerUsage 
+            finalCustomerUsage,
+            limitDetails: calculo.limitDetails
         };
     },
 
     async saveSaleAndUpdateLimits(receiptData) {
         try {
-            // CORREÇÃO: Agora salvamos o objeto `receiptData` inteiro, incluindo `finalCustomerUsage`,
-            // para que a regeneração do recibo funcione corretamente.
             const docRef = await db.collection("receipts").add(receiptData);
 
             if (receiptData.isResellerSale && receiptData.customerName !== 'Revendedor_Nao_Identificado') {
