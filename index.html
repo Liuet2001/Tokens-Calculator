@@ -934,19 +934,24 @@
   }
   .receipt-items-table th {
       text-align: left;
-      padding: 8px 2px;
+      padding: 12px 4px;
       color: var(--text-secondary);
       font-weight: 500;
   }
   .receipt-items-table td {
-      padding: 6px 2px;
+      padding: 8px 4px;
       border-bottom: 1px solid var(--bg-primary);
   }
-  .receipt-items-table td:nth-child(2),
-  .receipt-items-table td:nth-child(3),
   .receipt-items-table th:nth-child(2),
-  .receipt-items-table th:nth-child(3) {
+  .receipt-items-table td:nth-child(2) {
+      text-align: center;
+  }
+  .receipt-items-table th:nth-child(3),
+  .receipt-items-table td:nth-child(3) {
       text-align: right;
+  }
+  .receipt-items-table td:nth-child(2),
+  .receipt-items-table td:nth-child(3) {
       font-family: var(--font-mono);
   }
   .receipt-totals {
@@ -976,6 +981,11 @@
       text-align: center;
       margin-top: 25px;
       font-size: 12px;
+      color: var(--text-secondary);
+  }
+  .receipt-limit-status {
+      margin-top: 8px;
+      font-style: italic;
       color: var(--text-secondary);
   }
   .coin-icon {
@@ -1611,7 +1621,7 @@
         receiptHeader: "Recibo", receiptItemsHeader: "Itens Comprados", receiptSubtotal: "Subtotal",
         receiptDiscount: "Desconto", receiptFinalTotal: "Total Final", receiptThanks: "Gerado pelo Painel de Vendas by Riciv",
         receiptUnitPrice: "Preço Unit.", receiptSeller: "Venda por", receiptTransactionId: "ID da Transação",
-        volumePriceLegend: "* Preço aplicado p/ compras > 84 unidades",
+        volumePriceLegend: "* Preço aplicado p/ compras > 74 unidades",
         calculationMode: "Modo de Cálculo", modeQty: "Por Quantidade", modeMush: "Por Mush",
         distributeTokensLabel: "Tokens Desejáveis para Distribuição", totalMushLabel: "Total de Mush a Gastar",
         btnDistribute: "Distribuir", leftoverMushText: "Sobrou:",
@@ -1625,8 +1635,9 @@
         usersEmptyStateMessage: "Nenhum usuário encontrado.",
         loggedInAs: "Usuário:",
         resellerCustomerLabel: "Cliente Revendedor", resellerCustomerManualPlaceholder: "Digite o nome do cliente revendedor",
-        resellerLimitStatus: (revive, max, total, time) => `Limite Cliente: <b>Revive</b> (${revive}/${total}) | <b>Max</b> (${max}/${total}). Reseta em <b>${time}</b>.`,
+        resellerLimitStatus: (revive, total, time) => `Limite Cliente: <b>Revive</b> (${revive}/${total}). Reseta em <b>${time}</b>.`,
         resellerLimitExceededWarning: "Atenção: O limite diário do cliente para um ou mais itens foi excedido. Itens acima do limite serão cobrados com o preço base.",
+        receiptResellerLimit: (count, total) => `Limite Diário (Revive): ${count} / ${total}`,
         resalePricesLabel: "Preços Personalizados",
         resalePricesBtn: "Definir Preços de Revenda",
         customResaleModeLabel: "Modo Revenda (Preços Personalizados)",
@@ -1658,8 +1669,9 @@
         usersEmptyStateMessage: "No users found.",
         loggedInAs: "User:",
         resellerCustomerLabel: "Reseller Customer", resellerCustomerManualPlaceholder: "Enter reseller customer's name",
-        resellerLimitStatus: (revive, max, total, time) => `Customer Limit: <b>Revive</b> (${revive}/${total}) | <b>Max</b> (${max}/${total}). Resets in <b>${time}</b>.`,
+        resellerLimitStatus: (revive, total, time) => `Customer Limit: <b>Revive</b> (${revive}/${total}). Resets in <b>${time}</b>.`,
         resellerLimitExceededWarning: "Warning: The customer's daily limit for one or more items has been exceeded. Items above the limit will be charged at the base price.",
+        receiptResellerLimit: (count, total) => `Daily Limit (Revive): ${count} / ${total}`,
         resalePricesLabel: "Custom Prices",
         resalePricesBtn: "Set Resale Prices",
         customResaleModeLabel: "Resale Mode (Custom Prices)",
@@ -1806,7 +1818,7 @@
     isOfficialReseller: false, 
     currentUsername: null,
     saveTimeout: null,
-    currentCustomerUsage: { revive: 0, max: 0 },
+    currentCustomerUsage: { revive: 0 },
     resellerLimitInterval: null,
     manualPrices: {},
     customResalePrices: {},
@@ -2120,20 +2132,56 @@
 
     handleHistoryDelete(docIds) {
         if (!docIds || docIds.length === 0) return;
-        const message = docIds.length > 1 ? `Tem certeza que deseja excluir os ${docIds.length} registros?` : "Tem certeza que deseja excluir este registro?";
+        const message = docIds.length > 1 ? `Tem certeza que deseja excluir os ${docIds.length} registros? Esta ação também irá reverter os limites de revenda diários, se aplicável.` : "Tem certeza que deseja excluir este registro? Esta ação também irá reverter o limite de revenda diário, se aplicável.";
+        
         app.showConfirmation(message, async () => {
             const batch = db.batch();
-            docIds.forEach(id => batch.delete(db.collection('receipts').doc(id)));
+
             try {
+                const fetchPromises = docIds.map(id => db.collection('receipts').doc(id).get());
+                const docSnaps = await Promise.all(fetchPromises);
+
+                for (const docSnap of docSnaps) {
+                    if (!docSnap.exists) continue; 
+
+                    const receiptData = docSnap.data();
+                    
+                    const isResellerLimitSale = receiptData.isResellerSale && 
+                                                receiptData.customerName && 
+                                                receiptData.customerName !== 'Revendedor_Nao_Identificado' &&
+                                                receiptData.createdAt;
+
+                    if (isResellerLimitSale) {
+                        const reviveSold = receiptData.itemsData?.revive?.qty || 0;
+                        if (reviveSold > 0) {
+                            const saleDate = receiptData.createdAt.toDate();
+                            const dateStr = app.getFormattedDate(saleDate);
+                            const limitDocId = `${receiptData.customerName.toLowerCase()}_${dateStr}`;
+                            const limitRef = db.collection('resellerLimits').doc(limitDocId);
+                            
+                            const updateData = {};
+                            if (reviveSold > 0) {
+                                updateData.reviveCount = firebase.firestore.FieldValue.increment(-reviveSold);
+                            }
+                            
+                            batch.update(limitRef, updateData);
+                        }
+                    }
+
+                    batch.delete(docSnap.ref);
+                }
+
                 await batch.commit();
-                app.showNotification(`${docIds.length} registro(s) excluído(s).`, 'success');
-                app.loadHistory('first');
+                
+                app.showNotification(`${docIds.length} registro(s) excluído(s) com sucesso.`, 'success');
+                app.loadHistory('first'); 
+
             } catch (error) {
+                console.error("Erro ao excluir e reverter limite: ", error);
                 app.showNotification(`Erro ao excluir: ${error.message}`, 'error');
             }
         });
     },
-
     handleBulkDelete() { app.handleHistoryDelete(Array.from(app.historySelectedIds)); },
 
     async handleBulkDownload() {
@@ -2443,9 +2491,6 @@
             if (selectedSeller && teamUsernames.includes(selectedSeller)) {
                 finalTeamFilter = [selectedSeller];
             }
-
-            // --- INÍCIO DA CORREÇÃO ---
-            // 1. Construímos a consulta base ao Firestore sem o filtro de tipo de venda.
             let query = db.collection("receipts").where('seller', 'in', finalTeamFilter);
             if (startDate) query = query.where('createdAt', '>=', startDate);
             if (endDate) query = query.where('createdAt', '<=', endDate);
@@ -2454,20 +2499,15 @@
             const querySnapshot = await query.get();
             let docs = querySnapshot.docs;
 
-            // 2. Aplicamos o filtro de tipo de venda e busca AQUI, no lado do cliente.
             if (saleTypeFilter === 'reseller') {
                 docs = docs.filter(doc => doc.data().isResellerSale === true);
             } else if (saleTypeFilter === 'regular') {
-                // Esta condição cobre os casos onde isResellerSale é `false` ou não existe (null/undefined)
                 docs = docs.filter(doc => !doc.data().isResellerSale);
             }
 
             if (searchTerm) {
                 docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
             }
-            // --- FIM DA CORREÇÃO ---
-
-            // 3. Renderizamos a lista já filtrada.
             app.renderAllSalesView(docs);
 
         } catch (error) {
@@ -2517,7 +2557,7 @@
       const allDocsSnapshot = await query.get();
       let docs = allDocsSnapshot.docs;
       if (searchTerm) docs = docs.filter(doc => (doc.data().customerName || '').toLowerCase().includes(searchTerm));
-      if (docs.length === 0) return app.renderEmptyState(dom.historyTableContainer, TRANSLATIONS[currentLang].historyEmptyStateMessage);
+      if (docs.length === 0) return app.renderEmptyState(dom.historyTableContainer, TRANSLATIONS[currentLang].historyNoRecords);
       const customerSummary = {};
       docs.forEach(doc => {
           const data = doc.data();
@@ -2780,13 +2820,13 @@
         if (!customerName) {
             dom.resellerLimitStatus.classList.add('hidden');
             clearInterval(app.resellerLimitInterval);
-            app.currentCustomerUsage = { revive: 0, max: 0 };
+            app.currentCustomerUsage = { revive: 0 };
             return;
         }
         const docId = `${customerName}_${app.getFormattedDate()}`;
         try {
             const docSnap = await db.collection('resellerLimits').doc(docId).get();
-            app.currentCustomerUsage = docSnap.exists ? { revive: docSnap.data().reviveCount || 0, max: docSnap.data().maxCount || 0 } : { revive: 0, max: 0 };
+            app.currentCustomerUsage = docSnap.exists ? { revive: docSnap.data().reviveCount || 0 } : { revive: 0 };
             app.updateResellerLimitStatusUI();
             dom.resellerLimitStatus.classList.remove('hidden');
         } catch (error) {
@@ -2806,7 +2846,7 @@
             const minutes = String(Math.floor((diff % 36e5) / 6e4)).padStart(2, '0');
             const seconds = String(Math.floor((diff % 6e4) / 1000)).padStart(2, '0');
             dom.resellerLimitStatus.innerHTML = TRANSLATIONS[currentLang].resellerLimitStatus(
-                app.currentCustomerUsage.revive, app.currentCustomerUsage.max, app.CONFIG.RESELLER_DAILY_LIMIT, `${hours}:${minutes}:${seconds}`
+                app.currentCustomerUsage.revive, app.CONFIG.RESELLER_DAILY_LIMIT, `${hours}:${minutes}:${seconds}`
             );
         };
         updateTimer();
@@ -2915,7 +2955,7 @@
         const isResellerMode = dom.resellerModeToggle.checked;
         const isCustomResaleMode = dom.customResaleToggle.checked;
         let reviveLimitRemaining = app.CONFIG.RESELLER_DAILY_LIMIT - app.currentCustomerUsage.revive;
-        let maxLimitRemaining = app.CONFIG.RESELLER_DAILY_LIMIT - app.currentCustomerUsage.max;
+        
         for (const key in ITENS_CATALOGO) {
             const precoBase = ITENS_CATALOGO[key].preco;
             const quantidade = parseInt(document.getElementById(`qtd-${key}`)?.value) || 0;
@@ -2923,15 +2963,17 @@
             let precoAplicado;
             if (isResellerMode) {
                 precoAplicado = PRECOS_RESELLER[key];
-                if(key === 'revive' || key === 'max'){
-                    const limitRemaining = (key === 'revive') ? reviveLimitRemaining : maxLimitRemaining;
+                if(key === 'revive'){
+                    const limitRemaining = reviveLimitRemaining;
                     const tokensDentroDoLimite = Math.max(0, Math.min(quantidade, limitRemaining));
                     const tokensForaDoLimite = Math.max(0, quantidade - tokensDentroDoLimite);
                     subtotal += tokensDentroDoLimite * PRECOS_RESELLER[key];
                     subtotal += tokensForaDoLimite * precoBase;
-                } else { subtotal = quantidade * PRECOS_RESELLER[key]; }
+                } else { 
+                    subtotal = quantidade * PRECOS_RESELLER[key]; 
+                }
             } else if (isCustomResaleMode) {
-                precoAplicado = (quantidade > 84 && PRECOS_VOLUME[key]) ? PRECOS_VOLUME[key] : (app.customResalePrices[key] || precoBase);
+                precoAplicado = (quantidade > 74 && PRECOS_VOLUME[key]) ? PRECOS_VOLUME[key] : (app.customResalePrices[key] || precoBase);
                 subtotal = quantidade * precoAplicado;
             } else {
                 precoAplicado = parseFloat(document.getElementById(`price-${key}`)?.value) || precoBase;
@@ -2958,13 +3000,9 @@
             const key = Object.keys(ITENS_CATALOGO)[index];
             const itemCalculado = calculo.itens[key];
             const priceInput = document.getElementById(`price-${key}`);
-
-            // --- INÍCIO DA MODIFICAÇÃO (Preço dinâmico para Revenda) ---
             if (dom.customResaleToggle.checked && priceInput) {
                 priceInput.value = itemCalculado.precoUnitario;
             }
-            // --- FIM DA MODIFICAÇÃO ---
-
             const discountedPriceCell = row.querySelector(`#discounted-price-${key}`);
             if (discountedPriceCell) {
                 if (showDiscount) {
@@ -2993,13 +3031,11 @@
             dom.resellerCustomerManualInput.classList.add('hidden');
             dom.descontoInput.value = '';
             
-            // --- INÍCIO DA CORREÇÃO (Reset explícito dos toggles) ---
             dom.resellerModeToggle.checked = false;
-            app.toggleResellerMode(false); // Chama a função para reverter as mudanças de UI associadas
+            app.toggleResellerMode(false); 
             
             dom.customResaleToggle.checked = false;
-            app.toggleCustomResaleMode(false); // Chama a função para reverter as mudanças de UI associadas
-            // --- FIM DA CORREÇÃO ---
+            app.toggleCustomResaleMode(false);
             
             app.manualPrices = {};
             app.applyManualOrCatalogPrices();
@@ -3091,20 +3127,50 @@
         let subtotalBruto = 0;
         let itemsTableRows = '';
         const fatorDesconto = 1 - (receiptData.discountApplied || 0) / 100;
+
         for (const key in receiptData.itemsData) {
             const item = receiptData.itemsData[key];
             const catalogoItem = ITENS_CATALOGO[key];
             if (item.qty > 0 && catalogoItem) {
-                const precoOriginal = item.price; // O preço já vem correto do prepareSaleData
+                const precoOriginal = item.price; 
                 const subtotalItemSemDesconto = item.qty * precoOriginal;
                 subtotalBruto += subtotalItemSemDesconto;
-                itemsTableRows += `<tr><td>${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td>${app.formatCurrency(precoOriginal)}${coinIconHtml}</td><td>${app.formatCurrency(subtotalItemSemDesconto * fatorDesconto)}${coinIconHtml}</td></tr>`;
+                itemsTableRows += `<tr><td>${catalogoItem[`name_${currentLang}`]} x ${item.qty}</td><td>${app.formatCurrency(precoOriginal)}</td><td>${app.formatCurrency(subtotalItemSemDesconto * fatorDesconto)}</td></tr>`;
             }
         }
+
         const valorDesconto = subtotalBruto - receiptData.grandTotal;
         const dataVenda = receiptData.createdAt?.toDate ? receiptData.createdAt.toDate().toLocaleString(currentLang) : new Date().toLocaleString(currentLang);
         const resellerTagHtml = receiptData.isResellerSale ? `<span style="font-size: 0.9em; color: var(--accent-warning); font-weight: bold;">(Revendedor)</span>` : '';
-        return `<div class="receipt-body"><div class="receipt-header"><h2>${t.receiptHeader}</h2><p>${receiptData.customerName} ${resellerTagHtml}</p><p>${t.receiptSeller}: ${receiptData.seller}</p><p class="receipt-id">${t.receiptTransactionId}: ${docId}</p></div><div class="receipt-section-title">${t.receiptItemsHeader}</div><table class="receipt-items-table"><thead><tr><th>Item</th><th>${t.receiptUnitPrice}</th><th>Total</th></tr></thead><tbody>${itemsTableRows}</tbody></table><div class="receipt-totals"><div><span>${t.receiptSubtotal}:</span> <span>${app.formatCurrency(subtotalBruto)}${coinIconHtml}</span></div><div><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${app.formatCurrency(valorDesconto)}${coinIconHtml}</span></div><div class="final-total"><span>${t.receiptFinalTotal}:</span> <span>${app.formatCurrency(receiptData.grandTotal)}${coinIconHtml}</span></div></div><div class="receipt-footer"><p>${dataVenda}</p><p>${t.receiptThanks}</p></div></div>`;
+        
+        let limitStatusHtml = '';
+        if (receiptData.isResellerSale && receiptData.finalCustomerUsage) {
+            limitStatusHtml = `<p class="receipt-limit-status">${t.receiptResellerLimit(receiptData.finalCustomerUsage.revive, app.CONFIG.RESELLER_DAILY_LIMIT)}</p>`;
+        }
+        
+        return `<div class="receipt-body">
+                    <div class="receipt-header">
+                        <h2>${t.receiptHeader}</h2>
+                        <p>${receiptData.customerName} ${resellerTagHtml}</p>
+                        <p>${t.receiptSeller}: ${receiptData.seller}</p>
+                        <p class="receipt-id">${t.receiptTransactionId}: ${docId}</p>
+                    </div>
+                    <div class="receipt-section-title">${t.receiptItemsHeader}</div>
+                    <table class="receipt-items-table">
+                        <thead><tr><th>Item</th><th>${t.receiptUnitPrice}</th><th>Total</th></tr></thead>
+                        <tbody>${itemsTableRows}</tbody>
+                    </table>
+                    <div class="receipt-totals">
+                        <div><span>${t.receiptSubtotal}:</span> <span>${app.formatCurrency(subtotalBruto)}</span></div>
+                        <div><span>${t.receiptDiscount} (${receiptData.discountApplied || 0}%):</span> <span>-${app.formatCurrency(valorDesconto)}</span></div>
+                        <div class="final-total"><span>${t.receiptFinalTotal}:</span> <span>${app.formatCurrency(receiptData.grandTotal)}${coinIconHtml}</span></div>
+                    </div>
+                    <div class="receipt-footer">
+                        <p>${dataVenda}</p>
+                        ${limitStatusHtml}
+                        <p>${t.receiptThanks}</p>
+                    </div>
+                </div>`;
     },
     
     async processSaleAndGenerateReceipt() {
@@ -3122,44 +3188,63 @@
             app.showNotification(TRANSLATIONS[currentLang].alertNoItems, 'error');
             return null;
         }
-        if (dom.resellerModeToggle.checked) {
-            const reviveQty = calculo.itens.revive?.quantidade || 0;
-            const maxQty = calculo.itens.max?.quantidade || 0;
+        
+        const isResellerMode = dom.resellerModeToggle.checked;
+        const reviveQty = calculo.itens.revive?.quantidade || 0;
+        let finalCustomerUsage = null;
+
+        if (isResellerMode) {
             const reviveLimitRemaining = app.CONFIG.RESELLER_DAILY_LIMIT - app.currentCustomerUsage.revive;
-            const maxLimitRemaining = app.CONFIG.RESELLER_DAILY_LIMIT - app.currentCustomerUsage.max;
-            if (reviveQty > reviveLimitRemaining || maxQty > maxLimitRemaining) {
+            if (reviveQty > reviveLimitRemaining) {
                 app.showNotification(TRANSLATIONS[currentLang].resellerLimitExceededWarning, 'error');
             }
+            finalCustomerUsage = {
+                revive: (app.currentCustomerUsage.revive || 0) + reviveQty
+            };
         }
-        const isResellerMode = dom.resellerModeToggle.checked;
+
         const isCustomResaleMode = dom.customResaleToggle.checked;
         let customerName = isResellerMode ? (dom.resellerCustomerSelect.value === 'manual' ? dom.resellerCustomerManualInput.value.trim() : dom.resellerCustomerSelect.value) || 'Revendedor_Nao_Identificado' : dom.nomeClienteInput.value.trim() || 'Nao_Identificado';
+        
         const itemsToSave = {};
         for (const key in calculo.itens) {
             if (calculo.itens[key].quantidade > 0) {
                  itemsToSave[key] = { qty: calculo.itens[key].quantidade, price: parseFloat(document.getElementById(`price-${key}`).value) || ITENS_CATALOGO[key].preco };
             }
         }
-        return { customerName, discountApplied: calculo.descontoPercentual, grandTotal: calculo.totalFinal, itemsData: itemsToSave, seller: app.currentUsername, isResellerSale: isResellerMode, isCustomResale: isCustomResaleMode, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+        
+        return { 
+            customerName, 
+            discountApplied: calculo.descontoPercentual, 
+            grandTotal: calculo.totalFinal, 
+            itemsData: itemsToSave, 
+            seller: app.currentUsername, 
+            isResellerSale: isResellerMode, 
+            isCustomResale: isCustomResaleMode, 
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            finalCustomerUsage 
+        };
     },
 
     async saveSaleAndUpdateLimits(receiptData) {
         try {
+            // CORREÇÃO: Agora salvamos o objeto `receiptData` inteiro, incluindo `finalCustomerUsage`,
+            // para que a regeneração do recibo funcione corretamente.
             const docRef = await db.collection("receipts").add(receiptData);
+
             if (receiptData.isResellerSale && receiptData.customerName !== 'Revendedor_Nao_Identificado') {
                 const reviveComprados = receiptData.itemsData.revive?.qty || 0;
-                const maxComprados = receiptData.itemsData.max?.qty || 0;
-                if (reviveComprados > 0 || maxComprados > 0) {
+                
+                if (reviveComprados > 0) {
                     const customerNameForDb = receiptData.customerName.toLowerCase();
                     const dateStr = app.getFormattedDate();
                     const docId = `${customerNameForDb}_${dateStr}`;
                     const limitRef = db.collection('resellerLimits').doc(docId);
                     const updateData = { customerName: customerNameForDb, date: dateStr, lastUpdatedBy: auth.currentUser.email };
                     if (reviveComprados > 0) updateData.reviveCount = firebase.firestore.FieldValue.increment(reviveComprados);
-                    if (maxComprados > 0) updateData.maxCount = firebase.firestore.FieldValue.increment(maxComprados);
                     await limitRef.set(updateData, { merge: true });
+                    
                     app.currentCustomerUsage.revive += reviveComprados;
-                    app.currentCustomerUsage.max += maxComprados;
                     app.updateResellerLimitStatusUI();
                 }
             }
