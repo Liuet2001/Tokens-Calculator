@@ -227,12 +227,16 @@
   button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
   button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;}
   
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #btn-create-sub-reseller, #btn-open-resale-modal { background: var(--accent-primary); color: #fff; }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #btn-load-users:hover, #btn-create-sub-reseller:hover, #btn-open-resale-modal:hover { background: var(--accent-hover); }
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #btn-create-sub-reseller, #btn-open-resale-modal, #btn-open-official-resale-modal { background: var(--accent-primary); color: #fff; }
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #btn-load-users:hover, #btn-create-sub-reseller:hover, #btn-open-resale-modal:hover, #btn-open-official-resale-modal:hover { background: var(--accent-hover); }
 
   #btnResetar { background: var(--accent-danger); color: var(--text-primary); }
 
-  #btnGerarImagem, #btnLogout, #btnDistributeLeftover, #btn-prev-page, #btn-next-page, #export-txt-modal-btn, #cancel-txt-export-btn, .btn-view-receipt, #btn-load-my-resellers { background: var(--bg-tertiary); color: var(--text-primary); }
+  #btnViewPng, #btnLogout, #btnDistributeLeftover, #btn-prev-page, #btn-next-page, #export-txt-modal-btn, #cancel-txt-export-btn, .btn-view-receipt, #btn-load-my-resellers { background: var(--bg-tertiary); color: var(--text-primary); }
+  
+  #btnDownloadPng { background: var(--accent-primary); color: white; }
+  #btnDownloadPng:hover { background: var(--accent-hover); }
+
 
   .admin-section {
     padding: 20px;
@@ -248,13 +252,13 @@
   .container {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
   }
-  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #generate-txt-file-btn, #btn-create-sub-reseller, #btn-open-resale-modal, #save-resale-prices-btn {
+  #btnCalcular, #btnDistribute, #btnLogin, #history-apply-filter-btn, #btn-create-seller, #generate-txt-file-btn, #btn-create-sub-reseller, #btn-open-resale-modal, #btn-open-official-resale-modal, #save-resale-prices-btn, #btnDownloadPng {
     background-image: linear-gradient(to right, var(--accent-primary) 0%, var(--accent-hover) 100%);
     background-size: 200% auto;
     transition: all 0.4s ease-in-out;
     border: none;
   }
-  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #generate-txt-file-btn:hover, #btn-create-sub-reseller:hover, #btn-open-resale-modal:hover, #save-resale-prices-btn:hover {
+  #btnCalcular:hover, #btnDistribute:hover, #btnLogin:hover, #history-apply-filter-btn:hover, #btn-create-seller:hover, #generate-txt-file-btn:hover, #btn-create-sub-reseller:hover, #btn-open-resale-modal:hover, #btn-open-official-resale-modal:hover, #save-resale-prices-btn:hover, #btnDownloadPng:hover {
     background-position: right center;
     background-color: var(--accent-hover);
   }
@@ -641,7 +645,7 @@
         grid-column: 1 / -1;
     }
     
-    #btnResetar, #btnGerarImagem, #btnLogout {
+    #btnResetar, #btnViewPng, #btnLogout {
         background: transparent;
         border: 2px solid var(--bg-tertiary);
         color: var(--text-secondary);
@@ -657,7 +661,7 @@
         transform: translateY(-2px) scale(1.02);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
-    #btnGerarImagem:hover, #btnLogout:hover {
+    #btnViewPng:hover, #btnLogout:hover {
         border-color: var(--accent-primary);
         color: var(--accent-primary);
         background-color: transparent;
@@ -705,7 +709,6 @@
   
   .reseller-tag {
     display: inline-block;
-    margin-left: 8px;
     padding: 3px 8px;
     font-size: 11px;
     font-weight: 700;
@@ -922,12 +925,13 @@
       border: 1px solid var(--border-color);
       border-radius: 15px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      text-align: center;
   }
   .receipt-header h2 {
       font-family: var(--font-header);
       font-size: 26px;
       color: var(--accent-primary);
-      margin-bottom: 5px;
+      margin-bottom: 15px; /* Aumentado espaço */
   }
   .receipt-header p {
       text-align: center;
@@ -935,6 +939,25 @@
       font-size: 14px;
       margin-bottom: 2px;
   }
+    
+  /* --- ESTILOS MODIFICADOS PARA O RECIBO --- */
+  .receipt-customer-details {
+      margin-bottom: 15px;
+  }
+  .receipt-customer-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 4px 0;
+  }
+  .receipt-sale-type {
+      margin-bottom: 10px;
+  }
+  .receipt-sale-type .reseller-tag {
+      font-size: 0.8em;
+      color: #fff !important; /* Forçar cor branca */
+  }
+
   .receipt-header .receipt-id {
       font-family: var(--font-mono);
       font-size: 12px;
@@ -955,6 +978,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
+      text-align: left;
   }
   .receipt-items-table th {
       text-align: left;
@@ -1091,6 +1115,27 @@
     font-style: italic;
     font-family: var(--font-mono);
   }
+  
+  /* INÍCIO: NOVOS ESTILOS PARA PREÇO COM DESCONTO */
+  .price-display-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px; /* Alinha com a altura do input */
+    text-align: center;
+  }
+  .original-price {
+    color: var(--text-secondary);
+    text-decoration: line-through;
+    margin-right: 0.6em;
+    font-size: 0.9em;
+  }
+  .discounted-price {
+    color: var(--accent-primary);
+    font-weight: 700;
+  }
+  /* FIM: NOVOS ESTILOS PARA PREÇO COM DESCONTO */
+
   /* --- ESTILOS PARA TELA CHEIA (FULL-SCREEN UX - 1200px+) --- */
   @media (min-width: 1200px) {
       body { padding: 40px; }
@@ -1098,7 +1143,7 @@
       .container { padding: 48px; }
       #calculator-view {
         display: grid;
-        grid-template-columns: minmax(450px, 1.2fr) 2fr;
+        grid-template-columns: minmax(450px, 1fr) 1.5fr; /* Ajuste na proporção */
         grid-template-areas: "controls results";
         align-items: start;
         gap: 40px;
@@ -1205,6 +1250,35 @@
       }
   }
 
+  /* --- OTIMIZAÇÃO PARA 1080p (1920px) E TELAS MAIORES (1600px+) --- */
+  @media (min-width: 1600px) {
+    body { padding: 40px; }
+    #app-container {
+        max-width: 1700px; /* Aumenta a largura máxima para preencher mais a tela */
+    }
+    .container {
+        padding: 24px 32px; /* Reduz o padding para um look mais compacto */
+    }
+    #calculator-view {
+        gap: 32px;
+    }
+    .dashboard-stats-grid {
+        /* Força 4 colunas para os cartões de estatística, aproveitando o espaço */
+        grid-template-columns: repeat(4, 1fr);
+    }
+    #add-sub-reseller-section,
+    #admin-view .admin-section:first-of-type {
+        /* Evita que os formulários de adição fiquem muito largos e vazios */
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #calculator-controls .panel:first-of-type .controls-grid {
+      /* Torna o grid de controles da calculadora mais compacto */
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -1218,6 +1292,7 @@
   <symbol id="icon-discount" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a1 1 0 011-1h5a1 1 0 01.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></symbol>
   <symbol id="icon-reset" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></symbol>
   <symbol id="icon-image" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></symbol>
+  <symbol id="icon-view" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></symbol>
   <symbol id="icon-login" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd" /></symbol>
   <symbol id="icon-export" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></symbol>
   <symbol id="icon-receipt" viewBox="0 0 20 20" fill="currentColor"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm0 2h12v3H4V4zm0 5h12v2H4V9zm0 4h12v2H4v-2z" /></symbol>
@@ -1314,14 +1389,16 @@
                         <label for="mode-mush" data-translate-key="modeMush">Por Mush</label>
                     </div>
                 </div>
-                <div class="control-section">
-                    <div class="input-group hidden" id="reseller-mode-container">
+                <!-- MODIFICADO: Container para os modos de revenda -->
+                <div class="control-section" id="reseller-modes-container">
+                    <div class="input-group hidden" id="official-reseller-mode-container">
                         <label class="reseller-label"><input type="checkbox" id="reseller-mode-toggle">Modo Revendedor Oficial</label>
+                        <button id="btn-open-official-resale-modal" data-translate-key="resalePricesBtn" style="font-size: 12px; padding: 6px 10px; margin-top: 4px;">Gerenciar Preços</button>
                     </div>
                     <div class="input-group" id="managed-resale-mode-container">
                         <label class="reseller-label"><input type="checkbox" id="managed-resale-toggle"><span data-translate-key="managedResaleModeLabel">Modo de Revenda Gerenciável</span></label>
+                        <button id="btn-open-resale-modal" data-translate-key="resalePricesBtn" style="font-size: 12px; padding: 6px 10px; margin-top: 4px;">Gerenciar Preços</button>
                     </div>
-                     <button id="btn-open-resale-modal" data-translate-key="resalePricesBtn">Gerenciar Preços de Revenda</button>
                 </div>
                 <div id="reseller-limit-status" class="hidden"></div>
             </div>
@@ -1364,15 +1441,17 @@
                 <tbody id="tabela-itens"></tbody>
                 <tfoot>
                     <tr>
-                        <td><b data-translate-key="tableGrandTotal">TOTAL GERAL</b></td>
-                        <td id="totalGeral" style="text-align: center;"><b>0,00</b></td>
+                        <td colspan="3"><b data-translate-key="tableGrandTotal">TOTAL GERAL</b></td>
+                        <td colspan="2" id="totalGeral" style="text-align: right;"><b>0,00</b></td>
                     </tr>
                 </tfoot>
             </table>
+            <!-- MODIFICADO: Botões de Ação -->
             <div class="buttons buttons-center">
                 <button id="btnCalcular" data-translate-key="btnCalculate"><svg class="icon"><use xlink:href="#icon-calculator"></use></svg>Calcular</button>
                 <button id="btnResetar" data-translate-key="btnReset"><svg class="icon"><use xlink:href="#icon-reset"></use></svg>Resetar</button>
-                <button id="btnGerarImagem" data-translate-key="btnExport"><svg class="icon"><use xlink:href="#icon-image"></use></svg>Exportar para PNG</button>
+                <button id="btnViewPng" data-translate-key="btnView"><svg class="icon"><use xlink:href="#icon-view"></use></svg>Visualizar PNG</button>
+                <button id="btnDownloadPng" data-translate-key="btnExport"><svg class="icon"><use xlink:href="#icon-image"></use></svg>Baixar PNG</button>
             </div>
         </div>
       </div>
@@ -1468,12 +1547,12 @@
                   <p id="top-seller-value" class="stat-subtitle">Calculando...</p>
               </div>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
-              <div class="chart-container" style="padding: 20px; background-color: var(--bg-primary); border-radius: 12px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;" class="chart-container">
+              <div style="padding: 20px; background-color: var(--bg-primary); border-radius: 12px;">
                   <h3 style="text-align: center; margin-bottom: 15px;">Vendas por Dia</h3>
                   <canvas id="sales-over-time-chart"></canvas>
               </div>
-              <div class="chart-container" style="padding: 20px; background-color: var(--bg-primary); border-radius: 12px;">
+              <div style="padding: 20px; background-color: var(--bg-primary); border-radius: 12px;">
                   <h3 style="text-align: center; margin-bottom: 15px;">Tokens Mais Vendidos</h3>
                   <canvas id="tokens-sold-chart"></canvas>
               </div>
@@ -1558,22 +1637,19 @@
   </div>
 </div>
 
-<!-- MODAL DE PREÇOS DE REVENDA (MODIFICADO) -->
-<div id="resale-price-modal" class="modal hidden">
+<!-- MODIFICADO: O ID do modal foi alterado para ser genérico -->
+<div id="price-config-modal" class="modal hidden">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 data-translate-key="resaleModalHeader">Gerenciar Preços de Revenda</h3>
-      <button class="close-btn" id="close-resale-modal-btn">&times;</button>
+      <h3 id="price-config-modal-header">Gerenciar Preços</h3>
+      <button class="close-btn" id="close-price-config-modal-btn">&times;</button>
     </div>
-    <div class="modal-body" id="resale-price-modal-body">
-        <p data-translate-key="resaleModalDesc" style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
-            Configure os preços para o "Modo de Revenda Gerenciável". Deixe um campo em branco se não quiser usá-lo.
-        </p>
+    <div class="modal-body" id="price-config-modal-body">
         <!-- O conteúdo será gerado dinamicamente pelo JavaScript -->
     </div>
     <div class="modal-footer">
-      <button id="cancel-resale-prices-btn" data-translate-key="cancelButton">Cancelar</button>
-      <button id="save-resale-prices-btn" data-translate-key="saveButton">Salvar</button>
+      <button id="cancel-price-config-btn" data-translate-key="cancelButton">Cancelar</button>
+      <button id="save-price-config-btn" data-translate-key="saveButton">Salvar</button>
     </div>
   </div>
 </div>
@@ -1620,15 +1696,14 @@
   };
 
   const PRECOS_MINIMOS = { revive: 780, max: 540, partial: 180, change: 70 };
-  const PRECOS_RESELLER = { revive: 770, max: 530, partial: 175, change: 65 };
-
+  
   const TRANSLATIONS = {
     br: {
         pageTitle: "Painel", mainHeader: "Calculadora de Tokens", themeLabel: "Tema Claro",
         idLabel: "Identificador / Nome do Cliente", idPlaceholder: "Digite o nome ou ID do cliente", discountLabel: "Desconto (%)",
         discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Preço Unitário", tableQty: "Quantidade",
         tableTotal: "Valor Total", tableGrandTotal: "TOTAL GERAL", btnCalculate: "Calcular", btnReset: "Resetar",
-        btnExport: "Exportar para PNG", alertNoItems: "Nenhum item foi selecionado para gerar o recibo.",
+        btnExport: "Baixar PNG", btnView: "Visualizar PNG", alertNoItems: "Nenhum item foi selecionado.",
         receiptHeader: "Recibo", receiptItemsHeader: "Itens Comprados", receiptSubtotal: "Subtotal",
         receiptDiscount: "Desconto", receiptFinalTotal: "Total Final", receiptThanks: "Gerado por Token Store",
         receiptUnitPrice: "Preço Unit.", receiptSeller: "Venda por", receiptTransactionId: "ID da Transação",
@@ -1648,23 +1723,23 @@
         resellerLimitStatus: (revive, total, time) => `Limite Cliente: <b>Revive</b> (${revive}/${total}). Reseta em <b>${time}</b>.`,
         resellerLimitExceededWarning: "Atenção: O limite diário do cliente para Revive Token foi excedido!",
         receiptResellerLimit: (count, total) => `Limite Diário (Revive): ${count} / ${total}`,
-        resalePricesBtn: "Gerenciar Preços de Revenda",
+        resalePricesBtn: "Gerenciar Preços",
         managedResaleModeLabel: "Modo de Revenda Gerenciável",
         resaleModalHeader: "Gerenciar Preços de Revenda",
-        resaleModalDesc: "Configure os preços para o \"Modo de Revenda Gerenciável\". Deixe um campo em branco se não quiser usá-lo.",
+        officialResaleModalHeader: "Gerenciar Preços de Revendedor Oficial",
+        resaleModalDesc: "Configure os preços. Deixe um campo em branco para usar o valor padrão.",
         cancelButton: "Cancelar", saveButton: "Salvar",
         limitExceededDetail: (qty, price) => `${qty}x excedente(s) ao preço de M$ ${price}`,
         confirmLimitSale: "Atenção: Esta venda excede o limite diário do cliente. Parte dos itens será cobrada com preço normal. Deseja continuar?",
         resaleNormalPriceLabel: "Preço Normal", resaleThresholdLabel: "Qtd. p/ Desconto", resaleVolumePriceLabel: "Preço c/ Desconto",
         historyTagOfficial: "Revenda Oficial", historyTagManaged: "Revenda Gerenciada",
-        receiptHeaderOfficial: "Recibo", receiptHeaderManaged: "Recibo"
     },
     en: {
         pageTitle: "Panel", mainHeader: "Token Calculator", themeLabel: "Light Theme",
         idLabel: "Customer Identifier / Name", idPlaceholder: "Enter customer's name or ID", discountLabel: "Discount (%)",
         discountPlaceholder: "Ex: 10", tableItem: "Item", tablePrice: "Unit Price", tableQty: "Quantity",
         tableTotal: "Total Value", tableGrandTotal: "GRAND TOTAL", btnCalculate: "Calculate", btnReset: "Reset",
-        btnExport: "Export to PNG", alertNoItems: "No items were selected to generate the receipt.",
+        btnExport: "Download PNG", btnView: "View PNG", alertNoItems: "No items were selected.",
         receiptHeader: "Receipt", receiptItemsHeader: "Purchased Items", receiptSubtotal: "Subtotal",
         receiptDiscount: "Discount", receiptFinalTotal: "Final Total", receiptThanks: "Generated by Token Store",
         receiptUnitPrice: "Unit Price", receiptSeller: "Sold by", receiptTransactionId: "Transaction ID",
@@ -1684,16 +1759,16 @@
         resellerLimitStatus: (revive, total, time) => `Customer Limit: <b>Revive</b> (${revive}/${total}). Resets in <b>${time}</b>.`,
         resellerLimitExceededWarning: "Warning: The customer's daily limit for Revive Token has been exceeded!",
         receiptResellerLimit: (count, total) => `Daily Limit (Revive): ${count} / ${total}`,
-        resalePricesBtn: "Manage Resale Prices",
+        resalePricesBtn: "Manage Prices",
         managedResaleModeLabel: "Managed Resale Mode",
         resaleModalHeader: "Manage Resale Prices",
-        resaleModalDesc: "Configure the prices for the \"Managed Resale Mode\". Leave a field blank if you don't want to use it.",
+        officialResaleModalHeader: "Manage Official Reseller Prices",
+        resaleModalDesc: "Configure the prices. Leave a field blank to use the default value.",
         cancelButton: "Cancel", saveButton: "Save",
         limitExceededDetail: (qty, price) => `${qty}x item(s) over limit at M$ ${price}`,
         confirmLimitSale: "Warning: This sale exceeds the customer's daily limit. Part of the items will be charged at the normal price. Do you wish to continue?",
         resaleNormalPriceLabel: "Normal Price", resaleThresholdLabel: "Qty for Discount", resaleVolumePriceLabel: "Discounted Price",
         historyTagOfficial: "Official Resale", historyTagManaged: "Managed Resale",
-        receiptHeaderOfficial: "Receipt", receiptHeaderManaged: "Receipt"
     }
   };
 
@@ -1747,7 +1822,7 @@
     btnCreateSeller: document.getElementById('btn-create-seller'),
     newSellerUsernameInput: document.getElementById('new-seller-username'),
     newSellerPasswordInput: document.getElementById('new-seller-password'),
-    resellerModeContainer: document.getElementById('reseller-mode-container'),
+    officialResellerModeContainer: document.getElementById('official-reseller-mode-container'),
     resellerModeToggle: document.getElementById('reseller-mode-toggle'),
     resellerLimitStatus: document.getElementById('reseller-limit-status'),
     customerNameContainer: document.getElementById('customer-name-container'),
@@ -1774,11 +1849,13 @@
     addSubResellerSection: document.getElementById('add-sub-reseller-section'),
     historyViewTeamContainer: document.getElementById('history-view-team-container'),
     btnOpenResaleModal: document.getElementById('btn-open-resale-modal'),
-    resalePriceModal: document.getElementById('resale-price-modal'),
-    resalePriceModalBody: document.getElementById('resale-price-modal-body'),
-    closeResaleModalBtn: document.getElementById('close-resale-modal-btn'),
-    saveResalePricesBtn: document.getElementById('save-resale-prices-btn'),
-    cancelResalePricesBtn: document.getElementById('cancel-resale-prices-btn'),
+    btnOpenOfficialResaleModal: document.getElementById('btn-open-official-resale-modal'),
+    priceConfigModal: document.getElementById('price-config-modal'),
+    priceConfigModalHeader: document.getElementById('price-config-modal-header'),
+    priceConfigModalBody: document.getElementById('price-config-modal-body'),
+    closePriceConfigModalBtn: document.getElementById('close-price-config-modal-btn'),
+    savePriceConfigBtn: document.getElementById('save-price-config-btn'),
+    cancelPriceConfigBtn: document.getElementById('cancel-price-config-btn'),
     managedResaleToggle: document.getElementById('managed-resale-toggle'),
     managedResaleModeContainer: document.getElementById('managed-resale-mode-container'),
     settingsToggleBtn: document.getElementById('settings-toggle-btn'),
@@ -1796,6 +1873,8 @@
     topSellerCard: document.getElementById('top-seller-card'),
     topSellerName: document.getElementById('top-seller-name'),
     topSellerValue: document.getElementById('top-seller-value'),
+    btnDownloadPng: document.getElementById('btnDownloadPng'),
+    btnViewPng: document.getElementById('btnViewPng'),
   };
 
   let currentLang = 'br';
@@ -1838,6 +1917,8 @@
     resellerLimitInterval: null,
     manualPrices: {},
     resaleConfig: {}, 
+    officialResaleConfig: {}, // MODIFICADO: Nova configuração para revendedor oficial
+    currentEditingConfigType: null, // MODIFICADO: Para saber qual modal está ativo
 
     init() {
         app.loadDevicePreferences();
@@ -1894,10 +1975,11 @@
                         const canSeeTeamView = app.isOfficialReseller || app.isCurrentUserOwner || app.isCurrentUserAdmin;
                         dom.historyViewTeamContainer.style.display = canSeeTeamView ? 'contents' : 'none';
                     }
-                    if (app.isCurrentUserOwner || app.isCurrentUserAdmin) {
-                        dom.resellerModeContainer.classList.remove('hidden');
+                    // MODIFICADO: Lógica para mostrar container de modo revendedor oficial
+                    if (app.isCurrentUserOwner || app.isCurrentUserAdmin || app.isOfficialReseller) {
+                        dom.officialResellerModeContainer.classList.remove('hidden');
                     } else {
-                        dom.resellerModeContainer.classList.add('hidden');
+                        dom.officialResellerModeContainer.classList.add('hidden');
                     }
                     dom.authContainer.classList.add('hidden');
                     dom.appContainer.classList.remove('hidden');
@@ -1918,7 +2000,7 @@
                 app.currentUsername = null;
                 dom.authContainer.classList.remove('hidden');
                 dom.appContainer.classList.add('hidden');
-                dom.resellerModeContainer.classList.add('hidden');
+                dom.officialResellerModeContainer.classList.add('hidden');
                 document.querySelector('[data-tab="reseller-panel-view"]').style.display = 'none';
                 document.querySelector('[data-tab="admin-view"]').style.display = 'none';
                 app.calculatorInitialized = false;
@@ -1941,7 +2023,11 @@
       dom.descontoInput.addEventListener('input', () => { app.updateUI(); app.triggerSaveCalculatorPreferences(); });
       document.getElementById('btnCalcular').addEventListener('click', () => app.updateUI());
       document.getElementById('btnResetar').addEventListener('click', () => app.reset({ fullReset: true }));
-      document.getElementById('btnGerarImagem').addEventListener('click', () => app.processSaleAndGenerateReceipt());
+      
+      // MODIFICADO: Event listeners para os novos botões de PNG
+      dom.btnDownloadPng.addEventListener('click', () => app.handleSaleAndReceiptAction('download'));
+      dom.btnViewPng.addEventListener('click', () => app.handleSaleAndReceiptAction('view'));
+
       dom.themeToggle.addEventListener('click', () => {
           const newTheme = dom.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
           app.setTheme(newTheme);
@@ -2004,12 +2090,16 @@
       dom.selectAllCustomersCheckbox.addEventListener('change', (e) => app.handleSelectAllCustomers(e));
       dom.generateTxtFileBtn.addEventListener('click', () => app.generateTxtFile());
       dom.txtExportModal.addEventListener('click', (e) => { if (e.target === dom.txtExportModal) dom.txtExportModal.classList.add('hidden'); });
-      dom.btnOpenResaleModal.addEventListener('click', () => app.openResaleModal());
-      dom.closeResaleModalBtn.addEventListener('click', () => dom.resalePriceModal.classList.add('hidden'));
-      dom.cancelResalePricesBtn.addEventListener('click', () => dom.resalePriceModal.classList.add('hidden'));
-      dom.saveResalePricesBtn.addEventListener('click', () => app.saveResalePrices());
+
+      // MODIFICADO: Event listeners para os modais de configuração de preço
+      dom.btnOpenResaleModal.addEventListener('click', () => app.openPriceConfigModal('managed'));
+      dom.btnOpenOfficialResaleModal.addEventListener('click', () => app.openPriceConfigModal('official'));
+      dom.closePriceConfigModalBtn.addEventListener('click', () => dom.priceConfigModal.classList.add('hidden'));
+      dom.cancelPriceConfigBtn.addEventListener('click', () => dom.priceConfigModal.classList.add('hidden'));
+      dom.savePriceConfigBtn.addEventListener('click', () => app.savePriceConfig());
+      dom.priceConfigModal.addEventListener('click', (e) => { if (e.target === dom.priceConfigModal) dom.priceConfigModal.classList.add('hidden'); });
+      
       dom.managedResaleToggle.addEventListener('change', (e) => app.toggleManagedResaleMode(e.target.checked));
-      dom.resalePriceModal.addEventListener('click', (e) => { if (e.target === dom.resalePriceModal) dom.resalePriceModal.classList.add('hidden'); });
     },
 
     async handleLogin() {
@@ -2050,12 +2140,14 @@
             const docSnap = await docRef.get();
             app.manualPrices = {};
             app.resaleConfig = {};
+            app.officialResaleConfig = {}; // MODIFICADO
             if (docSnap.exists) {
                 const prefs = docSnap.data();
                 if (prefs.theme) app.setTheme(prefs.theme, false);
                 if (prefs.accentColor) app.setAccentColor(prefs.accentColor, false);
                 if (prefs.language) app.setLanguage(prefs.language, false, true);
-                if (prefs.resaleConfig) app.resaleConfig = prefs.resaleConfig; 
+                if (prefs.resaleConfig) app.resaleConfig = prefs.resaleConfig;
+                if (prefs.officialResaleConfig) app.officialResaleConfig = prefs.officialResaleConfig; // MODIFICADO
                 if (prefs.prices) app.manualPrices = prefs.prices;
                 if (prefs.calculator) {
                     dom.descontoInput.value = prefs.calculator.discount || '';
@@ -2113,13 +2205,15 @@
         } catch (error) { console.error("Erro ao salvar preferências da calculadora:", error); }
     },
     
-    async saveResaleConfigToFirestore() {
-        if (!auth.currentUser) return;
+    // MODIFICADO: Função generalizada para salvar qualquer tipo de configuração de preço
+    async savePriceConfigToFirestore(configType, configData) {
+        if (!auth.currentUser || !configType) return;
+        const fieldName = `${configType}ResaleConfig`;
         try {
-            await db.collection('userPreferences').doc(auth.currentUser.uid).set({ resaleConfig: app.resaleConfig }, { merge: true });
-            app.showNotification("Configurações de revenda salvas!", 'success');
+            await db.collection('userPreferences').doc(auth.currentUser.uid).set({ [fieldName]: configData }, { merge: true });
+            app.showNotification("Configurações de preços salvas!", 'success');
         } catch (error) {
-            console.error("Erro ao salvar configurações de revenda:", error);
+            console.error(`Erro ao salvar ${fieldName}:`, error);
             app.showNotification("Erro ao salvar configurações.", 'error');
         }
     },
@@ -2784,9 +2878,8 @@
     },
 
     async toggleResellerMode(isChecked) {
-        if (isChecked && dom.managedResaleToggle.checked) dom.managedResaleToggle.checked = false;
-        dom.managedResaleModeContainer.style.display = isChecked ? 'none' : 'flex';
         if (isChecked) {
+            if (dom.managedResaleToggle.checked) dom.managedResaleToggle.checked = false;
             dom.customerNameContainer.classList.add('hidden');
             dom.resellerCustomerSelectionContainer.classList.remove('hidden');
             await app.populateResellerCustomerDropdown();
@@ -2796,13 +2889,6 @@
             dom.resellerCustomerSelectionContainer.classList.add('hidden');
             dom.resellerLimitStatus.classList.add('hidden');
             clearInterval(app.resellerLimitInterval);
-        }
-        for (const key in ITENS_CATALOGO) {
-            const priceInput = document.getElementById(`price-${key}`);
-            if (priceInput) {
-                priceInput.disabled = isChecked;
-                priceInput.value = isChecked ? PRECOS_RESELLER[key] : (app.manualPrices[key] || ITENS_CATALOGO[key].preco);
-            }
         }
         app.updateUI();
     },
@@ -2894,21 +2980,30 @@
 
     loadTable() {
         const tfootTD = dom.calculatorTable.querySelector('tfoot td:first-child');
-        tfootTD.setAttribute('colspan', '3'); 
-        tfootTD.nextElementSibling.id = 'totalGeral'; 
-        tfootTD.nextElementSibling.style.textAlign = 'center';
-    
+        const totalCell = tfootTD.nextElementSibling;
+        
+        tfootTD.setAttribute('colspan', '3');
+        totalCell.setAttribute('colspan', '2');
+        totalCell.style.textAlign = 'right';
+
         dom.tabelaItensBody.innerHTML = '';
         const t = TRANSLATIONS[currentLang];
         for (const key in ITENS_CATALOGO) {
             const item = ITENS_CATALOGO[key];
             const tr = document.createElement('tr');
             tr.dataset.key = key;
+            // INÍCIO DA MODIFICAÇÃO
             tr.innerHTML = `<td data-label="${t.tableItem}">${item[`name_${currentLang}`]}</td>
-                <td data-label="${t.tablePrice}"><div style="width:100px;margin:0 auto;"><input type="number" class="price-input" id="price-${key}" step="10"></div></td>
+                <td data-label="${t.tablePrice}">
+                    <div class="price-display-wrapper">
+                        <span id="price-display-${key}"></span>
+                        <input type="number" class="price-input" id="price-${key}" step="10" style="display: none;">
+                    </div>
+                </td>
                 <td data-label="Preço c/ Desc." class="discounted-price-col"><span class="discounted-price-value" id="discounted-price-${key}">-</span></td>
                 <td data-label="${t.tableQty}"><div style="width:80px;margin:0 auto;"><input type="number" id="qtd-${key}" value="0" min="0"></div></td>
-                <td data-label="${t.tableTotal}">0,00</td>`;
+                <td data-label="${t.tableTotal}" style="text-align: right;">0,00</td>`;
+            // FIM DA MODIFICAÇÃO
             tr.querySelector('td:last-child').appendChild(app.createCoinIcon());
             dom.tabelaItensBody.appendChild(tr);
             tr.querySelector(`#qtd-${key}`).addEventListener('input', () => { app.updateUI(); app.triggerSaveCalculatorPreferences(); });
@@ -2937,14 +3032,18 @@
         app.triggerSaveCalculatorPreferences();
     },
 
-    openResaleModal() {
-        dom.resalePriceModalBody.innerHTML = `<p data-translate-key="resaleModalDesc" style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
-            ${TRANSLATIONS[currentLang].resaleModalDesc}
-        </p>`;
-        
+    // MODIFICADO: Função generalizada para abrir o modal de configuração de preços
+    openPriceConfigModal(configType) {
+        app.currentEditingConfigType = configType;
+        const isOfficial = configType === 'official';
+        const config = isOfficial ? app.officialResaleConfig : app.resaleConfig;
         const t = TRANSLATIONS[currentLang];
+
+        dom.priceConfigModalHeader.textContent = isOfficial ? t.officialResaleModalHeader : t.resaleModalHeader;
+        dom.priceConfigModalBody.innerHTML = `<p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">${t.resaleModalDesc}</p>`;
+        
         for (const key in ITENS_CATALOGO) {
-            const itemConfig = app.resaleConfig[key] || {};
+            const itemConfig = config[key] || {};
             const itemDiv = document.createElement('div');
             itemDiv.className = 'resale-item-config';
             itemDiv.innerHTML = `
@@ -2964,12 +3063,16 @@
                     </div>
                 </div>
             `;
-            dom.resalePriceModalBody.appendChild(itemDiv);
+            dom.priceConfigModalBody.appendChild(itemDiv);
         }
-        dom.resalePriceModal.classList.remove('hidden');
+        dom.priceConfigModal.classList.remove('hidden');
     },
 
-    async saveResalePrices() {
+    // MODIFICADO: Função generalizada para salvar as configurações do modal
+    async savePriceConfig() {
+        const configType = app.currentEditingConfigType;
+        if (!configType) return;
+        
         const newConfig = {};
         for (const key in ITENS_CATALOGO) {
             const normalPrice = parseFloat(document.getElementById(`resale-normal-${key}`).value);
@@ -2985,28 +3088,25 @@
                  newConfig[key] = itemConfig;
             }
         }
-        app.resaleConfig = newConfig;
-        await app.saveResaleConfigToFirestore();
-        dom.resalePriceModal.classList.add('hidden');
-        if (dom.managedResaleToggle.checked) app.toggleManagedResaleMode(true);
+
+        if (configType === 'official') {
+            app.officialResaleConfig = newConfig;
+        } else {
+            app.resaleConfig = newConfig;
+        }
+
+        await app.savePriceConfigToFirestore(configType, newConfig);
+        dom.priceConfigModal.classList.add('hidden');
+        
+        if ((configType === 'official' && dom.resellerModeToggle.checked) || (configType === 'managed' && dom.managedResaleToggle.checked)) {
+            app.updateUI(); // Re-aplica os preços se o modo correspondente estiver ativo
+        }
     },
     
     toggleManagedResaleMode(isChecked) {
         if (isChecked && dom.resellerModeToggle.checked) {
             dom.resellerModeToggle.checked = false;
             app.toggleResellerMode(false);
-        }
-        for (const key in ITENS_CATALOGO) {
-            const priceInput = document.getElementById(`price-${key}`);
-            if (priceInput) {
-                priceInput.disabled = isChecked;
-                 if (isChecked) {
-                    const config = app.resaleConfig[key] || {};
-                    priceInput.value = config.normalPrice || ITENS_CATALOGO[key].preco;
-                } else {
-                    app.applyManualOrCatalogPrices();
-                }
-            }
         }
         app.updateUI();
     },
@@ -3037,26 +3137,28 @@
             const quantidade = parseInt(document.getElementById(`qtd-${key}`)?.value) || 0;
             let subtotal = 0;
             let precoUnitarioEfetivo;
+            let precoOriginal = null; // INÍCIO DA MODIFICAÇÃO
             
-            if (isManagedResaleMode) {
-                const config = app.resaleConfig[key] || {};
-                const normalPrice = config.normalPrice || ITENS_CATALOGO[key].preco;
-                const threshold = config.threshold;
-                const volumePrice = config.volumePrice;
+            if (isResellerLimitMode || isManagedResaleMode) {
+                const config = isResellerLimitMode ? app.officialResaleConfig[key] : app.resaleConfig[key];
+                const { normalPrice, threshold, volumePrice } = config || {};
 
+                const precoBase = normalPrice || (isResellerLimitMode ? PRECOS_MINIMOS[key] : ITENS_CATALOGO[key].preco);
+                
                 if (threshold && volumePrice && quantidade >= threshold) {
                     precoUnitarioEfetivo = volumePrice;
+                    precoOriginal = precoBase; // Armazena o preço base como original quando um desconto é aplicado
                 } else {
-                    precoUnitarioEfetivo = normalPrice;
+                    precoUnitarioEfetivo = precoBase;
+                    precoOriginal = null; // Sem desconto, sem preço "original" para mostrar
                 }
-                subtotal = quantidade * precoUnitarioEfetivo;
-
-            } else if (isResellerLimitMode) {
-                precoUnitarioEfetivo = PRECOS_RESELLER[key];
-                if(key === 'revive' && quantidade > 0){
+                
+                if (isResellerLimitMode && key === 'revive' && quantidade > 0) {
                     const tokensDentroDoLimite = Math.max(0, Math.min(quantidade, reviveLimitRemaining));
                     const tokensForaDoLimite = Math.max(0, quantidade - tokensDentroDoLimite);
                     
+                    subtotal = (tokensDentroDoLimite * precoUnitarioEfetivo) + (tokensForaDoLimite * ITENS_CATALOGO[key].preco);
+
                     if (tokensForaDoLimite > 0) {
                         if (!notificationShown) {
                            app.showNotification(t.resellerLimitExceededWarning, 'error');
@@ -3068,17 +3170,16 @@
                             text: t.limitExceededDetail(tokensForaDoLimite, app.formatCurrency(ITENS_CATALOGO[key].preco))
                         };
                     }
-                    subtotal += tokensDentroDoLimite * PRECOS_RESELLER[key];
-                    subtotal += tokensForaDoLimite * ITENS_CATALOGO[key].preco;
-                } else { 
-                    subtotal = quantidade * PRECOS_RESELLER[key]; 
+                } else {
+                   subtotal = quantidade * precoUnitarioEfetivo;
                 }
             } else {
                 precoUnitarioEfetivo = parseFloat(document.getElementById(`price-${key}`)?.value) || ITENS_CATALOGO[key].preco;
                 subtotal = quantidade * (precoUnitarioEfetivo * fatorDesconto);
             }
             totalFinal += subtotal;
-            itensCalculados[key] = { quantidade, precoUnitario: precoUnitarioEfetivo, subtotal };
+            itensCalculados[key] = { quantidade, precoUnitario: precoUnitarioEfetivo, subtotal, precoOriginal }; // Adiciona precoOriginal ao resultado
+            // FIM DA MODIFICAÇÃO
         }
         return { totalFinal, descontoPercentual, itens: itensCalculados, limitDetails };
     },
@@ -3096,23 +3197,39 @@
         dom.calculatorTable.classList.toggle('show-discount', showDiscount);
         
         const colspanValue = showDiscount ? 4 : 3;
-        tfootTD.setAttribute('colspan', colspanValue);
+        if(tfootTD) tfootTD.setAttribute('colspan', colspanValue);
 
-        Array.from(dom.tabelaItensBody.rows).forEach((row, index) => {
+        Array.from(dom.tabelaItensBody.rows).forEach((row) => {
             const key = row.dataset.key;
             if (!key || !calculo.itens[key]) return;
 
             const itemCalculado = calculo.itens[key];
             const priceInput = document.getElementById(`price-${key}`);
+            const priceDisplaySpan = document.getElementById(`price-display-${key}`);
+            const isResaleMode = dom.managedResaleToggle.checked || dom.resellerModeToggle.checked;
+            
+            // INÍCIO DA MODIFICAÇÃO
+            if (isResaleMode) {
+                priceInput.style.display = 'none';
+                priceDisplaySpan.style.display = 'inline-block';
+                priceInput.disabled = true;
 
-            if (dom.managedResaleToggle.checked && priceInput) {
-                priceInput.value = itemCalculado.precoUnitario;
+                if (itemCalculado.precoOriginal && itemCalculado.precoOriginal !== itemCalculado.precoUnitario) {
+                    priceDisplaySpan.innerHTML = `<s class="original-price">${app.formatCurrency(itemCalculado.precoOriginal)}</s><span class="discounted-price">${app.formatCurrency(itemCalculado.precoUnitario)}</span>`;
+                } else {
+                    priceDisplaySpan.innerHTML = app.formatCurrency(itemCalculado.precoUnitario);
+                }
+            } else {
+                priceInput.style.display = 'block';
+                priceDisplaySpan.style.display = 'none';
+                priceInput.disabled = false;
             }
+            // FIM DA MODIFICAÇÃO
 
             const discountedPriceCell = row.querySelector(`#discounted-price-${key}`);
             if (discountedPriceCell) {
                 if (showDiscount) {
-                    const precoOriginal = parseFloat(document.getElementById(`price-${key}`).value) || ITENS_CATALOGO[key].preco;
+                    const precoOriginal = parseFloat(priceInput.value) || ITENS_CATALOGO[key].preco;
                     const precoFinal = precoOriginal * fatorDesconto;
                     discountedPriceCell.textContent = app.formatCurrency(precoFinal);
                 } else {
@@ -3234,20 +3351,17 @@
         return img;
     },
 
+    // MODIFICADO: Layout do recibo
     buildReceiptHtml(receiptData, docId) {
         const t = TRANSLATIONS[currentLang];
         const coinIconHtml = `<img src="${MOEDA_BASE64}" class="coin-icon" alt="mush">`;
         let itemsTableRows = '';
         
-        let receiptTitle = t.receiptHeader;
         let saleTypeTag = '';
-
         if (receiptData.isResellerSale) {
-            receiptTitle = t.receiptHeaderOfficial;
-            saleTypeTag = `<span class="reseller-tag official" style="font-size: 0.8em; color: #fff; background-color: ${getComputedStyle(document.documentElement).getPropertyValue('--accent-warning')};">${t.historyTagOfficial}</span>`;
+            saleTypeTag = `<span class="reseller-tag official">${t.historyTagOfficial}</span>`;
         } else if (receiptData.isManagedResale) {
-            receiptTitle = t.receiptHeaderManaged;
-            saleTypeTag = `<span class="reseller-tag managed" style="font-size: 0.8em; color: #fff; background-color: ${getComputedStyle(document.documentElement).getPropertyValue('--accent-info')};">${t.historyTagManaged}</span>`;
+            saleTypeTag = `<span class="reseller-tag managed">${t.historyTagManaged}</span>`;
         }
         
         for (const key in receiptData.itemsData) {
@@ -3274,8 +3388,11 @@
         
         return `<div class="receipt-body">
                     <div class="receipt-header">
-                        <h2>${receiptTitle}</h2>
-                        <p>${receiptData.customerName} ${saleTypeTag}</p>
+                        <h2>${t.receiptHeader}</h2>
+                        <div class="receipt-customer-details">
+                           <h3 class="receipt-customer-name">${receiptData.customerName}</h3>
+                           ${saleTypeTag ? `<div class="receipt-sale-type">${saleTypeTag}</div>` : ''}
+                        </div>
                         <p>${t.receiptSeller}: ${receiptData.seller}</p>
                         <p class="receipt-id">${t.receiptTransactionId}: ${docId}</p>
                     </div>
@@ -3295,21 +3412,24 @@
                 </div>`;
     },
     
-    async processSaleAndGenerateReceipt() {
+    // MODIFICADO: Função central para lidar com a venda e a ação do recibo (baixar/visualizar)
+    async handleSaleAndReceiptAction(action) {
         const receiptData = app.prepareSaleData();
         if (!receiptData) return;
 
         const executeSale = async () => {
             const savedDoc = await app.saveSaleAndUpdateLimits(receiptData);
             if (!savedDoc) return; 
-            await app.createAndDownloadReceiptImage(receiptData, savedDoc.id);
+            
+            // Adiciona a data atual ao objeto de dados para exibição imediata
+            receiptData.createdAt = { toDate: () => new Date() };
+
+            await app.generateAndHandleReceiptImage(receiptData, savedDoc.id, action);
             app.reset({ fullReset: true });
         };
         
         if (dom.resellerModeToggle.checked && Object.keys(receiptData.limitDetails).length > 0) {
-            app.showConfirmation(TRANSLATIONS[currentLang].confirmLimitSale, () => {
-                executeSale();
-            });
+            app.showConfirmation(TRANSLATIONS[currentLang].confirmLimitSale, executeSale);
         } else {
             executeSale();
         }
@@ -3348,7 +3468,7 @@
         
         return { 
             customerName, 
-            discountApplied: isManagedResaleMode ? 0 : calculo.descontoPercentual, 
+            discountApplied: isManagedResaleMode || isResellerLimitMode ? 0 : calculo.descontoPercentual, 
             grandTotal: calculo.totalFinal, 
             itemsData: itemsToSave, 
             seller: app.currentUsername, 
@@ -3387,10 +3507,10 @@
             return null;
         }
     },
-
-    async createAndDownloadReceiptImage(receiptData, docId, silent = false) {
-        const receiptDataWithDate = { ...receiptData, createdAt: receiptData.createdAt?.toDate ? { toDate: () => receiptData.createdAt.toDate() } : { toDate: () => new Date() } };
-        const receiptHtml = app.buildReceiptHtml(receiptDataWithDate, docId);
+    
+    // MODIFICADO: Gera a imagem e decide se baixa ou visualiza
+    async generateAndHandleReceiptImage(receiptData, docId, action = 'download', silent = false) {
+        const receiptHtml = app.buildReceiptHtml(receiptData, docId);
         dom.receiptGeneratorContainer.innerHTML = receiptHtml;
         dom.receiptGeneratorContainer.style.display = 'flex';
         const receiptBody = dom.receiptGeneratorContainer.querySelector('.receipt-body');
@@ -3403,12 +3523,18 @@
             if (!dataUrl || dataUrl === 'data:,') {
                  throw new Error('Canvas retornou uma URL de dados vazia.');
             }
-            const link = document.createElement('a');
-            const nomeSanitizado = (receiptData.customerName || 'recibo').normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
-            const dateStr = receiptDataWithDate.createdAt.toDate().toISOString().slice(0, 10);
-            link.download = `${nomeSanitizado}_${dateStr}.png`;
-            link.href = dataUrl;
-            link.click();
+
+            if (action === 'view') {
+                const newTab = window.open();
+                newTab.document.write(`<body style="margin:0; background:#333;"><img src="${dataUrl}" style="display:block; margin:auto; max-width:100%;"></body>`);
+            } else { // 'download' é o padrão
+                const link = document.createElement('a');
+                const nomeSanitizado = (receiptData.customerName || 'recibo').normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+                const dateStr = receiptData.createdAt.toDate().toISOString().slice(0, 10);
+                link.download = `${nomeSanitizado}_${dateStr}.png`;
+                link.href = dataUrl;
+                link.click();
+            }
         } catch (error) {
             console.error("Erro no html2canvas:", error);
             if (!silent) { app.showNotification("Falha ao gerar a imagem do recibo. Tente novamente.", "error"); }
@@ -3428,7 +3554,8 @@
               return;
             }
             const receiptData = docSnap.data();
-            await app.createAndDownloadReceiptImage(receiptData, docId, silent);
+            // Ação padrão para regenerar é baixar, mas pode ser alterado se necessário
+            await app.generateAndHandleReceiptImage(receiptData, docId, 'download', silent);
         } catch (error) {
             console.error("Erro ao regenerar recibo:", error);
             if (!silent) { app.showNotification("Ocorreu um erro ao buscar os dados do recibo.", 'error'); }
